@@ -1162,6 +1162,172 @@
   .flashcard.flipped .flashcard-answer { display: block; }
   .flashcard-hint { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
 
+  /* ── Result metadata ── */
+  .result-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .doc-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .confidence-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .confidence-label {
+    font-size: 0.75rem;
+    color: var(--text-2);
+  }
+
+  /* ── Red flags ── */
+  .rf-section { margin-top: 16px; }
+  .rf-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .rf-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .rf-high { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+  .rf-medium { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); }
+  .rf-low { background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); }
+  .rf-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .rf-high .rf-badge { background: rgba(239,68,68,0.2); color: #dc2626; }
+  .rf-medium .rf-badge { background: rgba(245,158,11,0.2); color: #d97706; }
+  .rf-low .rf-badge { background: rgba(234,179,8,0.2); color: #ca8a04; }
+  .rf-desc { color: var(--text); }
+
+  /* ── Key terms accordion ── */
+  .kt-section { margin-top: 16px; }
+  .kt-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .kt-item { border-bottom: 1px solid var(--border); }
+  .kt-item:last-child { border-bottom: none; }
+  .kt-term {
+    width: 100%;
+    text-align: left;
+    padding: 10px 0;
+    background: none;
+    border: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kt-term::after { content: '+'; font-size: 1rem; color: var(--text-2); }
+  .kt-term.active::after { content: '−'; }
+  .kt-def {
+    display: none;
+    padding: 0 0 10px;
+    font-size: 0.84rem;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+  .kt-def.open { display: block; }
+
+  /* ── Onboarding overlay ── */
+  .onboard-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .onboard-modal {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 32px 24px 24px;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+  }
+  .onboard-skip {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .onboard-screen { display: none; }
+  .onboard-screen.active { display: block; }
+  .onboard-emoji { font-size: 3rem; margin-bottom: 16px; }
+  .onboard-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .onboard-sub {
+    font-size: 0.88rem;
+    color: var(--text-2);
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .onboard-next { width: 100%; margin-bottom: 16px; }
+  .onboard-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  .onboard-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .onboard-dot.active {
+    background: var(--p1);
+  }
+
   /* Background tasks */
   .bg-tasks {
     position: fixed;
@@ -1487,6 +1653,43 @@
 
 </div>
 
+<div class="onboard-bg" id="onboarding" style="display:none">
+  <div class="onboard-modal">
+    <button class="onboard-skip" onclick="skipOnboarding()">Skip</button>
+
+    <!-- Screen 1 -->
+    <div class="onboard-screen active" id="ob1">
+      <div class="onboard-emoji">📷</div>
+      <h2 class="onboard-title">Understand anything, instantly</h2>
+      <p class="onboard-sub">Snap or upload any document and get a plain-English explanation in seconds.</p>
+      <button class="btn-primary onboard-next" onclick="nextOnboard(2)">Next</button>
+    </div>
+
+    <!-- Screen 2 -->
+    <div class="onboard-screen" id="ob2">
+      <div class="onboard-emoji">🚩</div>
+      <h2 class="onboard-title">Catch what's in the fine print</h2>
+      <p class="onboard-sub">Luminos flags red flags, hidden fees, and important terms you might otherwise miss.</p>
+      <button class="btn-primary onboard-next" onclick="nextOnboard(3)">Next</button>
+    </div>
+
+    <!-- Screen 3 -->
+    <div class="onboard-screen" id="ob3">
+      <div class="onboard-emoji">✨</div>
+      <h2 class="onboard-title">Meet Luminos</h2>
+      <p class="onboard-sub">Ask follow-up questions, run tools, and dig deeper into any document with AI.</p>
+      <button class="btn-primary onboard-next" onclick="skipOnboarding()">Get started</button>
+    </div>
+
+    <!-- Dots -->
+    <div class="onboard-dots">
+      <span class="onboard-dot active" id="odot1"></span>
+      <span class="onboard-dot" id="odot2"></span>
+      <span class="onboard-dot" id="odot3"></span>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -1691,6 +1894,57 @@ function setLoading(on, text) {
   document.getElementById('scanBtn').disabled = on;
 }
 
+function parseResult(text) {
+  const get = (pat) => { const m = text.match(pat); return m ? m[1].trim() : ''; };
+  const title = get(/TITLE:\s*(.+?)(?:\n|$)/i) || 'Scan result';
+  const docType = get(/DOC_TYPE:\s*(.+?)(?:\n|$)/i) || '';
+  const confidence = (get(/CONFIDENCE:\s*(.+?)(?:\n|$)/i) || 'medium').toLowerCase();
+
+  // EXPLANATION: everything between EXPLANATION: and the next section
+  const expMatch = text.match(/EXPLANATION:\s*([\s\S]*?)(?:\nRED_FLAGS:|\nKEY_TERMS:|$)/i);
+  const explanation = expMatch ? expMatch[1].trim() : text;
+
+  // RED_FLAGS: lines starting with HIGH:, MEDIUM:, LOW:
+  const rfMatch = text.match(/RED_FLAGS:\s*([\s\S]*?)(?:\nKEY_TERMS:|$)/i);
+  const rfText = rfMatch ? rfMatch[1].trim() : '';
+  let redFlags = [];
+  if (rfText && rfText.toLowerCase() !== 'none') {
+    redFlags = rfText.split('\n')
+      .map(l => l.trim())
+      .filter(l => /^(HIGH|MEDIUM|LOW):/i.test(l))
+      .map(l => {
+        const sev = l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase();
+        const desc = l.replace(/^(HIGH|MEDIUM|LOW):\s*/i, '').trim();
+        return { sev, desc };
+      });
+  }
+
+  // KEY_TERMS: lines as "term: definition"
+  const ktMatch = text.match(/KEY_TERMS:\s*([\s\S]*?)$/i);
+  const ktText = ktMatch ? ktMatch[1].trim() : '';
+  let keyTerms = [];
+  if (ktText && ktText.toLowerCase() !== 'none') {
+    keyTerms = ktText.split('\n')
+      .map(l => l.trim())
+      .filter(l => l.includes(':'))
+      .map(l => {
+        const idx = l.indexOf(':');
+        return { term: l.slice(0, idx).trim(), def: l.slice(idx+1).trim() };
+      })
+      .filter(t => t.term && t.def);
+  }
+
+  return { title, docType, confidence, explanation, redFlags, keyTerms };
+}
+
+function toggleKt(btn) {
+  const def = btn.nextElementSibling;
+  const isOpen = def.classList.contains('open');
+  btn.closest('.kt-section').querySelectorAll('.kt-def').forEach(d => d.classList.remove('open'));
+  btn.closest('.kt-section').querySelectorAll('.kt-term').forEach(b => b.classList.remove('active'));
+  if (!isOpen) { def.classList.add('open'); btn.classList.add('active'); }
+}
+
 async function runScan() {
   const limit = LIMITS[state.plan].scans;
   if (state.scansUsed >= limit) {
@@ -1711,29 +1965,80 @@ async function runScan() {
   try {
     const data = await safeApiCall({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
+      max_tokens: 1200,
       messages: [{
         role: 'user',
         content: [
           contentBlock,
-          { type: 'text', text: `You're ScanPlain. Look at this and respond in this exact format:
+          { type: 'text', text: `Analyze this document and respond in EXACTLY this format:
 
 TITLE: [4-7 word title]
-
+DOC_TYPE: [document type, e.g. "Lease Agreement", "Pay Stub", "Nutrition Facts"]
+CONFIDENCE: [high|medium|low]
 EXPLANATION:
-[3-5 sentences explaining what this is in plain everyday English, no jargon, like explaining to a friend]` }
+[3-5 sentences in plain English]
+RED_FLAGS:
+[Each risk on its own line starting with HIGH:, MEDIUM:, or LOW: followed by description. If none, write "None"]
+KEY_TERMS:
+[Each term on its own line as "term: definition". If none, write "None"]` }
         ]
       }]
     });
 
-    const text = sanitize(data.content[0].text);
-    const titleMatch = text.match(/TITLE:\s*(.+?)(?:\n|$)/i);
-    const expMatch = text.match(/EXPLANATION:\s*([\s\S]*?)$/i);
-    const title = titleMatch ? titleMatch[1].trim() : 'Scan result';
-    const explanation = expMatch ? expMatch[1].trim() : text;
+    const responseText = sanitize(data.content[0].text);
+    const parsed = parseResult(responseText);
+    const { title, docType, confidence, explanation, redFlags, keyTerms } = parsed;
 
-    document.getElementById('resultText').textContent = explanation;
-    document.getElementById('resultCard').style.display = 'block';
+    // Confidence dot colors
+    const confColor = { high: '#22c55e', medium: '#f59e0b', low: '#ef4444' }[confidence] || '#f59e0b';
+    const confLabel = confidence.charAt(0).toUpperCase() + confidence.slice(1);
+
+    // Doc type badge + confidence dot
+    const docTypeBadge = docType ? `
+      <div class="result-meta">
+        <span class="doc-type-badge">${escapeHtml(docType)}</span>
+        <span class="confidence-dot" style="background:${confColor}" title="Confidence: ${escapeHtml(confLabel)}"></span>
+        <span class="confidence-label">${escapeHtml(confLabel)} confidence</span>
+      </div>
+    ` : '';
+
+    // Red flags cards
+    let redFlagsHtml = '';
+    if (redFlags.length > 0) {
+      const rfCards = redFlags.map(rf => {
+        const cls = rf.sev === 'HIGH' ? 'rf-high' : rf.sev === 'MEDIUM' ? 'rf-medium' : 'rf-low';
+        return `<div class="rf-card ${cls}"><span class="rf-badge">${rf.sev}</span> <span class="rf-desc">${escapeHtml(rf.desc)}</span></div>`;
+      }).join('');
+      redFlagsHtml = `<div class="rf-section"><div class="rf-section-title">Red Flags</div>${rfCards}</div>`;
+    }
+
+    // Key terms accordion
+    let keyTermsHtml = '';
+    if (keyTerms.length > 0) {
+      const ktItems = keyTerms.map((kt, i) => `
+        <div class="kt-item">
+          <button class="kt-term" onclick="toggleKt(this)">${escapeHtml(kt.term)}</button>
+          <div class="kt-def">${escapeHtml(kt.def)}</div>
+        </div>
+      `).join('');
+      keyTermsHtml = `<div class="kt-section"><div class="kt-section-title">Key Terms</div>${ktItems}</div>`;
+    }
+
+    const resultCard = document.getElementById('resultCard');
+    const resultText = document.getElementById('resultText');
+    resultText.textContent = explanation;
+
+    // Remove any previously injected meta/flags/terms
+    resultCard.querySelectorAll('.result-meta, .rf-section, .kt-section').forEach(el => el.remove());
+
+    // Insert doc type badge before result text
+    if (docTypeBadge) {
+      resultText.insertAdjacentHTML('beforebegin', docTypeBadge);
+    }
+    // Append red flags and key terms after result text
+    resultText.insertAdjacentHTML('afterend', redFlagsHtml + keyTermsHtml);
+
+    resultCard.style.display = 'block';
     document.getElementById('postScanCTA').style.display = 'block';
 
     state.scansUsed++;
@@ -1747,6 +2052,10 @@ EXPLANATION:
       fileName: state.currentFile.name,
       title,
       explanation,
+      docType: docType,
+      confidence: confidence,
+      redFlags: redFlags,
+      keyTerms: keyTerms,
       chatHistory: [],
       followUps: [] // additional docs added in luminos
     };
@@ -2291,12 +2600,12 @@ function checkQuizAnswer(btn, correct, explain) {
     btn.style.background = 'var(--success)';
     btn.style.color = 'white';
     btn.style.borderColor = 'var(--success)';
-    answerDiv.innerHTML = '✓ Correct! ' + explain;
+    answerDiv.innerHTML = '✓ Correct! ' + escapeHtml(explain);
   } else {
     btn.style.background = 'rgba(220,38,38,0.15)';
     btn.style.color = 'var(--danger)';
     btn.style.borderColor = 'var(--danger)';
-    answerDiv.innerHTML = '✗ ' + explain;
+    answerDiv.innerHTML = '✗ ' + escapeHtml(explain);
   }
   answerDiv.style.display = 'block';
 }
@@ -2424,6 +2733,29 @@ function exportData() {
   showToast('Data exported');
 }
 
+// ============ ONBOARDING ============
+function showOnboarding() {
+  if (!localStorage.getItem('sp_onboarded')) {
+    const ob = document.getElementById('onboarding');
+    if (ob) ob.style.display = 'flex';
+  }
+}
+
+function skipOnboarding() {
+  localStorage.setItem('sp_onboarded', '1');
+  const ob = document.getElementById('onboarding');
+  if (ob) ob.style.display = 'none';
+}
+
+function nextOnboard(n) {
+  document.querySelectorAll('.onboard-screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.onboard-dot').forEach(d => d.classList.remove('active'));
+  const screen = document.getElementById('ob' + n);
+  const dot = document.getElementById('odot' + n);
+  if (screen) screen.classList.add('active');
+  if (dot) dot.classList.add('active');
+}
+
 // ============ INIT ============
 document.documentElement.setAttribute('data-theme', state.theme);
 document.querySelector('meta[name="theme-color"]').content = state.theme === 'light' ? '#fefbf3' : '#14110a';
@@ -2431,6 +2763,7 @@ updateThemeIcon();
 updatePlanUI();
 updateLibraryCount();
 renderBgTasks();
+showOnboarding();
 
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
