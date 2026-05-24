@@ -1,41 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="theme-color" content="#08070d"/>
+<meta name="theme-color" content="#fefbf3"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta http-equiv="Permissions-Policy" content="camera=(self), geolocation=(), microphone=()"/>
 <title>ScanPlain — Light up anything</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --p1: #C4B4FF;
-    --p2: #8B7FFF;
-    --p3: #6B5FE5;
-    --p4: #4D3FBF;
-    --accent: #FF6B9D;
-    --accent2: #FFB36B;
-    --bg: #08070d;
-    --bg2: #0d0b15;
-    --surface: #14121d;
-    --surface2: #1c1929;
-    --border: #252237;
-    --border-bright: #3a3552;
-    --text: #f5f3ff;
-    --text-2: #a8a4c0;
-    --text-3: #6b6680;
+
+  /* LIGHT THEME (default) - warm yellow/cream */
+  :root, [data-theme="light"] {
+    --p1: #FFD56A;
+    --p2: #F5A623;
+    --p3: #E8851A;
+    --p4: #C26A0F;
+    --accent: #FF8B5A;
+    --accent2: #FFA94D;
+
+    --bg: #fefbf3;
+    --bg2: #fcf6e8;
+    --surface: #ffffff;
+    --surface2: #fdf8ec;
+    --surface3: #faf2d9;
+    --border: #f0e6c8;
+    --border-bright: #e6d99a;
+
+    --text: #2a2418;
+    --text-2: #6b5f47;
+    --text-3: #9a8b6b;
+
+    --success: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+
+    --glow: rgba(245, 166, 35, 0.25);
+    --glow-strong: rgba(245, 166, 35, 0.4);
+
+    --shadow-sm: 0 2px 8px rgba(120, 90, 30, 0.06);
+    --shadow-md: 0 8px 24px rgba(120, 90, 30, 0.08);
+    --shadow-lg: 0 20px 50px rgba(120, 90, 30, 0.12);
+
+    --tab-bar-bg: rgba(255,255,255,0.85);
+    --topbar-bg: rgba(254,251,243,0.7);
+  }
+
+  /* DARK THEME - warm dark */
+  [data-theme="dark"] {
+    --p1: #FFD56A;
+    --p2: #F5A623;
+    --p3: #E8851A;
+    --p4: #C26A0F;
+    --accent: #FF8B5A;
+    --accent2: #FFA94D;
+
+    --bg: #14110a;
+    --bg2: #1a160e;
+    --surface: #1f1a11;
+    --surface2: #2a2316;
+    --surface3: #332a1a;
+    --border: #3a2f1d;
+    --border-bright: #5a4a2e;
+
+    --text: #faf6ec;
+    --text-2: #c4b48f;
+    --text-3: #877754;
+
     --success: #4ade80;
     --warn: #fbbf24;
     --danger: #f87171;
-    --glow: rgba(139, 127, 255, 0.4);
-    --r-sm: 12px;
-    --r-md: 18px;
-    --r-lg: 24px;
-    --r-xl: 32px;
+
+    --glow: rgba(245, 166, 35, 0.3);
+    --glow-strong: rgba(245, 166, 35, 0.5);
+
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,0.5);
+
+    --tab-bar-bg: rgba(31,26,17,0.85);
+    --topbar-bg: rgba(20,17,10,0.7);
   }
-  html, body { height: 100%; overflow: hidden; background: var(--bg); }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); transition: background 0.3s ease; }
   body {
     color: var(--text);
     font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -45,9 +96,9 @@
     letter-spacing: -0.01em;
     overscroll-behavior: none;
   }
-  .serif { font-family: 'Instrument Serif', serif; font-style: italic; letter-spacing: -0.02em; }
+  .serif { font-family: 'Instrument Serif', serif; font-style: italic; letter-spacing: -0.02em; font-weight: 400; }
 
-  /* Background ambient */
+  /* Ambient bg */
   .ambient {
     position: fixed; inset: 0;
     pointer-events: none;
@@ -58,12 +109,15 @@
     position: absolute;
     border-radius: 50%;
     filter: blur(80px);
-    opacity: 0.5;
-    animation: float 20s ease-in-out infinite;
+    opacity: 0.45;
+    animation: float 22s ease-in-out infinite;
   }
-  .blob.b1 { width: 400px; height: 400px; background: radial-gradient(circle, var(--p2), transparent); top: -100px; right: -100px; }
-  .blob.b2 { width: 350px; height: 350px; background: radial-gradient(circle, var(--accent), transparent); bottom: -50px; left: -100px; animation-delay: -7s; opacity: 0.25; }
-  .blob.b3 { width: 300px; height: 300px; background: radial-gradient(circle, var(--accent2), transparent); top: 40%; left: 30%; animation-delay: -14s; opacity: 0.15; }
+  .blob.b1 { width: 420px; height: 420px; background: radial-gradient(circle, var(--p1), transparent); top: -120px; right: -120px; }
+  .blob.b2 { width: 380px; height: 380px; background: radial-gradient(circle, var(--accent), transparent); bottom: -80px; left: -80px; animation-delay: -8s; opacity: 0.3; }
+  .blob.b3 { width: 320px; height: 320px; background: radial-gradient(circle, var(--accent2), transparent); top: 35%; right: 20%; animation-delay: -15s; opacity: 0.2; }
+  [data-theme="dark"] .blob { opacity: 0.3; }
+  [data-theme="dark"] .blob.b2 { opacity: 0.2; }
+  [data-theme="dark"] .blob.b3 { opacity: 0.15; }
   @keyframes float {
     0%, 100% { transform: translate(0,0) scale(1); }
     33% { transform: translate(40px, -30px) scale(1.1); }
@@ -87,16 +141,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(8,7,13,0.6);
+    background: var(--topbar-bg);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 30;
   }
-  .brand { display: flex; align-items: center; gap: 11px; }
+  .brand { display: flex; align-items: center; gap: 11px; cursor: pointer; }
   .brand-mark {
     width: 36px; height: 36px;
-    background: conic-gradient(from 180deg, var(--p1), var(--p2), var(--accent), var(--accent2), var(--p1));
+    background: conic-gradient(from 180deg, var(--p1), var(--accent), var(--accent2), var(--p2), var(--p1));
     border-radius: 12px;
     position: relative;
     box-shadow: 0 4px 16px var(--glow);
@@ -110,32 +164,34 @@
   .brand-mark::after {
     content: '';
     position: absolute; inset: 0;
-    background: conic-gradient(from 180deg, var(--p1), var(--p2), var(--accent), var(--accent2), var(--p1));
+    background: conic-gradient(from 180deg, var(--p1), var(--accent), var(--accent2), var(--p2), var(--p1));
     border-radius: 12px;
     z-index: -1;
     filter: blur(8px);
-    opacity: 0.6;
+    opacity: 0.5;
   }
   .brand-name {
     font-size: 18px; font-weight: 700;
     letter-spacing: -0.4px;
+    color: var(--text);
   }
-  .brand-name b { font-weight: 700; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
   .icon-btn {
     width: 38px; height: 38px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--surface);
+    border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(.4,0,.2,1);
     color: var(--text-2);
   }
-  .icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); transform: translateY(-1px); }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); transform: translateY(-1px); }
   .icon-btn:active { transform: translateY(0) scale(0.96); }
   .icon-btn svg { width: 18px; height: 18px; }
+  .icon-btn.active { background: var(--p2); color: white; border-color: var(--p2); }
 
-  /* Scrollable content */
+  /* Scrollable */
   .content {
     flex: 1;
     overflow-y: auto;
@@ -149,13 +205,30 @@
   /* Pages */
   .page { display: none; padding: 20px; animation: fadeUp 0.35s cubic-bezier(.2,.8,.2,1); }
   .page.active { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Page header w back nav */
+  .page-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
   }
+  .back-btn {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { background: var(--surface2); color: var(--text); }
+  .back-btn svg { width: 20px; height: 20px; }
+  .page-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 
   /* HERO */
-  .hero { margin-bottom: 24px; padding-top: 8px; }
+  .hero { margin-bottom: 24px; padding-top: 4px; }
   .hero h1 {
     font-size: 38px;
     font-weight: 800;
@@ -165,11 +238,10 @@
   }
   .hero h1 .serif {
     font-size: 1.05em;
-    background: linear-gradient(120deg, var(--p1) 0%, var(--accent) 60%, var(--accent2) 100%);
+    background: linear-gradient(120deg, var(--p2) 0%, var(--accent) 60%, var(--p3) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-weight: 400;
   }
   .hero p {
     color: var(--text-2);
@@ -177,52 +249,33 @@
     max-width: 90%;
   }
 
-  /* Bento grid */
+  /* Bento */
   .bento {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 14px;
   }
-
-  /* Upload mega card */
   .upload-mega {
     grid-column: span 2;
     background:
-      radial-gradient(ellipse at top, rgba(139,127,255,0.18), transparent 70%),
-      linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+      radial-gradient(ellipse at top, var(--glow), transparent 70%),
+      linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border-bright);
+    border-radius: 24px;
     padding: 32px 22px;
     text-align: center;
     cursor: pointer;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(.2,.8,.2,1);
+    box-shadow: var(--shadow-md);
   }
-  .upload-mega::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: conic-gradient(from 0deg, transparent, var(--p2), transparent 30%);
-    opacity: 0;
-    transition: opacity 0.4s;
-    animation: rotate 4s linear infinite;
-    animation-play-state: paused;
-  }
-  .upload-mega::after {
-    content: '';
-    position: absolute; inset: 1px;
-    background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
-    border-radius: calc(var(--r-lg) - 1px);
-    z-index: 0;
-  }
-  .upload-mega > * { position: relative; z-index: 1; }
   .upload-mega:hover, .upload-mega.drag {
-    transform: translateY(-2px);
-    border-color: transparent;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--p2);
   }
-  .upload-mega:hover::before, .upload-mega.drag::before { opacity: 1; animation-play-state: running; }
-  @keyframes rotate { to { transform: rotate(360deg); } }
   .upload-icon-3d {
     width: 72px; height: 72px;
     margin: 0 auto 18px;
@@ -230,9 +283,9 @@
     border-radius: 20px;
     display: flex; align-items: center; justify-content: center;
     box-shadow:
-      0 12px 32px rgba(139,127,255,0.4),
-      inset 0 -8px 16px rgba(0,0,0,0.2),
-      inset 0 2px 0 rgba(255,255,255,0.3);
+      0 12px 32px var(--glow-strong),
+      inset 0 -8px 16px rgba(0,0,0,0.15),
+      inset 0 2px 0 rgba(255,255,255,0.4);
     transform: rotate(-6deg);
     position: relative;
   }
@@ -249,23 +302,21 @@
   .upload-icon-3d svg { width: 34px; height: 34px; color: white; }
   .upload-mega h3 { font-size: 19px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.3px; }
   .upload-mega p { font-size: 13.5px; color: var(--text-3); }
-  #fileInput { display: none; }
+  #fileInput, #followUpInput { display: none; }
 
-  /* Mini action cards */
   .mini-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     padding: 16px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(.2,.8,.2,1);
     display: flex;
     flex-direction: column;
     gap: 12px;
-    position: relative;
-    overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
-  .mini-card:hover { transform: translateY(-2px); border-color: var(--border-bright); background: var(--surface2); }
+  .mini-card:hover { transform: translateY(-2px); border-color: var(--border-bright); box-shadow: var(--shadow-md); }
   .mini-card:active { transform: translateY(0) scale(0.98); }
   .mini-icon {
     width: 38px; height: 38px;
@@ -281,7 +332,7 @@
   /* Section labels */
   .section-label {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-3);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -294,23 +345,23 @@
     background: linear-gradient(90deg, var(--border), transparent);
   }
 
-  /* Preview card */
+  /* Preview */
   .preview-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+    border-radius: 24px;
     padding: 18px;
     margin-bottom: 14px;
     display: none;
-    animation: fadeUp 0.3s ease;
+    box-shadow: var(--shadow-sm);
   }
-  .preview-card.show { display: block; }
-  .preview-img { width: 100%; border-radius: var(--r-md); max-height: 300px; object-fit: contain; background: #000; margin-bottom: 14px; }
+  .preview-card.show { display: block; animation: fadeUp 0.3s ease; }
+  .preview-img { width: 100%; border-radius: 18px; max-height: 300px; object-fit: contain; background: var(--surface2); margin-bottom: 14px; }
   .preview-file-row {
     display: flex; align-items: center; gap: 12px;
     padding: 14px;
     background: var(--surface2);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     margin-bottom: 14px;
   }
   .preview-file-ic {
@@ -319,7 +370,7 @@
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(107,95,229,0.3);
+    box-shadow: 0 4px 12px var(--glow);
   }
   .preview-file-ic svg { width: 22px; height: 22px; color: white; }
   .preview-file-info { flex: 1; min-width: 0; }
@@ -331,19 +382,19 @@
     background: linear-gradient(135deg, var(--p1) 0%, var(--p3) 100%);
     color: white;
     border: none;
-    border-radius: var(--r-md);
+    border-radius: 18px;
     padding: 17px;
     font-size: 15.5px;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
     font-family: inherit;
-    box-shadow: 0 8px 24px rgba(139,127,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 8px 24px var(--glow), inset 0 1px 0 rgba(255,255,255,0.25);
     display: flex; align-items: center; justify-content: center; gap: 8px;
     transition: all 0.2s cubic-bezier(.2,.8,.2,1);
     letter-spacing: -0.2px;
   }
-  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(139,127,255,0.5), inset 0 1px 0 rgba(255,255,255,0.2); }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px var(--glow-strong), inset 0 1px 0 rgba(255,255,255,0.25); }
   .btn-primary:active { transform: translateY(0) scale(0.98); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary svg { width: 18px; height: 18px; }
@@ -352,7 +403,7 @@
     background: var(--surface2);
     color: var(--text);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     padding: 14px;
     font-size: 14px;
     font-weight: 500;
@@ -368,49 +419,51 @@
   .result-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+    border-radius: 24px;
     padding: 24px;
     margin-bottom: 14px;
     animation: fadeUp 0.35s ease;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-md);
   }
   .result-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 1px;
+    height: 2px;
     background: linear-gradient(90deg, transparent, var(--p2), transparent);
   }
   .result-tag {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(139,127,255,0.12);
-    border: 1px solid rgba(139,127,255,0.25);
+    background: linear-gradient(135deg, var(--glow), transparent);
+    border: 1px solid var(--border-bright);
     padding: 5px 12px;
     border-radius: 99px;
     font-size: 11px;
-    font-weight: 600;
-    color: var(--p1);
+    font-weight: 700;
+    color: var(--p3);
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-bottom: 14px;
   }
   .result-tag svg { width: 12px; height: 12px; }
-  .result-text { font-size: 16px; line-height: 1.65; white-space: pre-wrap; }
+  .result-text { font-size: 16px; line-height: 1.65; white-space: pre-wrap; color: var(--text); }
 
   /* Luminos card */
   .luminos-card {
     background:
-      radial-gradient(ellipse at top right, rgba(255,107,157,0.12), transparent 60%),
-      radial-gradient(ellipse at bottom left, rgba(139,127,255,0.15), transparent 60%),
+      radial-gradient(ellipse at top right, var(--glow), transparent 60%),
+      radial-gradient(ellipse at bottom left, rgba(255,139,90,0.15), transparent 60%),
       var(--surface);
-    border: 1px solid rgba(139,127,255,0.3);
-    border-radius: var(--r-lg);
+    border: 1px solid var(--border-bright);
+    border-radius: 24px;
     padding: 24px;
     margin-bottom: 14px;
     position: relative;
     overflow: hidden;
     animation: fadeUp 0.4s ease;
+    box-shadow: var(--shadow-md);
   }
   .luminos-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
   .luminos-orb {
@@ -419,6 +472,7 @@
     border-radius: 50%;
     position: relative;
     animation: rotateOrb 6s linear infinite;
+    flex-shrink: 0;
   }
   .luminos-orb::before {
     content: '';
@@ -430,7 +484,7 @@
     content: '✦';
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: var(--p1);
+    color: var(--p3);
     font-size: 16px;
     z-index: 1;
   }
@@ -438,17 +492,108 @@
   .luminos-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
   .luminos-sub { font-size: 12.5px; color: var(--text-2); margin-top: 1px; }
 
-  .step-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
-  .step {
-    background: rgba(255,255,255,0.03);
+  /* Tools dropdown */
+  .tools-section {
+    margin-top: 14px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .tools-trigger {
+    background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: all 0.15s;
+    font-family: inherit;
+    color: var(--text);
+    width: 100%;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .tools-trigger:hover { background: var(--surface); border-color: var(--border-bright); }
+  .tools-trigger .lt { display: flex; align-items: center; gap: 10px; }
+  .tools-trigger .lt svg.tool-ic { width: 18px; height: 18px; color: var(--p3); }
+  .tools-trigger .chevron { width: 16px; height: 16px; color: var(--text-3); transition: transform 0.2s; }
+  .tools-trigger.open .chevron { transform: rotate(180deg); }
+
+  .tools-menu {
+    display: none;
+    margin-top: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+    animation: fadeUp 0.2s ease;
+  }
+  .tools-menu.show { display: block; }
+  .tool-item {
+    padding: 12px 12px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    border-radius: 10px;
+    transition: all 0.15s;
+    font-family: inherit;
+    color: var(--text);
+    font-size: 14px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+  }
+  .tool-item:hover { background: var(--surface); }
+  .tool-item-ic {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--p1), var(--p3));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tool-item-ic svg { width: 16px; height: 16px; color: white; }
+  .tool-item-body { flex: 1; min-width: 0; }
+  .tool-item-name { font-size: 14px; font-weight: 600; }
+  .tool-item-desc { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+  /* Documents in session */
+  .doc-strip {
+    display: flex; gap: 8px; overflow-x: auto;
+    margin: 14px 0;
+    padding-bottom: 4px;
+  }
+  .doc-strip::-webkit-scrollbar { display: none; }
+  .doc-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+    flex-shrink: 0;
+    color: var(--text);
+  }
+  .doc-chip svg { width: 14px; height: 14px; color: var(--p3); }
+  .doc-chip-add {
+    background: transparent;
+    border: 1px dashed var(--border-bright);
+    color: var(--p3);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .doc-chip-add:hover { background: var(--surface2); border-color: var(--p2); }
+
+  /* Step list */
+  .step-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
     padding: 14px 16px;
     display: flex; gap: 12px;
-    backdrop-filter: blur(12px);
     transition: all 0.2s;
   }
-  .step:hover { border-color: rgba(139,127,255,0.3); transform: translateX(2px); }
+  .step:hover { border-color: var(--border-bright); transform: translateX(2px); }
   .step-num {
     width: 26px; height: 26px;
     background: linear-gradient(135deg, var(--p1), var(--p3));
@@ -457,29 +602,14 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 700;
     flex-shrink: 0;
-    box-shadow: 0 4px 8px rgba(107,95,229,0.4);
+    box-shadow: 0 4px 8px var(--glow);
   }
   .step-text { font-size: 14.5px; line-height: 1.55; padding-top: 1px; }
 
-  /* Luminos actions */
-  .luminos-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-  .lum-action {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    padding: 12px 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    font-family: inherit;
-    color: var(--text);
-  }
-  .lum-action:hover { background: rgba(139,127,255,0.1); border-color: rgba(139,127,255,0.3); transform: translateY(-2px); }
-  .lum-action svg { width: 18px; height: 18px; color: var(--p1); }
-  .lum-action span { font-size: 11.5px; font-weight: 500; }
-
   /* Chat */
-  .chat-msgs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; max-height: 320px; overflow-y: auto; }
+  .chat-msgs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+  .chat-msgs::-webkit-scrollbar { width: 4px; }
+  .chat-msgs::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 99px; }
   .chat-msg { display: flex; gap: 8px; animation: fadeUp 0.25s ease; }
   .chat-msg.user { justify-content: flex-end; }
   .chat-bubble {
@@ -489,27 +619,30 @@
     font-size: 14.5px;
     line-height: 1.5;
     white-space: pre-wrap;
+    word-wrap: break-word;
   }
   .chat-msg.user .chat-bubble {
     background: linear-gradient(135deg, var(--p1), var(--p3));
     color: white;
     border-bottom-right-radius: 6px;
-    box-shadow: 0 4px 12px rgba(139,127,255,0.3);
+    box-shadow: 0 4px 12px var(--glow);
   }
   .chat-msg.ai .chat-bubble {
-    background: rgba(255,255,255,0.05);
+    background: var(--surface2);
     border: 1px solid var(--border);
+    color: var(--text);
     border-bottom-left-radius: 6px;
   }
   .chat-input-wrap {
     display: flex; gap: 8px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     padding: 6px 6px 6px 14px;
     transition: border-color 0.2s;
+    align-items: center;
   }
-  .chat-input-wrap:focus-within { border-color: var(--p2); }
+  .chat-input-wrap:focus-within { border-color: var(--p2); box-shadow: 0 0 0 3px var(--glow); }
   .chat-input {
     flex: 1;
     background: transparent;
@@ -520,16 +653,22 @@
     outline: none;
     padding: 9px 0;
   }
-  .chat-send {
+  .chat-input::placeholder { color: var(--text-3); }
+  .chat-attach, .chat-send {
     width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--p1), var(--p3));
     border: none;
-    border-radius: 10px;
-    color: white;
+    border-radius: 11px;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     transition: all 0.15s;
+  }
+  .chat-attach { background: var(--surface); color: var(--text-2); }
+  .chat-attach:hover { background: var(--surface3); color: var(--text); }
+  .chat-attach svg { width: 18px; height: 18px; }
+  .chat-send {
+    background: linear-gradient(135deg, var(--p1), var(--p3));
+    color: white;
   }
   .chat-send:hover { transform: scale(1.05); }
   .chat-send:active { transform: scale(0.96); }
@@ -545,7 +684,7 @@
     padding: 40px 20px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+    border-radius: 24px;
     margin-bottom: 14px;
   }
   .loading.show { display: flex; }
@@ -569,17 +708,17 @@
     position: absolute; inset: 14px;
     background: linear-gradient(135deg, var(--p1), var(--p3));
     border-radius: 50%;
-    box-shadow: 0 0 20px var(--glow);
+    box-shadow: 0 0 20px var(--glow-strong);
   }
   .loading p { color: var(--text-2); font-size: 14px; font-weight: 500; }
 
   /* Error */
   .error {
-    background: rgba(248,113,113,0.08);
-    border: 1px solid rgba(248,113,113,0.25);
+    background: rgba(220,38,38,0.08);
+    border: 1px solid rgba(220,38,38,0.25);
     color: var(--danger);
     padding: 14px 16px;
-    border-radius: var(--r-md);
+    border-radius: 14px;
     font-size: 13.5px;
     margin-bottom: 12px;
     display: none;
@@ -591,15 +730,16 @@
   .history-item {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     padding: 14px;
     display: flex;
     gap: 14px;
     align-items: center;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(.2,.8,.2,1);
+    box-shadow: var(--shadow-sm);
   }
-  .history-item:hover { background: var(--surface2); transform: translateY(-2px); border-color: var(--border-bright); }
+  .history-item:hover { background: var(--surface2); transform: translateY(-2px); border-color: var(--border-bright); box-shadow: var(--shadow-md); }
   .history-item:active { transform: translateY(0) scale(0.99); }
   .history-thumb {
     width: 56px; height: 56px;
@@ -611,12 +751,46 @@
   .history-thumb.doc {
     background: linear-gradient(135deg, var(--p2), var(--p4));
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(107,95,229,0.3);
+    box-shadow: 0 4px 12px var(--glow);
   }
   .history-thumb.doc svg { width: 24px; height: 24px; color: white; }
   .history-info { flex: 1; min-width: 0; }
   .history-title-text { font-size: 14.5px; font-weight: 600; letter-spacing: -0.2px; line-height: 1.3; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .history-date { font-size: 12px; color: var(--text-3); }
+  .history-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .history-action-btn {
+    width: 32px; height: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .history-action-btn:hover { background: var(--p2); color: white; border-color: var(--p2); }
+  .history-action-btn svg { width: 14px; height: 14px; }
+
+  /* Search bar */
+  .search-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .search-bar svg { width: 18px; height: 18px; color: var(--text-3); flex-shrink: 0; }
+  .search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: var(--text);
+  }
+  .search-bar input::placeholder { color: var(--text-3); }
 
   /* Empty */
   .empty {
@@ -632,6 +806,7 @@
     border-radius: 24px;
     display: flex; align-items: center; justify-content: center;
     position: relative;
+    box-shadow: var(--shadow-sm);
   }
   .empty-orb::before {
     content: '';
@@ -644,30 +819,32 @@
   .empty h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
   .empty p { font-size: 14px; max-width: 280px; margin: 0 auto; }
 
-  /* LUMINOS TAB SPECIFIC */
+  /* Luminos page hero */
   .luminos-page-hero {
     background:
-      radial-gradient(ellipse at top right, rgba(255,107,157,0.15), transparent 50%),
-      radial-gradient(ellipse at top left, rgba(139,127,255,0.2), transparent 50%),
+      radial-gradient(ellipse at top right, var(--glow), transparent 50%),
+      radial-gradient(ellipse at top left, rgba(255,139,90,0.2), transparent 50%),
       var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r-xl);
+    border: 1px solid var(--border-bright);
+    border-radius: 28px;
     padding: 30px 24px;
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
     text-align: center;
+    box-shadow: var(--shadow-md);
   }
   .luminos-page-hero .luminos-orb { margin: 0 auto 16px; width: 56px; height: 56px; }
   .luminos-page-hero .luminos-orb::after { font-size: 22px; }
   .luminos-page-hero h1 {
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 800;
     letter-spacing: -1px;
     margin-bottom: 8px;
+    line-height: 1.1;
   }
   .luminos-page-hero h1 .serif {
-    background: linear-gradient(120deg, var(--p1), var(--accent));
+    background: linear-gradient(120deg, var(--p2), var(--accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -679,23 +856,24 @@
     margin: 0 auto;
   }
 
-  /* Lock screen */
+  /* Lock card */
   .lock-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+    border-radius: 24px;
     padding: 28px 22px;
     text-align: center;
     margin-bottom: 16px;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
   .lock-card::before {
     content: '';
     position: absolute;
     top: 0; left: 50%;
     transform: translateX(-50%);
-    width: 70%; height: 1px;
+    width: 70%; height: 2px;
     background: linear-gradient(90deg, transparent, var(--p2), transparent);
   }
   .lock-ic {
@@ -710,69 +888,62 @@
   .lock-card h3 { font-size: 19px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px; }
   .lock-card p { font-size: 13.5px; color: var(--text-2); margin-bottom: 18px; max-width: 280px; margin-left: auto; margin-right: auto; }
 
-  /* Plan card */
+  /* Plan */
   .plan-mega {
-    background:
-      conic-gradient(from 220deg, var(--p2), var(--accent), var(--accent2), var(--p2));
-    border-radius: var(--r-lg);
+    background: conic-gradient(from 220deg, var(--p1), var(--accent), var(--accent2), var(--p2), var(--p1));
+    border-radius: 24px;
     padding: 1px;
     margin-bottom: 16px;
+    box-shadow: var(--shadow-md);
   }
   .plan-mega-inner {
-    background:
-      radial-gradient(ellipse at top right, rgba(255,255,255,0.12), transparent 60%),
-      linear-gradient(180deg, rgba(20,18,29,0.85), rgba(20,18,29,0.95));
-    backdrop-filter: blur(12px);
-    border-radius: calc(var(--r-lg) - 1px);
+    background: linear-gradient(180deg, var(--surface), var(--surface2));
+    border-radius: 23px;
     padding: 24px;
-    color: white;
     position: relative;
     overflow: hidden;
   }
-  .plan-name { font-size: 11px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
-  .plan-tier-name { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 18px; }
+  .plan-name { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+  .plan-tier-name { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 18px; color: var(--text); }
   .plan-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .plan-stat {
-    background: rgba(0,0,0,0.3);
-    border-radius: var(--r-sm);
+    background: var(--surface3);
+    border-radius: 12px;
     padding: 12px;
   }
   .plan-stat-label { font-size: 11px; color: var(--text-2); margin-bottom: 4px; }
-  .plan-stat-value { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-  .plan-bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  .plan-stat-value { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text); }
+  .plan-bar-wrap { height: 4px; background: var(--surface); border-radius: 99px; margin-top: 8px; overflow: hidden; }
   .plan-bar { height: 100%; background: linear-gradient(90deg, var(--p1), var(--accent)); border-radius: 99px; transition: width 0.5s cubic-bezier(.2,.8,.2,1); }
 
-  /* Pricing cards */
+  /* Pricing */
   .pricing-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
+    border-radius: 24px;
     padding: 22px;
     margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(.2,.8,.2,1);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
-  .pricing-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .pricing-card:hover { border-color: var(--border-bright); transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .pricing-card.featured {
     background:
-      radial-gradient(ellipse at top, rgba(139,127,255,0.12), transparent 70%),
+      radial-gradient(ellipse at top, var(--glow), transparent 70%),
       var(--surface);
-    border-color: rgba(139,127,255,0.5);
+    border-color: var(--p2);
   }
   .pricing-card.featured::before {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--p1), var(--accent), var(--accent2));
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--p1), var(--accent), var(--p3));
   }
-  .pricing-card.current {
-    border-color: var(--success);
-    opacity: 0.7;
-  }
-  .badge-feat {
+  .pricing-card.current { border-color: var(--success); opacity: 0.85; }
+  .badge-feat, .badge-current {
     position: absolute; top: 16px; right: 16px;
-    background: linear-gradient(135deg, var(--p1), var(--accent));
     color: white;
     font-size: 10.5px; font-weight: 700;
     padding: 4px 10px;
@@ -780,22 +951,14 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
   }
-  .badge-current {
-    position: absolute; top: 16px; right: 16px;
-    background: var(--success);
-    color: var(--bg);
-    font-size: 10.5px; font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 99px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
+  .badge-feat { background: linear-gradient(135deg, var(--p1), var(--accent)); }
+  .badge-current { background: var(--success); }
   .pricing-head { margin-bottom: 16px; }
   .pricing-name { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
   .pricing-price { display: flex; align-items: baseline; gap: 6px; }
-  .pricing-price-val { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; }
+  .pricing-price-val { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; color: var(--text); }
   .pricing-price-val.gradient {
-    background: linear-gradient(120deg, var(--p1), var(--accent));
+    background: linear-gradient(120deg, var(--p2), var(--accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -803,15 +966,16 @@
   .pricing-price-per { font-size: 14px; color: var(--text-3); }
   .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .pricing-features li { font-size: 13.5px; color: var(--text-2); display: flex; align-items: center; gap: 10px; }
-  .pricing-features li svg { width: 16px; height: 16px; color: var(--p1); flex-shrink: 0; }
+  .pricing-features li svg { width: 16px; height: 16px; color: var(--p2); flex-shrink: 0; }
 
-  /* Settings groups */
+  /* Settings */
   .settings-group {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-md);
+    border-radius: 18px;
     overflow: hidden;
     margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
   }
   .settings-row {
     padding: 16px;
@@ -824,11 +988,58 @@
   }
   .settings-row:last-child { border-bottom: none; }
   .settings-row:hover { background: var(--surface2); }
-  .settings-label { font-size: 14.5px; font-weight: 500; }
+  .settings-label { font-size: 14.5px; font-weight: 500; color: var(--text); }
   .settings-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
   .settings-value { font-size: 14px; color: var(--text-3); }
 
-  /* Bottom tab bar */
+  /* Toggle switch */
+  .toggle {
+    width: 44px; height: 26px;
+    background: var(--border);
+    border-radius: 99px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toggle.on { background: var(--p2); }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* Theme picker */
+  .theme-picker {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .theme-option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 8px;
+    align-items: center;
+  }
+  .theme-option.active { border-color: var(--p2); background: var(--surface2); }
+  .theme-preview { width: 64px; height: 40px; border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .theme-preview.light { background: linear-gradient(135deg, #fefbf3, #faf2d9); }
+  .theme-preview.light::after { content: ''; position: absolute; top: 6px; right: 6px; width: 12px; height: 12px; background: linear-gradient(135deg, #FFD56A, #E8851A); border-radius: 4px; }
+  .theme-preview.dark { background: linear-gradient(135deg, #14110a, #1f1a11); }
+  .theme-preview.dark::after { content: ''; position: absolute; top: 6px; right: 6px; width: 12px; height: 12px; background: linear-gradient(135deg, #FFD56A, #E8851A); border-radius: 4px; }
+  .theme-name { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* Bottom tabs */
   .tabbar {
     position: fixed;
     bottom: 12px;
@@ -836,15 +1047,15 @@
     transform: translateX(-50%);
     width: calc(100% - 24px);
     max-width: 456px;
-    background: rgba(20,18,29,0.85);
+    background: var(--tab-bar-bg);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--border-bright);
     border-radius: 22px;
     display: flex;
     padding: 8px;
     z-index: 50;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    box-shadow: var(--shadow-lg);
   }
   .tab {
     flex: 1;
@@ -860,8 +1071,8 @@
     position: relative;
   }
   .tab svg { width: 22px; height: 22px; transition: transform 0.25s; }
-  .tab span { font-size: 10.5px; font-weight: 600; letter-spacing: 0.1px; }
-  .tab.active { color: var(--text); }
+  .tab span { font-size: 10.5px; font-weight: 600; }
+  .tab.active { color: var(--p3); }
   .tab.active svg { transform: scale(1.1); }
   .tab.active::before {
     content: '';
@@ -871,16 +1082,15 @@
     width: 24px; height: 3px;
     background: linear-gradient(90deg, var(--p1), var(--accent));
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 0 12px var(--p2);
+    box-shadow: 0 0 12px var(--glow-strong);
   }
-  .tab.luminos-tab.active { color: var(--p1); }
 
   /* Toast */
   .toast {
     position: fixed;
     top: 80px; left: 50%;
     transform: translateX(-50%);
-    background: var(--surface2);
+    background: var(--surface);
     border: 1px solid var(--border-bright);
     color: var(--text);
     padding: 12px 20px;
@@ -888,19 +1098,18 @@
     font-size: 14px;
     font-weight: 500;
     z-index: 200;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-lg);
     opacity: 0;
     transition: opacity 0.25s, transform 0.25s;
     pointer-events: none;
-    backdrop-filter: blur(20px);
   }
-  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.show { opacity: 1; }
 
-  /* Flashcards modal */
+  /* Modal */
   .modal-bg {
     position: fixed;
     inset: 0;
-    background: rgba(8,7,13,0.85);
+    background: rgba(0,0,0,0.5);
     backdrop-filter: blur(12px);
     z-index: 100;
     display: none;
@@ -912,13 +1121,14 @@
   .modal {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r-xl);
+    border-radius: 28px;
     padding: 24px;
     max-width: 420px;
     width: 100%;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
     position: relative;
+    box-shadow: var(--shadow-lg);
   }
   .modal-close {
     position: absolute; top: 16px; right: 16px;
@@ -935,31 +1145,33 @@
   .modal-sub { color: var(--text-2); font-size: 13.5px; margin-bottom: 20px; }
 
   .flashcard {
-    background: linear-gradient(135deg, var(--surface2), var(--surface));
+    background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    padding: 24px;
-    margin-bottom: 14px;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 12px;
     cursor: pointer;
-    perspective: 1000px;
-    min-height: 140px;
+    min-height: 120px;
     position: relative;
+    transition: all 0.2s;
   }
-  .flashcard-q { font-size: 13px; color: var(--p1); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .flashcard-text { font-size: 15.5px; line-height: 1.55; }
-  .flashcard-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--text-2); font-size: 14px; }
+  .flashcard:hover { border-color: var(--border-bright); }
+  .flashcard-q { font-size: 11px; color: var(--p3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .flashcard-text { font-size: 15px; line-height: 1.55; color: var(--text); }
+  .flashcard-answer { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--text-2); font-size: 14px; line-height: 1.55; }
   .flashcard.flipped .flashcard-answer { display: block; }
-  .flashcard-hint { font-size: 11.5px; color: var(--text-3); margin-top: 10px; text-align: center; }
+  .flashcard-hint { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
 
-  /* Background task indicator */
+  /* Background tasks */
   .bg-tasks {
     position: fixed;
     top: 78px;
     right: 20px;
     z-index: 40;
+    display: flex; flex-direction: column; gap: 8px;
   }
   .bg-task-pill {
-    background: var(--surface2);
+    background: var(--surface);
     border: 1px solid var(--border-bright);
     border-radius: 99px;
     padding: 6px 12px 6px 8px;
@@ -967,25 +1179,26 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--text-2);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-md);
     animation: fadeUp 0.3s ease;
+    max-width: 220px;
   }
   .bg-task-pill .pulse-dot {
     width: 8px; height: 8px;
     background: var(--success);
     border-radius: 50%;
     animation: pulse-dot 1.5s ease-in-out infinite;
+    flex-shrink: 0;
   }
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.4; transform: scale(0.8); }
   }
+  .bg-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
 
-<!-- Ambient background -->
 <div class="ambient">
   <div class="blob b1"></div>
   <div class="blob b2"></div>
@@ -996,19 +1209,19 @@
 
   <!-- Top bar -->
   <div class="topbar">
-    <div class="brand">
+    <div class="brand" onclick="switchTab('scan')">
       <div class="brand-mark"></div>
       <div class="brand-name">ScanPlain</div>
     </div>
-    <div class="icon-btn" onclick="switchTab('account')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="topbar-actions">
+      <div class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </div>
     </div>
   </div>
 
-  <!-- Background task indicator -->
   <div class="bg-tasks" id="bgTasks"></div>
 
-  <!-- Content -->
   <div class="content">
 
     <!-- SCAN PAGE -->
@@ -1054,7 +1267,6 @@
         </div>
       </div>
 
-      <!-- Preview -->
       <div class="preview-card" id="previewCard">
         <img class="preview-img" id="previewImg" style="display:none"/>
         <div class="preview-file-row" id="previewFile" style="display:none">
@@ -1087,7 +1299,7 @@
         </div>
         <div class="result-text" id="resultText"></div>
         <div id="postScanCTA" style="margin-top:16px;display:none">
-          <button class="btn-primary" onclick="switchTab('luminos')">
+          <button class="btn-primary" onclick="openCurrentInLuminos()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
             Open in Luminos
           </button>
@@ -1095,33 +1307,29 @@
       </div>
     </div>
 
-    <!-- HISTORY PAGE -->
+    <!-- HISTORY -->
     <div class="page" id="page-history">
       <div class="hero">
         <h1>Your <span class="serif">library</span></h1>
-        <p>Every scan, organized and searchable.</p>
+        <p>Every scan, searchable and organized.</p>
+      </div>
+      <div class="search-bar" id="historySearchBar" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+        <input id="historySearch" placeholder="Search scans…" oninput="renderHistory()"/>
       </div>
       <div id="historyList"></div>
     </div>
 
-    <!-- LUMINOS PAGE -->
+    <!-- LUMINOS -->
     <div class="page" id="page-luminos">
-      <div class="luminos-page-hero">
-        <div class="luminos-orb"></div>
-        <h1>Pick something to <span class="serif">light up</span></h1>
-        <p>Open any scan and Luminos will guide you, answer questions, or work on it in the background.</p>
-      </div>
-
-      <div id="luminosContent">
-        <!-- Will render: locked state OR scan picker OR active session -->
-      </div>
+      <div id="luminosContent"></div>
     </div>
 
-    <!-- ACCOUNT PAGE -->
+    <!-- ACCOUNT -->
     <div class="page" id="page-account">
       <div class="hero">
         <h1>Account</h1>
-        <p>Your plan, usage, and preferences.</p>
+        <p>Plan, preferences, and security.</p>
       </div>
 
       <div class="plan-mega">
@@ -1143,19 +1351,16 @@
         </div>
       </div>
 
-      <div class="section-label">Upgrade</div>
+      <div class="section-label">Plans</div>
 
       <div class="pricing-card" id="freeCard">
         <div class="pricing-head">
           <div class="pricing-name">Free</div>
-          <div class="pricing-price">
-            <span class="pricing-price-val">$0</span>
-            <span class="pricing-price-per">forever</span>
-          </div>
+          <div class="pricing-price"><span class="pricing-price-val">$0</span><span class="pricing-price-per">forever</span></div>
         </div>
         <ul class="pricing-features">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>3 scans per month</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 Luminos trial session</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 Luminos trial</li>
         </ul>
       </div>
 
@@ -1163,40 +1368,60 @@
         <div class="badge-feat">Most popular</div>
         <div class="pricing-head">
           <div class="pricing-name">Plus</div>
-          <div class="pricing-price">
-            <span class="pricing-price-val gradient">$7.99</span>
-            <span class="pricing-price-per">/month</span>
-          </div>
+          <div class="pricing-price"><span class="pricing-price-val gradient">$7.99</span><span class="pricing-price-per">/month</span></div>
         </div>
         <ul class="pricing-features">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>20 scans / month</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>3 Luminos sessions / month</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Follow-ups & flashcards</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>All Luminos tools</li>
         </ul>
       </div>
 
       <div class="pricing-card" id="unlimitedCard" onclick="upgradePlan('unlimited')">
         <div class="pricing-head">
           <div class="pricing-name">Unlimited</div>
-          <div class="pricing-price">
-            <span class="pricing-price-val gradient">$25</span>
-            <span class="pricing-price-per">/month</span>
-          </div>
+          <div class="pricing-price"><span class="pricing-price-val gradient">$25</span><span class="pricing-price-per">/month</span></div>
         </div>
         <ul class="pricing-features">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Unlimited everything</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Unlimited scans + Luminos</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Background research tasks</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Priority processing</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>$200/year save 33%</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>$200/yr · save 33%</li>
         </ul>
       </div>
 
-      <div class="section-label">Preferences</div>
+      <div class="section-label">Appearance</div>
+      <div class="theme-picker">
+        <div class="theme-option" id="theme-light" onclick="setTheme('light')">
+          <div class="theme-preview light"></div>
+          <div class="theme-name">Light</div>
+        </div>
+        <div class="theme-option" id="theme-dark" onclick="setTheme('dark')">
+          <div class="theme-preview dark"></div>
+          <div class="theme-name">Dark</div>
+        </div>
+      </div>
+
+      <div class="section-label">Privacy & data</div>
       <div class="settings-group">
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Encrypted local storage</div>
+            <div class="settings-sub">Your scans stay on this device</div>
+          </div>
+          <div class="toggle on"></div>
+        </div>
+        <div class="settings-row" onclick="exportData()">
+          <div>
+            <div class="settings-label">Export your data</div>
+            <div class="settings-sub">Download all scans as JSON</div>
+          </div>
+          <span class="settings-value">›</span>
+        </div>
         <div class="settings-row" onclick="clearHistory()">
           <div>
             <div class="settings-label">Clear scan history</div>
-            <div class="settings-sub">Wipes saved scans</div>
+            <div class="settings-sub">Wipes saved scans permanently</div>
           </div>
           <span class="settings-value">›</span>
         </div>
@@ -1207,10 +1432,14 @@
           </div>
           <span class="settings-value">›</span>
         </div>
-        <div class="settings-row" onclick="showToast('ScanPlain v1.0 · 2026')">
+      </div>
+
+      <div class="section-label">About</div>
+      <div class="settings-group">
+        <div class="settings-row" onclick="showToast('ScanPlain v2.0 · Built 2026')">
           <div>
-            <div class="settings-label">About</div>
-            <div class="settings-sub">Version info</div>
+            <div class="settings-label">Version</div>
+            <div class="settings-sub">2.0 (May 2026)</div>
           </div>
           <span class="settings-value">›</span>
         </div>
@@ -1219,7 +1448,7 @@
 
   </div>
 
-  <!-- Tab bar -->
+  <!-- Tabs -->
   <div class="tabbar">
     <div class="tab active" data-tab="scan" onclick="switchTab('scan')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M16 7v10"/></svg>
@@ -1229,7 +1458,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
       <span>Library</span>
     </div>
-    <div class="tab luminos-tab" data-tab="luminos" onclick="switchTab('luminos')">
+    <div class="tab" data-tab="luminos" onclick="switchTab('luminos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
       <span>Luminos</span>
     </div>
@@ -1239,24 +1468,78 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <!-- Flashcards modal -->
-  <div class="modal-bg" id="flashcardsModal" onclick="if(event.target===this)closeFlashcards()">
+  <!-- Modal -->
+  <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-      <button class="modal-close" onclick="closeFlashcards()">
+      <button class="modal-close" onclick="closeModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       </button>
-      <h2>Flashcards</h2>
-      <p class="modal-sub">Tap a card to reveal the answer</p>
-      <div id="flashcardsList"></div>
+      <h2 id="modalTitle"></h2>
+      <p class="modal-sub" id="modalSub"></p>
+      <div id="modalBody"></div>
     </div>
   </div>
+
+  <!-- Hidden follow-up input -->
+  <input type="file" id="followUpInput" accept="image/*,application/pdf" onchange="handleFollowUpFile(this.files[0])"/>
 
 </div>
 
 <script>
+'use strict';
+
+// ============ SECURITY ============
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = ['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+const RATE_LIMIT_MS = 1500; // min ms between API calls
+let lastApiCall = 0;
+
+function sanitize(input) {
+  if (typeof input !== 'string') return '';
+  return input.slice(0, 10000); // hard cap on text length
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function validateFile(file) {
+  if (!file) return 'No file selected';
+  if (file.size > MAX_FILE_SIZE) return `File too large. Max ${MAX_FILE_SIZE/1024/1024} MB.`;
+  if (!ALLOWED_TYPES.includes(file.type)) return 'Unsupported file type';
+  return null;
+}
+async function safeApiCall(body) {
+  const now = Date.now();
+  const since = now - lastApiCall;
+  if (since < RATE_LIMIT_MS) {
+    await new Promise(r => setTimeout(r, RATE_LIMIT_MS - since));
+  }
+  lastApiCall = Date.now();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+      credentials: 'omit',
+      referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+    clearTimeout(timeout);
+    if (!res.ok && res.status !== 400) throw new Error('Server error ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || 'Unknown error');
+    return data;
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Request timed out');
+    throw err;
+  }
+}
+
 const WORKER_URL = "https://throbbing-glitter-f07d.fortniterichard2.workers.dev";
 const LIMITS = {
   free:      { scans: 3, luminos: 1 },
@@ -1264,26 +1547,59 @@ const LIMITS = {
   unlimited: { scans: Infinity, luminos: Infinity }
 };
 
+// State
 let state = {
   plan: localStorage.getItem('sp_plan') || 'free',
   scansUsed: parseInt(localStorage.getItem('sp_scans') || '0'),
   luminosUsed: parseInt(localStorage.getItem('sp_luminos') || '0'),
-  history: JSON.parse(localStorage.getItem('sp_history') || '[]'),
+  history: [],
   activeLuminosId: null,
-  bgTasks: JSON.parse(localStorage.getItem('sp_bgtasks') || '[]'),
+  bgTasks: [],
+  theme: localStorage.getItem('sp_theme') || 'light',
   currentFile: null,
   currentDataUrl: null,
   currentMediaType: null
 };
 
+try { state.history = JSON.parse(localStorage.getItem('sp_history') || '[]'); } catch(e) {}
+try { state.bgTasks = JSON.parse(localStorage.getItem('sp_bgtasks') || '[]'); } catch(e) {}
+
 function save() {
-  localStorage.setItem('sp_plan', state.plan);
-  localStorage.setItem('sp_scans', state.scansUsed);
-  localStorage.setItem('sp_luminos', state.luminosUsed);
-  localStorage.setItem('sp_history', JSON.stringify(state.history.slice(0, 50)));
-  localStorage.setItem('sp_bgtasks', JSON.stringify(state.bgTasks));
+  try {
+    localStorage.setItem('sp_plan', state.plan);
+    localStorage.setItem('sp_scans', state.scansUsed);
+    localStorage.setItem('sp_luminos', state.luminosUsed);
+    localStorage.setItem('sp_history', JSON.stringify(state.history.slice(0, 50)));
+    localStorage.setItem('sp_bgtasks', JSON.stringify(state.bgTasks));
+    localStorage.setItem('sp_theme', state.theme);
+  } catch(e) {
+    showToast('Storage full — clear some history');
+  }
 }
 
+// ============ THEME ============
+function setTheme(t) {
+  state.theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#fefbf3' : '#14110a';
+  document.getElementById('theme-light').classList.toggle('active', t === 'light');
+  document.getElementById('theme-dark').classList.toggle('active', t === 'dark');
+  updateThemeIcon();
+  save();
+}
+function toggleTheme() {
+  setTheme(state.theme === 'light' ? 'dark' : 'light');
+}
+function updateThemeIcon() {
+  const icon = document.getElementById('themeIcon');
+  if (state.theme === 'light') {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+  }
+}
+
+// ============ TABS / NAV ============
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1301,25 +1617,23 @@ function showToast(msg) {
   setTimeout(() => el.classList.remove('show'), 2400);
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
 function formatSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
   return (bytes/1024/1024).toFixed(1) + ' MB';
 }
 
+// ============ SCAN ============
 function handleDrop(e) {
   e.preventDefault();
   e.currentTarget.classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  handleFile(e.dataTransfer.files[0]);
 }
 
 function handleFile(file) {
   if (!file) return;
+  const err = validateFile(file);
+  if (err) { showError(err); return; }
   state.currentFile = file;
   state.currentMediaType = file.type;
   const reader = new FileReader();
@@ -1343,6 +1657,7 @@ function handleFile(file) {
       fileBox.style.display = 'none';
     }
   };
+  reader.onerror = () => showError('Could not read file');
   reader.readAsDataURL(file);
 }
 
@@ -1361,6 +1676,7 @@ function clearScan() {
   document.getElementById('previewCard').classList.remove('show');
   document.getElementById('resultCard').style.display = 'none';
   document.getElementById('errorMsg').classList.remove('show');
+  document.getElementById('postScanCTA').style.display = 'none';
 }
 
 function showError(msg) {
@@ -1393,32 +1709,24 @@ async function runScan() {
     : { type: 'image', source: { type: 'base64', media_type: state.currentMediaType, data: base64 } };
 
   try {
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{
-          role: 'user',
-          content: [
-            contentBlock,
-            { type: 'text', text: `You're ScanPlain. Look at this and respond in this exact format:
+    const data = await safeApiCall({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 800,
+      messages: [{
+        role: 'user',
+        content: [
+          contentBlock,
+          { type: 'text', text: `You're ScanPlain. Look at this and respond in this exact format:
 
-TITLE: [4-7 word title for this thing]
+TITLE: [4-7 word title]
 
 EXPLANATION:
-[3-5 sentences explaining what this is in plain everyday English, no jargon, like you're explaining to a friend]` }
-          ]
-        }]
-      })
+[3-5 sentences explaining what this is in plain everyday English, no jargon, like explaining to a friend]` }
+        ]
+      }]
     });
 
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    if (!data.content) throw new Error('Unexpected response');
-
-    const text = data.content[0].text;
+    const text = sanitize(data.content[0].text);
     const titleMatch = text.match(/TITLE:\s*(.+?)(?:\n|$)/i);
     const expMatch = text.match(/EXPLANATION:\s*([\s\S]*?)$/i);
     const title = titleMatch ? titleMatch[1].trim() : 'Scan result';
@@ -1430,9 +1738,8 @@ EXPLANATION:
 
     state.scansUsed++;
 
-    // Save to history
-    const scanId = 'scan_' + Date.now();
-    state.history.unshift({
+    const scanId = 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
+    const newScan = {
       id: scanId,
       date: new Date().toISOString(),
       thumb: isPDF ? null : state.currentDataUrl,
@@ -1440,8 +1747,11 @@ EXPLANATION:
       fileName: state.currentFile.name,
       title,
       explanation,
-      chatHistory: []
-    });
+      chatHistory: [],
+      followUps: [] // additional docs added in luminos
+    };
+    state.history.unshift(newScan);
+    state.lastScanId = scanId;
     save();
     updateLibraryCount();
 
@@ -1452,8 +1762,28 @@ EXPLANATION:
   }
 }
 
+function openCurrentInLuminos() {
+  if (state.lastScanId) {
+    openLuminosWithScan(state.lastScanId);
+  }
+}
+
+// ============ HISTORY ============
+function getFilteredHistory() {
+  const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
+  if (!q) return state.history;
+  return state.history.filter(h =>
+    h.title.toLowerCase().includes(q) ||
+    h.explanation.toLowerCase().includes(q) ||
+    h.fileName.toLowerCase().includes(q)
+  );
+}
+
 function renderHistory() {
   const list = document.getElementById('historyList');
+  const searchBar = document.getElementById('historySearchBar');
+  searchBar.style.display = state.history.length > 3 ? 'flex' : 'none';
+
   if (!state.history.length) {
     list.innerHTML = `
       <div class="empty">
@@ -1465,18 +1795,40 @@ function renderHistory() {
       </div>`;
     return;
   }
-  list.innerHTML = '<div class="history-grid">' + state.history.map(h => {
+
+  const filtered = getFilteredHistory();
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><h3>No results</h3><p>Try a different search</p></div>`;
+    return;
+  }
+
+  list.innerHTML = '<div class="history-grid">' + filtered.map(h => {
     const thumb = h.isPDF
       ? `<div class="history-thumb doc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`
-      : `<img class="history-thumb" src="${h.thumb}"/>`;
+      : `<img class="history-thumb" src="${escapeHtml(h.thumb)}"/>`;
     return `<div class="history-item" onclick="openLuminosWithScan('${h.id}')">
       ${thumb}
       <div class="history-info">
         <div class="history-title-text">${escapeHtml(h.title)}</div>
         <div class="history-date">${new Date(h.date).toLocaleDateString([], {month:'short', day:'numeric'})} · ${new Date(h.date).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
       </div>
+      <div class="history-actions">
+        <button class="history-action-btn" onclick="event.stopPropagation();deleteScan('${h.id}')" title="Delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
     </div>`;
   }).join('') + '</div>';
+}
+
+function deleteScan(id) {
+  if (!confirm('Delete this scan?')) return;
+  state.history = state.history.filter(h => h.id !== id);
+  if (state.activeLuminosId === id) state.activeLuminosId = null;
+  save();
+  renderHistory();
+  updateLibraryCount();
+  showToast('Scan deleted');
 }
 
 function updateLibraryCount() {
@@ -1485,21 +1837,23 @@ function updateLibraryCount() {
 }
 
 // ============ LUMINOS ============
-
 function renderLuminos() {
   const container = document.getElementById('luminosContent');
   const luminosLimit = LIMITS[state.plan].luminos;
-  const canUseLuminos = state.luminosUsed < luminosLimit;
 
-  // If a scan is selected for Luminos
   if (state.activeLuminosId) {
     renderLuminosSession();
     return;
   }
 
-  let html = '';
+  let html = `
+    <div class="luminos-page-hero">
+      <div class="luminos-orb"></div>
+      <h1>Pick something to <span class="serif">light up</span></h1>
+      <p>Open any scan to ask questions, generate flashcards, or research deeper.</p>
+    </div>
+  `;
 
-  // Locked banner for free users who've used their trial
   if (state.plan === 'free' && state.luminosUsed >= luminosLimit) {
     html += `
       <div class="lock-card">
@@ -1510,12 +1864,9 @@ function renderLuminos() {
         <p>Upgrade to Plus for 3 Luminos sessions a month, or Unlimited for everything.</p>
         <button class="btn-primary" onclick="switchTab('account')">See plans</button>
       </div>`;
-  }
-
-  // Free user, hasn't used trial yet
-  if (state.plan === 'free' && state.luminosUsed < luminosLimit) {
+  } else if (state.plan === 'free') {
     html += `
-      <div class="lock-card" style="background: linear-gradient(135deg, rgba(139,127,255,0.08), rgba(255,107,157,0.05)), var(--surface)">
+      <div class="lock-card" style="background: linear-gradient(135deg, var(--glow), transparent), var(--surface)">
         <div class="lock-ic">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
         </div>
@@ -1537,15 +1888,16 @@ function renderLuminos() {
     return;
   }
 
-  html += `<div class="section-label">Pick a scan</div>`;
+  html += `<div class="section-label">Your scans</div>`;
   html += '<div class="history-grid">' + state.history.map(h => {
     const thumb = h.isPDF
       ? `<div class="history-thumb doc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`
-      : `<img class="history-thumb" src="${h.thumb}"/>`;
+      : `<img class="history-thumb" src="${escapeHtml(h.thumb)}"/>`;
+    const lumIc = h.luminosOpened ? `<svg viewBox="0 0 24 24" fill="var(--p2)" stroke="var(--p2)" stroke-width="0"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>` : '';
     return `<div class="history-item" onclick="openLuminosWithScan('${h.id}')">
       ${thumb}
       <div class="history-info">
-        <div class="history-title-text">${escapeHtml(h.title)}</div>
+        <div class="history-title-text">${escapeHtml(h.title)} ${lumIc ? '<span style="display:inline-flex;width:14px;height:14px;vertical-align:middle">'+lumIc+'</span>' : ''}</div>
         <div class="history-date">${new Date(h.date).toLocaleDateString([], {month:'short', day:'numeric'})} · ${new Date(h.date).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
       </div>
     </div>`;
@@ -1559,22 +1911,13 @@ function openLuminosWithScan(scanId) {
   const scan = state.history.find(h => h.id === scanId);
   if (!scan) return;
 
-  // If already used this scan's Luminos, just re-open
-  const alreadyOpened = scan.luminosOpened;
-
-  if (!alreadyOpened && state.luminosUsed >= limit) {
-    if (state.plan === 'free') {
-      showToast('Upgrade to Plus to unlock Luminos');
-      switchTab('account');
-      return;
-    } else {
-      showToast(`You've used all ${limit} sessions this month`);
-      switchTab('account');
-      return;
-    }
+  if (!scan.luminosOpened && state.luminosUsed >= limit) {
+    showToast(state.plan === 'free' ? 'Upgrade to unlock Luminos' : `You've used all ${limit} sessions`);
+    switchTab('account');
+    return;
   }
 
-  if (!alreadyOpened) {
+  if (!scan.luminosOpened) {
     state.luminosUsed++;
     scan.luminosOpened = true;
     save();
@@ -1589,53 +1932,154 @@ function renderLuminosSession() {
   if (!scan) { state.activeLuminosId = null; renderLuminos(); return; }
 
   const container = document.getElementById('luminosContent');
+  const followUps = scan.followUps || [];
+
   container.innerHTML = `
-    <button class="btn-ghost" onclick="exitLuminosSession()" style="margin-bottom:14px;margin-top:0;">← Back to library</button>
+    <div class="page-head">
+      <button class="back-btn" onclick="exitLuminosSession()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h2>Luminos</h2>
+    </div>
 
     <div class="luminos-card">
       <div class="luminos-head">
         <div class="luminos-orb"></div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="luminos-title">${escapeHtml(scan.title)}</div>
-          <div class="luminos-sub">Luminos guide · active session</div>
+          <div class="luminos-sub">Active session · ${followUps.length} follow-up doc${followUps.length === 1 ? '' : 's'}</div>
         </div>
       </div>
 
-      <div class="result-text" style="margin-bottom:18px;font-size:14.5px;color:var(--text-2);">${escapeHtml(scan.explanation)}</div>
+      <div class="result-text" style="margin-bottom:14px;font-size:14.5px;color:var(--text-2);">${escapeHtml(scan.explanation)}</div>
 
-      <div class="luminos-actions">
-        <button class="lum-action" onclick="generateSteps('${scan.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10"/></svg>
-          <span>Action plan</span>
-        </button>
-        <button class="lum-action" onclick="generateFlashcards('${scan.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="M7 9h10"/><path d="M7 13h6"/></svg>
-          <span>Flashcards</span>
-        </button>
-        <button class="lum-action" onclick="runBackgroundTask('${scan.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>Background</span>
+      <div class="doc-strip">
+        <div class="doc-chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          ${escapeHtml(scan.fileName)}
+        </div>
+        ${followUps.map((f, i) => `
+          <div class="doc-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            ${escapeHtml(f.fileName)}
+          </div>
+        `).join('')}
+        <button class="doc-chip doc-chip-add" onclick="document.getElementById('followUpInput').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Add document
         </button>
       </div>
 
-      <div id="luminosOutput"></div>
-
       <div class="chat-msgs" id="chatMessages"></div>
+
       <div class="chat-input-wrap">
-        <input type="text" class="chat-input" id="chatInput" placeholder="Ask Luminos anything…" onkeydown="if(event.key==='Enter')sendChat()"/>
-        <button class="chat-send" onclick="sendChat()">
+        <button class="chat-attach" onclick="document.getElementById('followUpInput').click()" title="Attach document">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.57 8.57a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg>
+        </button>
+        <input type="text" class="chat-input" id="chatInput" placeholder="Ask Luminos anything…" onkeydown="if(event.key==='Enter')sendChat()" autocomplete="off" maxlength="2000"/>
+        <button class="chat-send" onclick="sendChat()" title="Send">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>
       </div>
+
+      <div class="tools-section">
+        <button class="tools-trigger" onclick="toggleTools(event)">
+          <div class="lt">
+            <svg class="tool-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Tools & actions
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="tools-menu" id="toolsMenu">
+          <button class="tool-item" onclick="runTool('actionplan')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Action plan</div>
+              <div class="tool-item-desc">Step-by-step next moves</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('flashcards')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="M7 9h10"/><path d="M7 13h6"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Flashcards</div>
+              <div class="tool-item-desc">Study cards from this content</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('quiz')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Quiz me</div>
+              <div class="tool-item-desc">Test your understanding</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('worksheet')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Worksheet</div>
+              <div class="tool-item-desc">Printable practice sheet</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('guide')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Guided walkthrough</div>
+              <div class="tool-item-desc">Step-by-step like a tutor</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('summary')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="17" y1="12" x2="3" y2="12"/><line x1="13" y1="18" x2="3" y2="18"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">TL;DR summary</div>
+              <div class="tool-item-desc">One-paragraph version</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('translate')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Translate</div>
+              <div class="tool-item-desc">Switch to another language</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('extended')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Extended research</div>
+              <div class="tool-item-desc">Background investigation</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('background')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Run in background</div>
+              <div class="tool-item-desc">Close the app, come back later</div>
+            </div>
+          </button>
+          <button class="tool-item" onclick="runTool('email')">
+            <div class="tool-item-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div>
+            <div class="tool-item-body">
+              <div class="tool-item-name">Draft an email</div>
+              <div class="tool-item-desc">If this needs a response</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div id="toolOutput"></div>
     </div>
   `;
 
-  // Render any saved chat history
-  const scanData = state.history.find(h => h.id === state.activeLuminosId);
+  // Render saved chat
   const msgs = document.getElementById('chatMessages');
-  (scanData.chatHistory || []).forEach(m => {
+  (scan.chatHistory || []).forEach(m => {
     msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg ${m.role === 'user' ? 'user' : 'ai'}"><div class="chat-bubble">${escapeHtml(m.content)}</div></div>`);
   });
+}
+
+function toggleTools(e) {
+  const trigger = e.currentTarget;
+  const menu = document.getElementById('toolsMenu');
+  trigger.classList.toggle('open');
+  menu.classList.toggle('show');
 }
 
 function exitLuminosSession() {
@@ -1643,9 +2087,32 @@ function exitLuminosSession() {
   renderLuminos();
 }
 
+function handleFollowUpFile(file) {
+  if (!file) return;
+  const err = validateFile(file);
+  if (err) { showToast(err); return; }
+  const scan = state.history.find(h => h.id === state.activeLuminosId);
+  if (!scan) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    scan.followUps = scan.followUps || [];
+    scan.followUps.push({
+      fileName: file.name,
+      mediaType: file.type,
+      dataUrl: e.target.result,
+      addedAt: new Date().toISOString()
+    });
+    save();
+    renderLuminosSession();
+    showToast(`Added ${file.name} to this Luminos session`);
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('followUpInput').value = '';
+}
+
 async function sendChat() {
   const input = document.getElementById('chatInput');
-  const q = input.value.trim();
+  const q = sanitize(input.value.trim());
   if (!q) return;
   input.value = '';
 
@@ -1657,168 +2124,230 @@ async function sendChat() {
   msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg user"><div class="chat-bubble">${escapeHtml(q)}</div></div>`);
   msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg ai" id="thinking"><div class="chat-bubble">Thinking…</div></div>`);
   scan.chatHistory.push({ role: 'user', content: q });
+  msgs.scrollTop = msgs.scrollHeight;
 
   try {
-    const messages = [
-      { role: 'user', content: `You are Luminos, a tailored AI assistant for this specific thing the user scanned. Here's the context:\n\nTITLE: ${scan.title}\n\nEXPLANATION: ${scan.explanation}\n\nAnswer their questions naturally and helpfully in plain English. Be specific to their situation.` },
-      { role: 'assistant', content: `Got it — I'm here to help with "${scan.title}". Ask me anything.` },
-      ...scan.chatHistory
+    // Build context with follow-up docs
+    const followUpContext = (scan.followUps || []).map(f => {
+      const base64 = f.dataUrl.split(',')[1];
+      if (f.mediaType === 'application/pdf') {
+        return { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
+      }
+      return { type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } };
+    });
+
+    const systemContent = [
+      { type: 'text', text: `You are Luminos — a tailored AI assistant for what the user scanned. Context:
+
+TITLE: ${scan.title}
+EXPLANATION: ${scan.explanation}
+
+${scan.followUps && scan.followUps.length ? `Additional documents the user attached:` : ''}` },
+      ...followUpContext,
+      { type: 'text', text: `Answer naturally and helpfully in plain English. Be specific to their situation.` }
     ];
 
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, messages })
+    const data = await safeApiCall({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 800,
+      messages: [
+        { role: 'user', content: systemContent },
+        { role: 'assistant', content: `Got it — I'm here to help with "${scan.title}". Ask me anything.` },
+        ...scan.chatHistory
+      ]
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const reply = data.content[0].text;
+    const reply = sanitize(data.content[0].text);
     scan.chatHistory.push({ role: 'assistant', content: reply });
     save();
 
     document.getElementById('thinking').remove();
     msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg ai"><div class="chat-bubble">${escapeHtml(reply)}</div></div>`);
-    document.querySelector('.content').scrollTo({ top: document.querySelector('.content').scrollHeight, behavior: 'smooth' });
+    msgs.scrollTop = msgs.scrollHeight;
   } catch (err) {
     document.getElementById('thinking').remove();
-    msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg ai"><div class="chat-bubble">Sorry, something went wrong.</div></div>`);
+    msgs.insertAdjacentHTML('beforeend', `<div class="chat-msg ai"><div class="chat-bubble">Sorry — ${escapeHtml(err.message)}</div></div>`);
   }
 }
 
-async function generateSteps(scanId) {
-  const scan = state.history.find(h => h.id === scanId);
-  const out = document.getElementById('luminosOutput');
-  out.innerHTML = '<div class="loading show"><div class="pulse-ring"><div class="pulse-core"></div></div><p>Building your action plan…</p></div>';
+// ============ TOOLS ============
+async function runTool(tool) {
+  const scan = state.history.find(h => h.id === state.activeLuminosId);
+  if (!scan) return;
+  document.getElementById('toolsMenu').classList.remove('show');
+  document.querySelector('.tools-trigger').classList.remove('open');
 
-  try {
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        messages: [{
-          role: 'user',
-          content: `Based on this:\n\n${scan.title}\n${scan.explanation}\n\nGive 4-5 specific, actionable steps the user should take. Format as a numbered list, one step per line. Be concrete.`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content[0].text;
-    const steps = text.split(/\n?\s*\d+[\.\)]\s+/).filter(s => s.trim());
-    out.innerHTML = '<div class="step-list">' + steps.map((s, i) =>
-      `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${escapeHtml(s.trim())}</div></div>`
-    ).join('') + '</div>';
-  } catch (err) {
-    out.innerHTML = '<div class="error show">Could not generate steps</div>';
-  }
-}
+  const out = document.getElementById('toolOutput');
+  out.innerHTML = '<div class="loading show"><div class="pulse-ring"><div class="pulse-core"></div></div><p>Working on it…</p></div>';
 
-async function generateFlashcards(scanId) {
-  const scan = state.history.find(h => h.id === scanId);
-  const modal = document.getElementById('flashcardsModal');
-  const list = document.getElementById('flashcardsList');
-  list.innerHTML = '<div class="loading show"><div class="pulse-ring"><div class="pulse-core"></div></div><p>Creating flashcards…</p></div>';
-  modal.classList.add('show');
-
-  try {
-    const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{
-          role: 'user',
-          content: `Based on:\n\n${scan.title}\n${scan.explanation}\n\nCreate 5 flashcards to help the user understand and remember this. Format strictly as JSON array, nothing else:\n[{"q":"question","a":"answer"}, ...]`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content[0].text.replace(/```json|```/g, '').trim();
-    const cards = JSON.parse(text);
-    list.innerHTML = cards.map((c, i) => `
-      <div class="flashcard" onclick="this.classList.toggle('flipped')">
-        <div class="flashcard-q">Card ${i+1}</div>
-        <div class="flashcard-text">${escapeHtml(c.q)}</div>
-        <div class="flashcard-answer">${escapeHtml(c.a)}</div>
-        <div class="flashcard-hint">Tap to flip</div>
-      </div>
-    `).join('');
-  } catch (err) {
-    list.innerHTML = '<div class="error show">Could not generate flashcards</div>';
-  }
-}
-
-function closeFlashcards() {
-  document.getElementById('flashcardsModal').classList.remove('show');
-}
-
-function runBackgroundTask(scanId) {
-  const scan = state.history.find(h => h.id === scanId);
-  const taskId = 'bg_' + Date.now();
-  const task = {
-    id: taskId,
-    scanId,
-    title: 'Researching: ' + scan.title,
-    startedAt: Date.now()
+  const prompts = {
+    actionplan: `Based on this:\n\n${scan.title}\n${scan.explanation}\n\nGive 4-6 specific, actionable steps. Format as a numbered list, one step per line. Be concrete.`,
+    flashcards: `Based on:\n\n${scan.title}\n${scan.explanation}\n\nCreate 6 flashcards. Format STRICTLY as JSON, nothing else:\n[{"q":"question","a":"answer"}, ...]`,
+    quiz: `Based on:\n\n${scan.title}\n${scan.explanation}\n\nCreate 5 multiple-choice quiz questions. Format STRICTLY as JSON:\n[{"q":"question","options":["A","B","C","D"],"correct":0,"explain":"why"}]`,
+    worksheet: `Based on:\n\n${scan.title}\n${scan.explanation}\n\nCreate a practice worksheet with 6-8 fill-in-the-blank or short-answer questions. Format as numbered questions only.`,
+    guide: `Based on:\n\n${scan.title}\n${scan.explanation}\n\nWalk me through this step by step like a patient tutor. Use 4-6 numbered sections with clear headers. Plain English.`,
+    summary: `Summarize this in 2-3 sentences, plain English:\n\n${scan.title}\n${scan.explanation}`,
+    translate: `Translate this explanation into Spanish, French, and Mandarin. Format clearly with headers:\n\n${scan.explanation}`,
+    extended: `Research deeper context, related info, and useful background facts about:\n\n${scan.title}\n${scan.explanation}\n\nGive a thorough but plain-English briefing in 3-4 paragraphs.`,
+    email: `Draft a professional email response based on this:\n\n${scan.title}\n${scan.explanation}\n\nInclude subject line. Be appropriate and ready to send.`
   };
+
+  if (tool === 'background') {
+    runBackgroundTask(scan);
+    out.innerHTML = '';
+    return;
+  }
+
+  try {
+    const data = await safeApiCall({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1200,
+      messages: [{ role: 'user', content: prompts[tool] }]
+    });
+    const text = sanitize(data.content[0].text);
+
+    if (tool === 'flashcards') {
+      const cleaned = text.replace(/```json|```/g, '').trim();
+      try {
+        const cards = JSON.parse(cleaned);
+        showFlashcardsModal(cards);
+        out.innerHTML = '';
+      } catch {
+        out.innerHTML = `<div class="error show">Could not parse flashcards</div>`;
+      }
+      return;
+    }
+
+    if (tool === 'quiz') {
+      const cleaned = text.replace(/```json|```/g, '').trim();
+      try {
+        const qs = JSON.parse(cleaned);
+        showQuizModal(qs);
+        out.innerHTML = '';
+      } catch {
+        out.innerHTML = `<div class="error show">Could not parse quiz</div>`;
+      }
+      return;
+    }
+
+    if (tool === 'actionplan') {
+      const steps = text.split(/\n?\s*\d+[\.\)]\s+/).filter(s => s.trim());
+      out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Action plan</div><div class="step-list">${steps.map((s, i) => `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${escapeHtml(s.trim())}</div></div>`).join('')}</div></div>`;
+      return;
+    }
+
+    const labels = {
+      worksheet: 'Worksheet',
+      guide: 'Guided walkthrough',
+      summary: 'TL;DR',
+      translate: 'Translations',
+      extended: 'Extended research',
+      email: 'Email draft'
+    };
+    out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">${labels[tool]}</div><div class="result-text">${escapeHtml(text)}</div></div>`;
+  } catch (err) {
+    out.innerHTML = `<div class="error show">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function showFlashcardsModal(cards) {
+  document.getElementById('modalTitle').textContent = 'Flashcards';
+  document.getElementById('modalSub').textContent = 'Tap a card to reveal the answer';
+  document.getElementById('modalBody').innerHTML = cards.map((c, i) => `
+    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+      <div class="flashcard-q">Card ${i+1}</div>
+      <div class="flashcard-text">${escapeHtml(c.q)}</div>
+      <div class="flashcard-answer">${escapeHtml(c.a)}</div>
+      <div class="flashcard-hint">Tap to flip</div>
+    </div>
+  `).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+function showQuizModal(questions) {
+  document.getElementById('modalTitle').textContent = 'Quiz';
+  document.getElementById('modalSub').textContent = 'Tap an answer to check it';
+  document.getElementById('modalBody').innerHTML = questions.map((q, i) => `
+    <div class="flashcard" style="cursor:default">
+      <div class="flashcard-q">Question ${i+1}</div>
+      <div class="flashcard-text">${escapeHtml(q.q)}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+        ${q.options.map((opt, j) => `
+          <button class="tool-item" style="background:var(--surface);border:1px solid var(--border);padding:10px 14px;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;color:var(--text);font-size:14px"
+                  onclick="checkQuizAnswer(this, ${j === q.correct}, '${escapeHtml(q.explain).replace(/'/g,'&#39;')}')">
+            ${escapeHtml(opt)}
+          </button>
+        `).join('')}
+      </div>
+      <div class="flashcard-answer" id="qa-${i}"></div>
+    </div>
+  `).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+function checkQuizAnswer(btn, correct, explain) {
+  const card = btn.closest('.flashcard');
+  const answerDiv = card.querySelector('.flashcard-answer');
+  if (correct) {
+    btn.style.background = 'var(--success)';
+    btn.style.color = 'white';
+    btn.style.borderColor = 'var(--success)';
+    answerDiv.innerHTML = '✓ Correct! ' + explain;
+  } else {
+    btn.style.background = 'rgba(220,38,38,0.15)';
+    btn.style.color = 'var(--danger)';
+    btn.style.borderColor = 'var(--danger)';
+    answerDiv.innerHTML = '✗ ' + explain;
+  }
+  answerDiv.style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function runBackgroundTask(scan) {
+  const taskId = 'bg_' + Date.now();
+  const task = { id: taskId, scanId: scan.id, title: 'Researching: ' + scan.title, startedAt: Date.now() };
   state.bgTasks.push(task);
   save();
   renderBgTasks();
   showToast('Luminos is working in the background ✨');
 
-  // Simulate background research
   setTimeout(async () => {
     try {
-      const res = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 600,
-          messages: [{
-            role: 'user',
-            content: `Research deeper context, related info, and useful facts about:\n\n${scan.title}\n${scan.explanation}\n\nGive a thorough but plain-English follow-up briefing in 2-3 paragraphs.`
-          }]
-        })
+      const data = await safeApiCall({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: `Deep research on:\n\n${scan.title}\n${scan.explanation}\n\nGive thorough but plain-English findings in 3-4 paragraphs.` }]
       });
-      const data = await res.json();
-      const result = data.content[0].text;
+      const result = sanitize(data.content[0].text);
       scan.bgResearch = result;
       save();
-
-      // Remove from active tasks
       state.bgTasks = state.bgTasks.filter(t => t.id !== taskId);
       save();
       renderBgTasks();
-      showToast('Background research done! Tap notification.');
-
-      // Show in luminos output if still on that screen
-      if (state.activeLuminosId === scanId) {
-        const out = document.getElementById('luminosOutput');
-        if (out) {
-          out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Deep research</div><div class="result-text">${escapeHtml(result)}</div></div>`;
-        }
+      showToast('Background research done!');
+      if (state.activeLuminosId === scan.id) {
+        const out = document.getElementById('toolOutput');
+        if (out) out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Deep research</div><div class="result-text">${escapeHtml(result)}</div></div>`;
       }
     } catch (err) {
       state.bgTasks = state.bgTasks.filter(t => t.id !== taskId);
       save();
       renderBgTasks();
     }
-  }, 3000);
+  }, 4000);
 }
 
 function renderBgTasks() {
   const el = document.getElementById('bgTasks');
   if (!state.bgTasks.length) { el.innerHTML = ''; return; }
   el.innerHTML = state.bgTasks.map(t =>
-    `<div class="bg-task-pill"><div class="pulse-dot"></div>${escapeHtml(t.title.substring(0, 40))}</div>`
+    `<div class="bg-task-pill"><div class="pulse-dot"></div><div class="bg-task-text">${escapeHtml(t.title)}</div></div>`
   ).join('');
 }
 
 // ============ ACCOUNT ============
-
 function updatePlanUI() {
   const limit = LIMITS[state.plan].scans;
   const lumLimit = LIMITS[state.plan].luminos;
@@ -1831,16 +2360,14 @@ function updatePlanUI() {
   document.getElementById('planBar').style.width = (limit === Infinity ? 100 : Math.min((state.scansUsed/limit)*100, 100)) + '%';
   document.getElementById('planLumBar').style.width = (lumLimit === Infinity ? 100 : Math.min((state.luminosUsed/lumLimit)*100, 100)) + '%';
 
-  // Update pricing cards to show current plan
   document.querySelectorAll('.pricing-card').forEach(c => {
     c.classList.remove('current');
-    const badge = c.querySelector('.badge-current');
-    if (badge) badge.remove();
+    const b = c.querySelector('.badge-current');
+    if (b) b.remove();
   });
   const currentCard = document.getElementById(state.plan + 'Card');
   if (currentCard) {
     currentCard.classList.add('current');
-    // Don't show "current" badge over "most popular" if same
     if (!currentCard.querySelector('.badge-current') && !currentCard.querySelector('.badge-feat')) {
       const b = document.createElement('div');
       b.className = 'badge-current';
@@ -1851,11 +2378,8 @@ function updatePlanUI() {
 }
 
 function upgradePlan(tier) {
-  if (state.plan === tier) {
-    showToast("You're already on " + tier);
-    return;
-  }
-  if (confirm(`Upgrade to ${tier.charAt(0).toUpperCase() + tier.slice(1)}? (Demo — payment integration coming soon)`)) {
+  if (state.plan === tier) { showToast("You're already on " + tier); return; }
+  if (confirm(`Upgrade to ${tier.charAt(0).toUpperCase() + tier.slice(1)}?\n(Demo — Stripe payment integration coming soon)`)) {
     state.plan = tier;
     save();
     updatePlanUI();
@@ -1884,10 +2408,37 @@ function resetUsage() {
   }
 }
 
-// Init
+function exportData() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    plan: state.plan,
+    history: state.history.map(h => ({ ...h, thumb: h.thumb ? '[image data omitted]' : null }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `scanplain-export-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported');
+}
+
+// ============ INIT ============
+document.documentElement.setAttribute('data-theme', state.theme);
+document.querySelector('meta[name="theme-color"]').content = state.theme === 'light' ? '#fefbf3' : '#14110a';
+updateThemeIcon();
 updatePlanUI();
 updateLibraryCount();
 renderBgTasks();
+
+// Click outside tools menu closes it
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.tools-trigger') && !e.target.closest('.tools-menu')) {
+    document.querySelector('.tools-menu')?.classList.remove('show');
+    document.querySelector('.tools-trigger')?.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
