@@ -1264,6 +1264,102 @@
   }
   .kt-def.open { display: block; }
 
+  /* ── Weekly usage chart ── */
+  .weekly-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 80px;
+    padding: 8px 0 0;
+  }
+  .weekly-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .weekly-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--border);
+    min-height: 4px;
+    transition: height 0.3s;
+  }
+  .weekly-bar.today {
+    background: linear-gradient(180deg, var(--p1), var(--p2));
+  }
+  .weekly-bar.has-data {
+    background: var(--accent);
+    opacity: 0.7;
+  }
+  .weekly-bar.today.has-data {
+    background: linear-gradient(180deg, var(--p1), var(--p2));
+    opacity: 1;
+  }
+  .weekly-day-label {
+    font-size: 0.68rem;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .weekly-day-label.today { color: var(--text); font-weight: 700; }
+
+  /* ── Referral section ── */
+  .section-sub {
+    font-size: 0.84rem;
+    color: var(--text-2);
+    margin: 4px 0 12px;
+    line-height: 1.4;
+  }
+  .referral-link-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .referral-link {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--text-2);
+    font-family: monospace;
+    word-break: break-all;
+  }
+  .referral-copy-btn {
+    flex-shrink: 0;
+    width: auto;
+    margin-top: 0;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+  .referral-stats {
+    font-size: 0.8rem;
+    color: var(--text-2);
+  }
+
+  /* ── Section card ── */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
   /* ── Onboarding overlay ── */
   .onboard-bg {
     position: fixed;
@@ -1429,6 +1525,14 @@
     font-size: 0.9rem;
     font-weight: 700;
     text-align: center;
+  }
+
+  .tool-result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 10px;
   }
 
   /* Background tasks */
@@ -1870,6 +1974,21 @@
         </div>
       </div>
 
+      <div class="section-card" id="weeklyChartSection">
+        <div class="section-title">Weekly Activity</div>
+        <div class="weekly-chart" id="weeklyChart"></div>
+      </div>
+
+      <div class="section-card" id="referralSection">
+        <div class="section-title">Refer Friends</div>
+        <p class="section-sub">Share Luminos and earn bonus scans for every friend who signs up.</p>
+        <div class="referral-link-wrap">
+          <span class="referral-link" id="referralLink">scanplain.app/ref/...</span>
+          <button class="btn-ghost referral-copy-btn" onclick="copyReferralLink()">Copy</button>
+        </div>
+        <div class="referral-stats" id="referralStats">0 friends referred · 0 bonus scans earned</div>
+      </div>
+
       <div class="section-label">Plans</div>
 
       <div class="pricing-card" id="freeCard">
@@ -2181,7 +2300,7 @@ function switchTab(name) {
   document.getElementById('page-' + name).classList.add('active');
   if (name === 'scan') { renderRecentlyViewed(); updateStreakBanner(); }
   if (name === 'history') renderHistory();
-  if (name === 'account') updatePlanUI();
+  if (name === 'account') { updatePlanUI(); renderWeeklyChart(); initReferral(); }
   if (name === 'luminos') renderLuminos();
   document.querySelector('.content').scrollTo(0, 0);
   updateSidebarActive(name);
@@ -2802,6 +2921,18 @@ function renderLuminosSession() {
               <div class="tool-item-desc">If this needs a response</div>
             </div>
           </button>
+          <button class="tool-item" onclick="runTool('redflags')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            Red flags deep scan
+          </button>
+          <button class="tool-item" onclick="runTool('fill')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Fill this out
+          </button>
+          <button class="tool-item" onclick="runTool('compare')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Compare documents
+          </button>
         </div>
       </div>
 
@@ -2938,13 +3069,105 @@ async function runTool(tool) {
     return;
   }
 
+  if (tool === 'fill') {
+    if (!scan.followUps || scan.followUps.length === 0) {
+      out.innerHTML = `<div class="tool-result-card"><p style="color:var(--text-2);font-size:0.88rem;">📎 Please attach the blank form using the attachment button below, then run "Fill this out" again.</p></div>`;
+      return;
+    }
+  }
+
+  if (tool === 'compare') {
+    if (!scan.followUps || scan.followUps.length === 0) {
+      out.innerHTML = `<div class="tool-result-card"><p style="color:var(--text-2);font-size:0.88rem;">📎 Please attach a second document using the attachment button below to compare with this one, then run "Compare documents" again.</p></div>`;
+      return;
+    }
+  }
+
+  // Build prompt for new tools
+  let toolPrompt = prompts[tool];
+  if (tool === 'redflags') {
+    toolPrompt = `Perform a thorough red flags analysis of this document. For every risk, concern, unfair clause, hidden fee, or problematic term you find, classify it as HIGH, MEDIUM, or LOW severity.
+
+Format your response as:
+RED_FLAGS_ANALYSIS:
+[Each finding on its own line starting with HIGH:, MEDIUM:, or LOW: followed by a clear explanation of the risk]
+
+Be thorough — err on the side of flagging more rather than fewer issues. If there are truly no red flags, write "None found."
+
+Document context:
+${scan.title}
+${scan.explanation}`;
+  } else if (tool === 'fill') {
+    toolPrompt = `I need help filling out this form. Walk through each field in the document and explain:
+1. What information goes in this field
+2. Where to find that information
+3. Any tips or common mistakes to avoid
+
+Be practical and specific. Format as a numbered list of fields.
+
+Document context:
+${scan.title}
+${scan.explanation}`;
+  } else if (tool === 'compare') {
+    toolPrompt = `Compare the original document with the additional document(s) provided.
+
+Analyze:
+1. Key differences between the documents
+2. Which version is more favorable and why
+3. Any concerning changes or missing clauses
+4. A brief recommendation on which to choose
+
+Be clear and specific about which document is which.
+
+Original document:
+${scan.title}
+${scan.explanation}`;
+  }
+
+  // For tools that operate on attached documents, include the actual document data
+  let messageContent;
+  if ((tool === 'fill' || tool === 'compare') && scan.followUps && scan.followUps.length > 0) {
+    const followUpContent = scan.followUps.map(f => {
+      const base64 = f.dataUrl.split(',')[1];
+      if (f.mediaType === 'application/pdf') {
+        return { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
+      }
+      return { type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } };
+    });
+    messageContent = [{ type: 'text', text: toolPrompt }, ...followUpContent];
+  } else {
+    messageContent = toolPrompt || prompts[tool];
+  }
+
   try {
     const data = await safeApiCall({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1200,
-      messages: [{ role: 'user', content: prompts[tool] }]
+      messages: [{ role: 'user', content: messageContent }]
     });
     const text = sanitize(data.content[0].text);
+
+    if (tool === 'redflags') {
+      const lines = text.split('\n').filter(l => /^(HIGH|MEDIUM|LOW):/i.test(l.trim()));
+      if (lines.length === 0) {
+        out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Red Flags</div><div class="result-text">${escapeHtml(text)}</div></div>`;
+      } else {
+        const cards = lines.map(l => {
+          const sev = l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase();
+          const desc = l.replace(/^(HIGH|MEDIUM|LOW):\s*/i, '').trim();
+          const cls = sev === 'HIGH' ? 'rf-high' : sev === 'MEDIUM' ? 'rf-medium' : 'rf-low';
+          return `<div class="rf-card ${cls}"><span class="rf-badge">${sev}</span> <span class="rf-desc">${escapeHtml(desc)}</span></div>`;
+        }).join('');
+        out.innerHTML = `<div class="tool-result-card"><div class="rf-section-title">Red Flags Analysis</div>${cards}</div>`;
+      }
+      return;
+    }
+
+    if (tool === 'fill' || tool === 'compare') {
+      const labels = { fill: 'Fill this out', compare: 'Document comparison' };
+      out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">${labels[tool]}</div><div class="result-text">${escapeHtml(text)}</div></div>`;
+      return;
+    }
 
     if (tool === 'flashcards') {
       const cleaned = text.replace(/```json|```/g, '').trim();
@@ -3116,6 +3339,63 @@ function updatePlanUI() {
       currentCard.appendChild(b);
     }
   }
+  renderWeeklyChart();
+  initReferral();
+}
+
+function renderWeeklyChart() {
+  const container = document.getElementById('weeklyChart');
+  if (!container) return;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  // Build last 7 days (oldest first)
+  const dayData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    const count = state.history.filter(s => s.date && s.date.slice(0,10) === ds).length;
+    dayData.push({ label: days[d.getDay()], ds, count });
+  }
+  const maxCount = Math.max(1, ...dayData.map(d => d.count));
+  container.innerHTML = dayData.map(d => {
+    const heightPct = Math.max(5, Math.round((d.count / maxCount) * 100));
+    const isToday = d.ds === todayStr;
+    return `
+      <div class="weekly-bar-wrap">
+        <div class="weekly-bar${isToday ? ' today' : ''}${d.count > 0 ? ' has-data' : ''}" style="height:${heightPct}%"></div>
+        <span class="weekly-day-label${isToday ? ' today' : ''}">${d.label}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function initReferral() {
+  let code = localStorage.getItem('sp_refcode');
+  if (!code) {
+    code = Math.random().toString(36).slice(2, 10).toUpperCase();
+    localStorage.setItem('sp_refcode', code);
+  }
+  const linkEl = document.getElementById('referralLink');
+  const statsEl = document.getElementById('referralStats');
+  if (linkEl) linkEl.textContent = 'scanplain.app/ref/' + code;
+  const refCount = parseInt(localStorage.getItem('sp_refcount') || '0');
+  if (statsEl) statsEl.textContent = refCount + ' friend' + (refCount === 1 ? '' : 's') + ' referred · ' + refCount + ' bonus scan' + (refCount === 1 ? '' : 's') + ' earned';
+}
+
+function copyReferralLink() {
+  const code = localStorage.getItem('sp_refcode') || '';
+  const link = 'scanplain.app/ref/' + code;
+  navigator.clipboard.writeText(link).then(() => showToast('Link copied!')).catch(() => {
+    const el = document.getElementById('referralLink');
+    if (el) {
+      const range = document.createRange();
+      range.selectNode(el);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+  });
 }
 
 function upgradePlan(tier) {
@@ -3227,6 +3507,7 @@ showOnboarding();
 renderRecentlyViewed();
 updateStreakBanner();
 updateSidebarUsage();
+initReferral();
 
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
