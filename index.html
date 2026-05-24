@@ -1195,6 +1195,185 @@
     50% { opacity: 0.4; transform: scale(0.8); }
   }
   .bg-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Desktop Layout ── */
+[data-layout="desktop"] .topbar,
+[data-layout="desktop"] .tabbar {
+  display: none !important;
+}
+
+[data-layout="desktop"] .desktop-sidebar {
+  display: flex;
+}
+
+[data-layout="desktop"] .app {
+  flex-direction: row;
+  max-width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+[data-layout="desktop"] .content {
+  flex: 1;
+  max-width: 1100px;
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 0;
+  margin: 0 auto;
+}
+
+/* Desktop sidebar hidden on mobile by default */
+.desktop-sidebar {
+  display: none;
+  flex-direction: column;
+  width: 240px;
+  min-width: 240px;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
+  gap: 0;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.sidebar-logo {
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+}
+
+.sidebar-nav-item:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.sidebar-nav-item.active {
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: #1a1200;
+  font-weight: 600;
+}
+
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-usage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-usage-label {
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.sidebar-usage-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.sidebar-usage-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--p1), var(--p2));
+  transition: width 0.3s;
+}
+
+.sidebar-usage-count {
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sidebar-theme-btn:hover {
+  background: var(--surface);
+}
+
+/* Desktop scan tab: 2-column grid */
+[data-layout="desktop"] #page-scan .scan-desktop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+[data-layout="desktop"] #page-scan .scan-desktop-left { }
+[data-layout="desktop"] #page-scan .scan-desktop-right { }
+
+/* Desktop library: 3-column card grid */
+[data-layout="desktop"] #page-history .history-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+[data-layout="desktop"] #page-history .history-item {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+[data-layout="desktop"] #page-history .history-thumb {
+  width: 100%;
+  height: 120px;
+  border-radius: 8px 8px 0 0;
+}
 </style>
 </head>
 <body>
@@ -1206,6 +1385,41 @@
 </div>
 
 <div class="app">
+
+  <aside class="desktop-sidebar" id="desktopSidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-logo">✦</span>
+      <span class="sidebar-name">Luminos</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-item active" data-tab="scan" onclick="switchTab('scan');updateSidebarActive('scan')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span>Scan</span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="history" onclick="switchTab('history');updateSidebarActive('history')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Library</span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="luminos" onclick="switchTab('luminos');updateSidebarActive('luminos')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Luminos</span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="account" onclick="switchTab('account');updateSidebarActive('account')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Account</span>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-usage">
+        <div class="sidebar-usage-label">Scans used</div>
+        <div class="sidebar-usage-bar"><div class="sidebar-usage-fill" id="sidebarUsageFill"></div></div>
+        <div class="sidebar-usage-count" id="sidebarUsageCount">0 / 3</div>
+      </div>
+      <button class="sidebar-theme-btn" onclick="toggleTheme()" title="Toggle theme">
+        <svg id="sidebarThemeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </aside>
 
   <!-- Top bar -->
   <div class="topbar">
@@ -1231,78 +1445,84 @@
         <p>Snap, upload, drop. Get plain English back in seconds.</p>
       </div>
 
-      <div id="uploadSection">
-        <div class="bento">
-          <div class="upload-mega" onclick="document.getElementById('fileInput').click()"
-               ondragover="event.preventDefault();this.classList.add('drag')"
-               ondragleave="this.classList.remove('drag')"
-               ondrop="handleDrop(event)">
-            <div class="upload-icon-3d">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div class="scan-desktop-grid">
+        <div class="scan-desktop-left">
+          <div id="uploadSection">
+            <div class="bento">
+              <div class="upload-mega" onclick="document.getElementById('fileInput').click()"
+                   ondragover="event.preventDefault();this.classList.add('drag')"
+                   ondragleave="this.classList.remove('drag')"
+                   ondrop="handleDrop(event)">
+                <div class="upload-icon-3d">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <h3>Drop anything</h3>
+                <p>Photos · screenshots · PDFs · docs</p>
+                <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this.files[0])"/>
+              </div>
+
+              <div class="mini-card" onclick="captureCamera()">
+                <div class="mini-icon camera">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                </div>
+                <div>
+                  <div class="mini-title">Camera</div>
+                  <div class="mini-sub">Take a photo</div>
+                </div>
+              </div>
+
+              <div class="mini-card" onclick="switchTab('history')">
+                <div class="mini-icon lib">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                </div>
+                <div>
+                  <div class="mini-title">Library</div>
+                  <div class="mini-sub" id="libraryCount">0 scans</div>
+                </div>
+              </div>
             </div>
-            <h3>Drop anything</h3>
-            <p>Photos · screenshots · PDFs · docs</p>
-            <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this.files[0])"/>
           </div>
 
-          <div class="mini-card" onclick="captureCamera()">
-            <div class="mini-icon camera">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          <div class="preview-card" id="previewCard">
+            <img class="preview-img" id="previewImg" style="display:none"/>
+            <div class="preview-file-row" id="previewFile" style="display:none">
+              <div class="preview-file-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="preview-file-info">
+                <div class="preview-file-name" id="previewFileName">document.pdf</div>
+                <div class="preview-file-meta" id="previewFileMeta">PDF</div>
+              </div>
             </div>
-            <div>
-              <div class="mini-title">Camera</div>
-              <div class="mini-sub">Take a photo</div>
-            </div>
-          </div>
-
-          <div class="mini-card" onclick="switchTab('history')">
-            <div class="mini-icon lib">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            </div>
-            <div>
-              <div class="mini-title">Library</div>
-              <div class="mini-sub" id="libraryCount">0 scans</div>
-            </div>
+            <button class="btn-primary" id="scanBtn" onclick="runScan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
+              Light it up
+            </button>
+            <button class="btn-ghost" onclick="clearScan()">Choose different</button>
           </div>
         </div>
-      </div>
 
-      <div class="preview-card" id="previewCard">
-        <img class="preview-img" id="previewImg" style="display:none"/>
-        <div class="preview-file-row" id="previewFile" style="display:none">
-          <div class="preview-file-ic">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div class="scan-desktop-right">
+          <div class="error" id="errorMsg"></div>
+
+          <div class="loading" id="loading">
+            <div class="pulse-ring"><div class="pulse-core"></div></div>
+            <p id="loadingText">Reading your scan…</p>
           </div>
-          <div class="preview-file-info">
-            <div class="preview-file-name" id="previewFileName">document.pdf</div>
-            <div class="preview-file-meta" id="previewFileMeta">PDF</div>
+
+          <div class="result-card" id="resultCard" style="display:none">
+            <div class="result-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              Plain English
+            </div>
+            <div class="result-text" id="resultText"></div>
+            <div id="postScanCTA" style="margin-top:16px;display:none">
+              <button class="btn-primary" onclick="openCurrentInLuminos()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
+                Open in Luminos
+              </button>
+            </div>
           </div>
-        </div>
-        <button class="btn-primary" id="scanBtn" onclick="runScan()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
-          Light it up
-        </button>
-        <button class="btn-ghost" onclick="clearScan()">Choose different</button>
-      </div>
-
-      <div class="error" id="errorMsg"></div>
-
-      <div class="loading" id="loading">
-        <div class="pulse-ring"><div class="pulse-core"></div></div>
-        <p id="loadingText">Reading your scan…</p>
-      </div>
-
-      <div class="result-card" id="resultCard" style="display:none">
-        <div class="result-tag">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          Plain English
-        </div>
-        <div class="result-text" id="resultText"></div>
-        <div id="postScanCTA" style="margin-top:16px;display:none">
-          <button class="btn-primary" onclick="openCurrentInLuminos()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
-            Open in Luminos
-          </button>
         </div>
       </div>
     </div>
@@ -1575,6 +1795,7 @@ function save() {
   } catch(e) {
     showToast('Storage full — clear some history');
   }
+  updateSidebarUsage();
 }
 
 // ============ THEME ============
@@ -1592,10 +1813,13 @@ function toggleTheme() {
 }
 function updateThemeIcon() {
   const icon = document.getElementById('themeIcon');
+  const sidebarIcon = document.getElementById('sidebarThemeIcon');
   if (state.theme === 'light') {
     icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    if (sidebarIcon) sidebarIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   } else {
     icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+    if (sidebarIcon) sidebarIcon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
   }
 }
 
@@ -1608,6 +1832,7 @@ function switchTab(name) {
   if (name === 'account') updatePlanUI();
   if (name === 'luminos') renderLuminos();
   document.querySelector('.content').scrollTo(0, 0);
+  updateSidebarActive(name);
 }
 
 function showToast(msg) {
@@ -2424,6 +2649,33 @@ function exportData() {
   showToast('Data exported');
 }
 
+// ============ DESKTOP LAYOUT ============
+function detectLayout() {
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  const hasTouchPoints = navigator.maxTouchPoints > 1;
+  const isMobileUA = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+  const isNarrow = window.innerWidth < 1024;
+  const isMobile = isCoarse || hasTouchPoints || isMobileUA || isNarrow;
+  document.documentElement.setAttribute('data-layout', isMobile ? 'mobile' : 'desktop');
+}
+detectLayout();
+window.addEventListener('resize', detectLayout);
+
+function updateSidebarActive(tab) {
+  document.querySelectorAll('.sidebar-nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === tab);
+  });
+}
+
+function updateSidebarUsage() {
+  const limit = LIMITS[state.plan] ? LIMITS[state.plan].scans : 3;
+  const used = state.scansUsed;
+  const fill = document.getElementById('sidebarUsageFill');
+  const count = document.getElementById('sidebarUsageCount');
+  if (fill) fill.style.width = (limit === Infinity ? 100 : Math.min(100, (used/limit)*100)) + '%';
+  if (count) count.textContent = used + ' / ' + (limit === Infinity ? '∞' : limit);
+}
+
 // ============ INIT ============
 document.documentElement.setAttribute('data-theme', state.theme);
 document.querySelector('meta[name="theme-color"]').content = state.theme === 'light' ? '#fefbf3' : '#14110a';
@@ -2431,6 +2683,7 @@ updateThemeIcon();
 updatePlanUI();
 updateLibraryCount();
 renderBgTasks();
+updateSidebarUsage();
 
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
