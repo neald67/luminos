@@ -103,8 +103,8 @@
        ondrop="handleDrop(event)">
     <div class="upload-icon">📷</div>
     <h3>Tap to upload anything</h3>
-    <p>Photo, screenshot, document, sign — anything confusing</p>
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])"/>
+    <p>Photo, screenshot, PDF, document, sign — anything confusing</p>
+    <input type="file" id="fileInput" accept="image/*,application/pdf,.heic,.heif,.webp" onchange="handleFile(this.files[0])"/>
   </div>
 
   <img id="imgPreview" class="img-preview"/>
@@ -192,9 +192,16 @@ function handleFile(file) {
   reader.onload = e => {
     currentDataUrl = e.target.result;
     const preview = document.getElementById('imgPreview');
-    preview.src = currentDataUrl;
-    preview.style.display = 'block';
-    document.getElementById('uploadArea').style.display = 'none';
+    // Show preview for images only, show icon for PDFs
+    if (file.type === 'application/pdf') {
+      preview.src = '';
+      preview.style.display = 'none';
+      document.getElementById('uploadArea').innerHTML = `<div class="upload-icon">📄</div><h3>${file.name}</h3><p>PDF ready to scan</p>`;
+    } else {
+      preview.src = currentDataUrl;
+      preview.style.display = 'block';
+      document.getElementById('uploadArea').style.display = 'none';
+    }
     document.getElementById('scanBtn').disabled = false;
     document.getElementById('resultCard').style.display = 'none';
     document.getElementById('luminosSection').style.display = 'none';
