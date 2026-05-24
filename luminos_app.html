@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Luminos</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --purple: #7F77DD; --purple-light: #a09ae8; --bg: #0f0f13; --card: #1a1a24; --text: #f0f0f5; --muted: #888; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+  /* Header */
+  header { padding: 20px 20px 10px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 22px; font-weight: 700; color: var(--purple); letter-spacing: -0.5px; }
+  .logo span { color: var(--text); }
+  .tagline { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid #222; padding: 0 20px; }
+  .tab { flex: 1; text-align: center; padding: 12px 0; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* Pages */
+  .page { display: none; flex: 1; padding: 20px; flex-direction: column; gap: 16px; }
+  .page.active { display: flex; }
+
+  /* Upload area */
+  .upload-area { border: 2px dashed #333; border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--card); }
+  .upload-area:hover, .upload-area.drag { border-color: var(--purple); background: #1e1e30; }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-area h3 { font-size: 16px; margin-bottom: 6px; }
+  .upload-area p { font-size: 13px; color: var(--muted); }
+  #fileInput { display: none; }
+
+  /* Preview */
+  .img-preview { width: 100%; border-radius: 12px; max-height: 220px; object-fit: contain; background: #111; display: none; }
+
+  /* Button */
+  .btn { background: var(--purple); color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.9; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+
+  /* Result */
+  .result-card { background: var(--card); border-radius: 16px; padding: 20px; display: none; flex-direction: column; gap: 12px; }
+  .result-card h3 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .result-text { font-size: 15px; line-height: 1.6; }
+
+  /* Luminos cards */
+  .luminos-section { display: none; flex-direction: column; gap: 10px; }
+  .luminos-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--purple); font-weight: 600; }
+  .step-card { background: linear-gradient(135deg, #1e1b3a, #1a1a24); border: 1px solid #3a3570; border-radius: 12px; padding: 14px 16px; font-size: 14px; line-height: 1.5; display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: var(--purple); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  /* Loading */
+  .loading { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 30px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid #333; border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { color: var(--muted); font-size: 14px; }
+
+  /* History */
+  .history-item { background: var(--card); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; cursor: pointer; }
+  .history-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #222; flex-shrink: 0; }
+  .history-info { flex: 1; overflow: hidden; }
+  .history-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
+
+  /* Settings */
+  .settings-section { background: var(--card); border-radius: 12px; overflow: hidden; }
+  .settings-row { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; font-size: 14px; }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row span { color: var(--muted); font-size: 13px; }
+  .plan-badge { background: var(--purple); color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
+
+  .scans-bar-wrap { background: #222; border-radius: 99px; height: 6px; width: 100%; margin-top: 6px; }
+  .scans-bar { background: var(--purple); height: 6px; border-radius: 99px; transition: width 0.3s; }
+
+  .error-msg { background: #2a1a1a; border: 1px solid #5a2020; border-radius: 10px; padding: 12px 16px; color: #ff7070; font-size: 13px; display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">◉ <span>Luminos</span></div>
+    <div class="tagline">Understand anything, instantly</div>
+  </div>
+  <div class="plan-badge" id="planBadge">Free</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('scan')">Scan</div>
+  <div class="tab" onclick="switchTab('history')">History</div>
+  <div class="tab" onclick="switchTab('settings')">Settings</div>
+</div>
+
+<!-- SCAN PAGE -->
+<div class="page active" id="page-scan">
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()"
+       ondragover="event.preventDefault();this.classList.add('drag')"
+       ondragleave="this.classList.remove('drag')"
+       ondrop="handleDrop(event)">
+    <div class="upload-icon">📷</div>
+    <h3>Tap to upload anything</h3>
+    <p>Photo, screenshot, document, sign — anything confusing</p>
+    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])"/>
+  </div>
+
+  <img id="imgPreview" class="img-preview"/>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Luminos is reading this…</p>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <h3>Plain English</h3>
+    <div class="result-text" id="resultText"></div>
+  </div>
+
+  <div class="luminos-section" id="luminosSection">
+    <div class="luminos-label">◉ Luminos Guide — What to do next</div>
+    <div id="stepsContainer"></div>
+  </div>
+
+  <button class="btn" id="scanBtn" onclick="runScan()" disabled>Explain This</button>
+  <button class="btn btn-outline" id="clearBtn" onclick="clearScan()" style="display:none">Scan Something Else</button>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div id="historyList"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="settings-section">
+    <div class="settings-row">
+      <div>Plan<br><span>Free — 3 scans/month</span></div>
+      <div class="plan-badge">Free</div>
+    </div>
+    <div class="settings-row">
+      <div>Scans used<br>
+        <div class="scans-bar-wrap"><div class="scans-bar" id="scansBar" style="width:0%"></div></div>
+      </div>
+      <span id="scansCount">0 / 3</span>
+    </div>
+  </div>
+  <button class="btn" onclick="alert('Upgrade coming soon! 🚀')">Upgrade to Plus — $7.99/mo</button>
+  <button class="btn btn-outline" onclick="alert('Unlimited plan coming soon!')">Unlimited — $25/mo</button>
+  <div class="settings-section">
+    <div class="settings-row" onclick="clearHistory()" style="cursor:pointer">
+      Clear scan history <span>›</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = "https://throbbing-glitter-f07d.fortniterichard2.workers.dev";
+const FREE_LIMIT = 3;
+
+let currentFile = null;
+let currentDataUrl = null;
+
+// Load state
+let history = JSON.parse(localStorage.getItem('luminos_history') || '[]');
+let scansUsed = parseInt(localStorage.getItem('luminos_scans') || '0');
+updateScansUI();
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['scan','history','settings'][i] === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  if (tab === 'history') renderHistory();
+  if (tab === 'settings') updateScansUI();
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handleFile(file);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  currentFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentDataUrl = e.target.result;
+    const preview = document.getElementById('imgPreview');
+    preview.src = currentDataUrl;
+    preview.style.display = 'block';
+    document.getElementById('uploadArea').style.display = 'none';
+    document.getElementById('scanBtn').disabled = false;
+    document.getElementById('resultCard').style.display = 'none';
+    document.getElementById('luminosSection').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runScan() {
+  if (scansUsed >= FREE_LIMIT) {
+    showError("You've used all 3 free scans this month. Upgrade to Plus for more!");
+    return;
+  }
+  if (!currentDataUrl) return;
+
+  setLoading(true);
+  hideResult();
+
+  const base64 = currentDataUrl.split(',')[1];
+  const mediaType = currentFile.type || 'image/jpeg';
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: `You are Luminos, an AI that explains anything in plain simple English that anyone can understand.
+
+Look at this image and:
+1. EXPLAIN what it is and what it means in simple plain English (2-4 sentences, no jargon)
+2. Give 3 SPECIFIC ACTION STEPS the person should take based on what you see
+
+Format your response EXACTLY like this:
+EXPLANATION:
+[your plain English explanation here]
+
+STEPS:
+1. [first action step]
+2. [second action step]
+3. [third action step]` }
+          ]
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+    const text = data.content[0].text;
+    parseAndShow(text);
+
+    // Save to history
+    scansUsed++;
+    localStorage.setItem('luminos_scans', scansUsed);
+    history.unshift({ date: new Date().toISOString(), thumb: currentDataUrl, explanation: text });
+    localStorage.setItem('luminos_history', JSON.stringify(history.slice(0, 50)));
+    updateScansUI();
+
+  } catch (err) {
+    showError('Something went wrong: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function parseAndShow(text) {
+  const expMatch = text.match(/EXPLANATION:\s*([\s\S]*?)(?=STEPS:|$)/i);
+  const stepsMatch = text.match(/STEPS:\s*([\s\S]*)/i);
+
+  const explanation = expMatch ? expMatch[1].trim() : text;
+  document.getElementById('resultText').textContent = explanation;
+  document.getElementById('resultCard').style.display = 'flex';
+
+  if (stepsMatch) {
+    const stepsRaw = stepsMatch[1].trim();
+    const steps = stepsRaw.split(/\n?\d+\.\s+/).filter(s => s.trim());
+    const container = document.getElementById('stepsContainer');
+    container.innerHTML = '';
+    steps.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'step-card';
+      card.innerHTML = `<div class="step-num">${i+1}</div><div>${s.trim()}</div>`;
+      container.appendChild(card);
+    });
+    document.getElementById('luminosSection').style.display = 'flex';
+  }
+
+  document.getElementById('scanBtn').style.display = 'none';
+  document.getElementById('clearBtn').style.display = 'block';
+}
+
+function clearScan() {
+  currentFile = null;
+  currentDataUrl = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+  document.getElementById('scanBtn').disabled = true;
+  document.getElementById('scanBtn').style.display = 'block';
+  document.getElementById('clearBtn').style.display = 'none';
+  hideResult();
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+}
+
+function hideResult() {
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('luminosSection').style.display = 'none';
+}
+
+function setLoading(on) {
+  document.getElementById('loading').style.display = on ? 'flex' : 'none';
+  document.getElementById('scanBtn').disabled = on;
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function updateScansUI() {
+  const pct = Math.min((scansUsed / FREE_LIMIT) * 100, 100);
+  document.getElementById('scansBar').style.width = pct + '%';
+  document.getElementById('scansCount').textContent = scansUsed + ' / ' + FREE_LIMIT;
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!history.length) {
+    list.innerHTML = '<div class="empty-state">No scans yet.<br>Go to Scan to get started!</div>';
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item">
+      <img class="history-thumb" src="${h.thumb}" />
+      <div class="history-info">
+        <div class="history-title">${h.explanation.replace(/EXPLANATION:\s*/i,'').substring(0,60)}…</div>
+        <div class="history-date">${new Date(h.date).toLocaleDateString()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearHistory() {
+  if (confirm('Clear all scan history?')) {
+    history = [];
+    localStorage.removeItem('luminos_history');
+    renderHistory();
+  }
+}
+</script>
+</body>
+</html>
