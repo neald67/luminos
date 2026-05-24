@@ -1162,6 +1162,110 @@
   .flashcard.flipped .flashcard-answer { display: block; }
   .flashcard-hint { font-size: 11px; color: var(--text-3); margin-top: 10px; text-align: center; }
 
+  /* ── Category bubbles ── */
+  .category-section {
+    padding: 16px 16px 0;
+  }
+  .category-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .category-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .category-scroll::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .cat-pill:hover {
+    border-color: var(--p1);
+    background: var(--bg);
+  }
+  .cat-pill.active {
+    background: linear-gradient(135deg, var(--p1), var(--p2));
+    border-color: transparent;
+    color: #1a1200;
+    font-weight: 600;
+  }
+
+  /* ── Recently viewed strip ── */
+  .recently-viewed {
+    padding: 12px 16px 0;
+  }
+  .recently-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .recently-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .recently-scroll::-webkit-scrollbar { display: none; }
+  .recent-thumb-btn {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+  }
+  .recent-thumb-btn:hover { transform: scale(1.05); }
+  .recent-thumb-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .recent-pdf-icon {
+    font-size: 1.4rem;
+  }
+
+  /* ── Streak banner ── */
+  .streak-banner {
+    margin: 0 16px 0;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff6b00, #ff9500);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
   /* Background tasks */
   .bg-tasks {
     position: fixed;
@@ -1229,6 +1333,36 @@
       <div class="hero">
         <h1>Light up <span class="serif">anything</span><br/>confusing.</h1>
         <p>Snap, upload, drop. Get plain English back in seconds.</p>
+      </div>
+
+      <!-- Streak banner (hidden by default) -->
+      <div class="streak-banner" id="streakBanner" style="display:none">
+        🔥 <span id="streakCount">2</span>-day streak!
+      </div>
+
+      <!-- Category selector -->
+      <div class="category-section">
+        <div class="category-label">What are you scanning?</div>
+        <div class="category-scroll" id="categoryScroll">
+          <button class="cat-pill active" data-cat="General" onclick="selectCategory(this,'General')">📄 General</button>
+          <button class="cat-pill" data-cat="Nutrition Label" onclick="selectCategory(this,'Nutrition Label')">🥗 Nutrition Label</button>
+          <button class="cat-pill" data-cat="Contract/Lease" onclick="selectCategory(this,'Contract/Lease')">📋 Contract/Lease</button>
+          <button class="cat-pill" data-cat="Prescription" onclick="selectCategory(this,'Prescription')">💊 Prescription</button>
+          <button class="cat-pill" data-cat="Medical Bill" onclick="selectCategory(this,'Medical Bill')">🏥 Medical Bill</button>
+          <button class="cat-pill" data-cat="Receipt" onclick="selectCategory(this,'Receipt')">🧾 Receipt</button>
+          <button class="cat-pill" data-cat="Tax Form" onclick="selectCategory(this,'Tax Form')">📊 Tax Form</button>
+          <button class="cat-pill" data-cat="Foreign Language" onclick="selectCategory(this,'Foreign Language')">🌐 Foreign Language</button>
+          <button class="cat-pill" data-cat="Terms of Service" onclick="selectCategory(this,'Terms of Service')">⚖️ Terms of Service</button>
+          <button class="cat-pill" data-cat="Insurance" onclick="selectCategory(this,'Insurance')">🛡️ Insurance</button>
+          <button class="cat-pill" data-cat="ID/Document" onclick="selectCategory(this,'ID/Document')">🪪 ID/Document</button>
+          <button class="cat-pill" data-cat="Ingredients" onclick="selectCategory(this,'Ingredients')">🧪 Ingredients</button>
+        </div>
+      </div>
+
+      <!-- Recently viewed strip (rendered by JS) -->
+      <div class="recently-viewed" id="recentlyViewed" style="display:none">
+        <div class="recently-label">Recently viewed</div>
+        <div class="recently-scroll" id="recentlyScroll"></div>
       </div>
 
       <div id="uploadSection">
@@ -1541,6 +1675,20 @@ async function safeApiCall(body) {
 }
 
 const WORKER_URL = "https://throbbing-glitter-f07d.fortniterichard2.workers.dev";
+const CATEGORY_PROMPTS = {
+  'General': 'Explain this document in plain English.',
+  'Nutrition Label': 'Focus on key nutritional values, daily % recommendations, and any concerning ingredients.',
+  'Contract/Lease': 'Highlight obligations, deadlines, penalties, and any unfair clauses.',
+  'Prescription': 'Explain the medication, dosage, purpose, and important warnings.',
+  'Medical Bill': 'Break down each charge, flag anything that seems incorrect or unusual.',
+  'Receipt': 'List items, totals, taxes, and flag any discrepancies.',
+  'Tax Form': 'Explain each section and what information the recipient needs to provide.',
+  'Foreign Language': 'Translate and explain the full content.',
+  'Terms of Service': 'Summarize key rights, restrictions, and any concerning clauses.',
+  'Insurance': 'Explain coverage, exclusions, deductibles, and claim procedures.',
+  'ID/Document': 'Describe the document type, key identifiers, and expiry if present.',
+  'Ingredients': 'Flag allergens, additives, and explain any concerning ingredients.'
+};
 const LIMITS = {
   free:      { scans: 3, luminos: 1 },
   plus:      { scans: 20, luminos: 3 },
@@ -1558,7 +1706,8 @@ let state = {
   theme: localStorage.getItem('sp_theme') || 'light',
   currentFile: null,
   currentDataUrl: null,
-  currentMediaType: null
+  currentMediaType: null,
+  category: 'General'
 };
 
 try { state.history = JSON.parse(localStorage.getItem('sp_history') || '[]'); } catch(e) {}
@@ -1604,6 +1753,7 @@ function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
+  if (name === 'scan') { renderRecentlyViewed(); updateStreakBanner(); }
   if (name === 'history') renderHistory();
   if (name === 'account') updatePlanUI();
   if (name === 'luminos') renderLuminos();
@@ -1615,6 +1765,56 @@ function showToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function selectCategory(el, cat) {
+  state.category = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function renderRecentlyViewed() {
+  const strip = document.getElementById('recentlyViewed');
+  const scroll = document.getElementById('recentlyScroll');
+  if (!strip || !scroll) return;
+  const recent = state.history.slice(0, 4);
+  if (recent.length === 0) { strip.style.display = 'none'; return; }
+  strip.style.display = 'block';
+  scroll.innerHTML = recent.map(s => `
+    <button class="recent-thumb-btn" onclick="openLuminosWithScan('${s.id}')" title="${escapeHtml(s.title||'Scan')}">
+      ${s.thumb ? `<img src="${escapeHtml(s.thumb)}" alt="">` : `<span class="recent-pdf-icon">📄</span>`}
+    </button>
+  `).join('');
+}
+
+function updateStreakBanner() {
+  const streak = parseInt(localStorage.getItem('sp_streak') || '0') || 0;
+  const banner = document.getElementById('streakBanner');
+  const countEl = document.getElementById('streakCount');
+  if (!banner) return;
+  if (streak >= 2) {
+    banner.style.display = 'block';
+    if (countEl) countEl.textContent = streak;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  const lastScan = localStorage.getItem('sp_lastScan') || '';
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  let streak = parseInt(localStorage.getItem('sp_streak') || '0') || 0;
+  if (lastScan === today) {
+    // already updated today, no change
+  } else if (lastScan === yesterday) {
+    streak += 1;
+  } else {
+    streak = 1;
+  }
+  localStorage.setItem('sp_streak', streak);
+  localStorage.setItem('sp_lastScan', today);
+  updateStreakBanner();
 }
 
 function formatSize(bytes) {
@@ -1716,12 +1916,17 @@ async function runScan() {
         role: 'user',
         content: [
           contentBlock,
-          { type: 'text', text: `You're ScanPlain. Look at this and respond in this exact format:
+          { type: 'text', text: (() => {
+            const catModifier = CATEGORY_PROMPTS[state.category] || CATEGORY_PROMPTS['General'];
+            return `You're ScanPlain. Category: ${state.category}. ${catModifier}
+
+Look at this and respond in this exact format:
 
 TITLE: [4-7 word title]
 
 EXPLANATION:
-[3-5 sentences explaining what this is in plain everyday English, no jargon, like explaining to a friend]` }
+[3-5 sentences explaining what this is in plain everyday English, no jargon, like explaining to a friend]`;
+          })() }
         ]
       }]
     });
@@ -1754,6 +1959,8 @@ EXPLANATION:
     state.lastScanId = scanId;
     save();
     updateLibraryCount();
+    updateStreak();
+    renderRecentlyViewed();
 
   } catch (err) {
     showError('Something went wrong: ' + err.message);
@@ -1828,6 +2035,7 @@ function deleteScan(id) {
   save();
   renderHistory();
   updateLibraryCount();
+  renderRecentlyViewed();
   showToast('Scan deleted');
 }
 
@@ -2393,6 +2601,7 @@ function clearHistory() {
     state.activeLuminosId = null;
     save();
     updateLibraryCount();
+    renderRecentlyViewed();
     showToast('History cleared');
   }
 }
@@ -2431,6 +2640,8 @@ updateThemeIcon();
 updatePlanUI();
 updateLibraryCount();
 renderBgTasks();
+renderRecentlyViewed();
+updateStreakBanner();
 
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
