@@ -1734,19 +1734,23 @@
         </div>
       </div>
 
-      <div class="section-card" id="weeklyChartSection">
-        <div class="section-title">Weekly Activity</div>
-        <div class="weekly-chart" id="weeklyChart"></div>
-      </div>
+      <div class="section-label">Scans this week</div>
+      <div id="weeklyChart" style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 16px 14px;margin-bottom:14px;box-shadow:var(--shadow-sm)"></div>
 
-      <div class="section-card" id="referralSection">
-        <div class="section-title">Refer Friends</div>
-        <p class="section-sub">Share Luminos and earn bonus scans for every friend who signs up.</p>
-        <div class="referral-link-wrap">
-          <span class="referral-link" id="referralLink">scanplain.app/ref/...</span>
-          <button class="btn-ghost referral-copy-btn" onclick="copyReferralLink()">Copy</button>
+      <div class="section-label">Refer friends</div>
+      <div id="referralCard" style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:22px">🎁</span>
+          <div>
+            <div style="font-size:14.5px;font-weight:600;color:var(--text)">Give a free scan, get one too</div>
+            <div style="font-size:12.5px;color:var(--text-3);margin-top:2px">You and your friend each get 1 bonus scan</div>
+          </div>
         </div>
-        <div class="referral-stats" id="referralStats">0 friends referred · 0 bonus scans earned</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <div id="referralLinkBox" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:monospace">scanplain.app/ref/...</div>
+          <button onclick="copyReferralLink()" style="background:linear-gradient(135deg,var(--p1),var(--p3));color:white;border:none;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">Copy</button>
+        </div>
+        <div id="referralStats" style="font-size:12.5px;color:var(--text-3)">0 friends referred · 0 bonus scans</div>
       </div>
 
       <div class="section-label">Plans</div>
@@ -2658,15 +2662,15 @@ function renderLuminosSession() {
             </div>
           </button>
           <button class="tool-item" onclick="runTool('redflags')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
             Red flags deep scan
           </button>
-          <button class="tool-item" onclick="runTool('fill')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <button class="tool-item" onclick="runTool('fillout')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Fill this out
           </button>
           <button class="tool-item" onclick="runTool('compare')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Compare documents
           </button>
         </div>
@@ -2778,6 +2782,16 @@ ${scan.followUps && scan.followUps.length ? `Additional documents the user attac
 }
 
 // ============ TOOLS ============
+function showToolResult(html, label) {
+  const outEl = document.getElementById('toolOutput');
+  if (!outEl) return;
+  outEl.innerHTML = `<div class="result-card" style="margin-top:12px">
+    <div class="result-tag">${escapeHtml(label)}</div>
+    <div>${html}</div>
+  </div>`;
+  outEl.style.display = 'block';
+}
+
 async function runTool(tool) {
   const scan = state.history.find(h => h.id === state.activeLuminosId);
   if (!scan) return;
@@ -2805,64 +2819,42 @@ async function runTool(tool) {
     return;
   }
 
-  if (tool === 'fill') {
-    if (!scan.followUps || scan.followUps.length === 0) {
-      out.innerHTML = `<div class="tool-result-card"><p style="color:var(--text-2);font-size:0.88rem;">📎 Please attach the blank form using the attachment button below, then run "Fill this out" again.</p></div>`;
-      return;
-    }
-  }
-
-  if (tool === 'compare') {
-    if (!scan.followUps || scan.followUps.length === 0) {
-      out.innerHTML = `<div class="tool-result-card"><p style="color:var(--text-2);font-size:0.88rem;">📎 Please attach a second document using the attachment button below to compare with this one, then run "Compare documents" again.</p></div>`;
-      return;
-    }
-  }
-
-  // Build prompt for new tools
-  let toolPrompt = prompts[tool];
   if (tool === 'redflags') {
-    toolPrompt = `Perform a thorough red flags analysis of this document. For every risk, concern, unfair clause, hidden fee, or problematic term you find, classify it as HIGH, MEDIUM, or LOW severity.
-
-Format your response as:
-RED_FLAGS_ANALYSIS:
-[Each finding on its own line starting with HIGH:, MEDIUM:, or LOW: followed by a clear explanation of the risk]
-
-Be thorough — err on the side of flagging more rather than fewer issues. If there are truly no red flags, write "None found."
-
-Document context:
-${scan.title}
-${scan.explanation}`;
-  } else if (tool === 'fill') {
-    toolPrompt = `I need help filling out this form. Walk through each field in the document and explain:
-1. What information goes in this field
-2. Where to find that information
-3. Any tips or common mistakes to avoid
-
-Be practical and specific. Format as a numbered list of fields.
-
-Document context:
-${scan.title}
-${scan.explanation}`;
-  } else if (tool === 'compare') {
-    toolPrompt = `Compare the original document with the additional document(s) provided.
-
-Analyze:
-1. Key differences between the documents
-2. Which version is more favorable and why
-3. Any concerning changes or missing clauses
-4. A brief recommendation on which to choose
-
-Be clear and specific about which document is which.
-
-Original document:
-${scan.title}
-${scan.explanation}`;
+    const rfPrompt = `Perform a thorough red flags analysis of this document:\n\nTitle: ${scan.title}\nContent: ${scan.explanation}\n\nList every concern, each on its own line formatted as:\nHIGH: [serious issue requiring immediate attention]\nMEDIUM: [moderate concern to be aware of]\nLOW: [minor note]\n\nIf no issues found, write: None found.`;
+    try {
+      const data = await safeApiCall({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: rfPrompt }]
+      });
+      const responseText = sanitize(data.content[0].text);
+      const lines = responseText.split('\n').filter(l => /^(HIGH|MEDIUM|LOW):/i.test(l.trim()));
+      if (lines.length > 0) {
+        const cards = lines.map(l => {
+          const sev = l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase();
+          const desc = l.replace(/^(HIGH|MEDIUM|LOW):\s*/i, '').trim();
+          const bg = sev==='HIGH'?'rgba(220,38,38,0.08)':sev==='MEDIUM'?'rgba(217,119,6,0.08)':'rgba(245,158,11,0.06)';
+          const brd = sev==='HIGH'?'rgba(220,38,38,0.2)':sev==='MEDIUM'?'rgba(217,119,6,0.2)':'rgba(245,158,11,0.15)';
+          const bb = sev==='HIGH'?'#dc2626':sev==='MEDIUM'?'#d97706':'#92400e';
+          const bc = sev==='LOW'?'#1a1200':'white';
+          return `<div style="border-radius:12px;padding:11px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;background:${bg};border:1px solid ${brd}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;color:${bc};background:${bb};flex-shrink:0;margin-top:1px">${sev}</span><span style="color:var(--text)">${escapeHtml(desc)}</span></div>`;
+        }).join('');
+        showToolResult(cards, 'Red flags deep scan');
+      } else {
+        showToolResult(`<p style="font-size:14px;color:var(--text);line-height:1.6">${escapeHtml(responseText)}</p>`, 'Red flags deep scan');
+      }
+    } catch (err) {
+      out.innerHTML = `<div class="error show">${escapeHtml(err.message)}</div>`;
+    }
+    return;
   }
 
-  // For tools that operate on attached documents, include the actual document data
-  let messageContent;
-  if ((tool === 'fill' || tool === 'compare') && scan.followUps && scan.followUps.length > 0) {
+  if (tool === 'fillout') {
+    if (!scan.followUps || scan.followUps.length === 0) {
+      showToolResult(`<p style="font-size:14px;color:var(--text-2);line-height:1.5;margin-bottom:14px">To use <strong>Fill This Out</strong>, attach the blank form using the + Add document button above, then run this tool again.</p><button class="btn-ghost" onclick="document.querySelector('[id*=followUp],[id*=FollowUp]')?.click()" style="font-size:13px">+ Add document</button>`, 'Fill this out');
+      return;
+    }
+    const fillPrompt = `This is a form that needs to be completed.\n\nDocument: ${scan.title}\nContext: ${scan.explanation}\n\nWalk through each field or section and explain: what information goes there, how to find it, and any tips. Format as a numbered list, one field per item.`;
     const followUpContent = scan.followUps.map(f => {
       const base64 = f.dataUrl.split(',')[1];
       if (f.mediaType === 'application/pdf') {
@@ -2870,10 +2862,54 @@ ${scan.explanation}`;
       }
       return { type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } };
     });
-    messageContent = [{ type: 'text', text: toolPrompt }, ...followUpContent];
-  } else {
-    messageContent = toolPrompt || prompts[tool];
+    try {
+      const data = await safeApiCall({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: [{ type: 'text', text: fillPrompt }, ...followUpContent] }]
+      });
+      const responseText = sanitize(data.content[0].text);
+      showToolResult('<p style="font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap">' + escapeHtml(responseText) + '</p>', 'Fill this out');
+    } catch (err) {
+      out.innerHTML = `<div class="error show">${escapeHtml(err.message)}</div>`;
+    }
+    return;
   }
+
+  if (tool === 'compare') {
+    if (!scan.followUps || scan.followUps.length === 0) {
+      showToolResult(`<p style="font-size:14px;color:var(--text-2);line-height:1.5;margin-bottom:14px">To <strong>Compare Documents</strong>, attach a second document using the + Add document button above, then run Compare again.</p><button class="btn-ghost" onclick="document.querySelector('[id*=followUp],[id*=FollowUp]')?.click()" style="font-size:13px">+ Add document</button>`, 'Compare documents');
+      return;
+    }
+    const compareText = 'Compare these two documents. Identify: (1) Key differences, (2) What was added or removed, (3) Which version is more favorable and why, (4) Any new concerns in the second version. Be specific.';
+    const followUpContent = scan.followUps.map(f => {
+      const base64 = f.dataUrl.split(',')[1];
+      if (f.mediaType === 'application/pdf') {
+        return { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
+      }
+      return { type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } };
+    });
+    const systemContext = [
+      { type: 'text', text: `You are Luminos. Original document context:\n\nTitle: ${scan.title}\nExplanation: ${scan.explanation}\n\nAdditional documents for comparison:` },
+      ...followUpContent,
+      { type: 'text', text: compareText }
+    ];
+    try {
+      const data = await safeApiCall({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: systemContext }]
+      });
+      const responseText = sanitize(data.content[0].text);
+      showToolResult('<p style="font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap">' + escapeHtml(responseText) + '</p>', 'Compare documents');
+    } catch (err) {
+      out.innerHTML = `<div class="error show">${escapeHtml(err.message)}</div>`;
+    }
+    return;
+  }
+
+  // Build prompt for built-in tools
+  const messageContent = prompts[tool] || '';
 
   try {
     const data = await safeApiCall({
@@ -2882,28 +2918,6 @@ ${scan.explanation}`;
       messages: [{ role: 'user', content: messageContent }]
     });
     const text = sanitize(data.content[0].text);
-
-    if (tool === 'redflags') {
-      const lines = text.split('\n').filter(l => /^(HIGH|MEDIUM|LOW):/i.test(l.trim()));
-      if (lines.length === 0) {
-        out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Red Flags</div><div class="result-text">${escapeHtml(text)}</div></div>`;
-      } else {
-        const cards = lines.map(l => {
-          const sev = l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase();
-          const desc = l.replace(/^(HIGH|MEDIUM|LOW):\s*/i, '').trim();
-          const cls = sev === 'HIGH' ? 'rf-high' : sev === 'MEDIUM' ? 'rf-medium' : 'rf-low';
-          return `<div class="rf-card ${cls}"><span class="rf-badge">${sev}</span> <span class="rf-desc">${escapeHtml(desc)}</span></div>`;
-        }).join('');
-        out.innerHTML = `<div class="tool-result-card"><div class="rf-section-title">Red Flags Analysis</div>${cards}</div>`;
-      }
-      return;
-    }
-
-    if (tool === 'fill' || tool === 'compare') {
-      const labels = { fill: 'Fill this out', compare: 'Document comparison' };
-      out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">${labels[tool]}</div><div class="result-text">${escapeHtml(text)}</div></div>`;
-      return;
-    }
 
     if (tool === 'flashcards') {
       const cleaned = text.replace(/```json|```/g, '').trim();
@@ -3077,6 +3091,7 @@ function updatePlanUI() {
   }
   renderWeeklyChart();
   initReferral();
+  renderReferral();
 }
 
 function renderWeeklyChart() {
@@ -3084,54 +3099,55 @@ function renderWeeklyChart() {
   if (!container) return;
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const today = new Date();
-  const todayStr = today.toISOString().slice(0,10);
-  // Build last 7 days (oldest first)
-  const dayData = [];
+  const data = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const ds = d.toISOString().slice(0,10);
-    const count = state.history.filter(s => s.date && s.date.slice(0,10) === ds).length;
-    dayData.push({ label: days[d.getDay()], ds, count });
+    const ds = d.toDateString();
+    const count = state.history.filter(h => h.date && new Date(h.date).toDateString() === ds).length;
+    data.push({ label: days[d.getDay()], ds, count, isToday: i === 0 });
   }
-  const maxCount = Math.max(1, ...dayData.map(d => d.count));
-  container.innerHTML = dayData.map(d => {
-    const heightPct = Math.max(5, Math.round((d.count / maxCount) * 100));
-    const isToday = d.ds === todayStr;
-    return `
-      <div class="weekly-bar-wrap">
-        <div class="weekly-bar${isToday ? ' today' : ''}${d.count > 0 ? ' has-data' : ''}" style="height:${heightPct}%"></div>
-        <span class="weekly-day-label${isToday ? ' today' : ''}">${d.label}</span>
-      </div>
-    `;
-  }).join('');
+  const maxCount = Math.max(1, ...data.map(d => d.count));
+  container.innerHTML =
+    `<div style="display:flex;align-items:flex-end;height:80px;gap:6px;margin-bottom:2px">` +
+    data.map(d => {
+      const h = Math.max(4, Math.round((d.count / maxCount) * 80));
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end"><div style="background:linear-gradient(180deg,var(--p1),var(--p3));border-radius:4px 4px 0 0;width:100%;height:${h}px;min-height:4px;transition:height 0.4s"></div></div>`;
+    }).join('') +
+    `</div><div style="display:flex;gap:6px">` +
+    data.map(d => `<div style="flex:1;font-size:10px;color:${d.isToday?'var(--p3)':'var(--text-3)'};font-weight:${d.isToday?700:400};text-align:center;margin-top:6px">${d.label}</div>`).join('') +
+    `</div>`;
 }
 
 function initReferral() {
   let code = localStorage.getItem('sp_refcode');
   if (!code) {
-    code = Math.random().toString(36).slice(2, 10).toUpperCase();
+    code = Math.random().toString(36).slice(2, 8).toUpperCase();
     localStorage.setItem('sp_refcode', code);
   }
-  const linkEl = document.getElementById('referralLink');
+  state.referralCode = code;
+  state.referralCount = parseInt(localStorage.getItem('sp_refcount') || '0');
+  renderReferral();
+}
+
+function renderReferral() {
+  const linkBox = document.getElementById('referralLinkBox');
   const statsEl = document.getElementById('referralStats');
-  if (linkEl) linkEl.textContent = 'scanplain.app/ref/' + code;
-  const refCount = parseInt(localStorage.getItem('sp_refcount') || '0');
-  if (statsEl) statsEl.textContent = refCount + ' friend' + (refCount === 1 ? '' : 's') + ' referred · ' + refCount + ' bonus scan' + (refCount === 1 ? '' : 's') + ' earned';
+  if (linkBox) linkBox.textContent = `scanplain.app/ref/${state.referralCode || '...'}`;
+  if (statsEl) {
+    const c = state.referralCount || 0;
+    statsEl.textContent = `${c} friend${c===1?'':'s'} referred · ${c} bonus scan${c===1?'':'s'}`;
+  }
 }
 
 function copyReferralLink() {
-  const code = localStorage.getItem('sp_refcode') || '';
-  const link = 'scanplain.app/ref/' + code;
-  navigator.clipboard.writeText(link).then(() => showToast('Link copied!')).catch(() => {
-    const el = document.getElementById('referralLink');
-    if (el) {
-      const range = document.createRange();
-      range.selectNode(el);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-    }
-  });
+  const link = `scanplain.app/ref/${state.referralCode}`;
+  navigator.clipboard.writeText(link)
+    .then(() => showToast('Link copied!'))
+    .catch(() => {
+      const el = document.getElementById('referralLinkBox');
+      if (el) { el.style.outline = '2px solid var(--p2)'; setTimeout(() => el.style.outline = '', 1500); }
+    });
 }
 
 function upgradePlan(tier) {
