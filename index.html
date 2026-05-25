@@ -1169,30 +1169,8 @@
     gap: 8px;
     margin-bottom: 12px;
   }
-  .doc-type-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .confidence-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .confidence-label {
-    font-size: 0.75rem;
-    color: var(--text-2);
-  }
 
-  /* ── Red flags ── */
-  .rf-section { margin-top: 16px; }
+  /* ── Tool red flags output (used by runTool redflags) ── */
   .rf-section-title {
     font-size: 0.82rem;
     font-weight: 700;
@@ -1226,43 +1204,6 @@
   .rf-medium .rf-badge { background: rgba(245,158,11,0.2); color: #d97706; }
   .rf-low .rf-badge { background: rgba(234,179,8,0.2); color: #ca8a04; }
   .rf-desc { color: var(--text); }
-
-  /* ── Key terms accordion ── */
-  .kt-section { margin-top: 16px; }
-  .kt-section-title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-  }
-  .kt-item { border-bottom: 1px solid var(--border); }
-  .kt-item:last-child { border-bottom: none; }
-  .kt-term {
-    width: 100%;
-    text-align: left;
-    padding: 10px 0;
-    background: none;
-    border: none;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .kt-term::after { content: '+'; font-size: 1rem; color: var(--text-2); }
-  .kt-term.active::after { content: '−'; }
-  .kt-def {
-    display: none;
-    padding: 0 0 10px;
-    font-size: 0.84rem;
-    color: var(--text-2);
-    line-height: 1.5;
-  }
-  .kt-def.open { display: block; }
 
   /* ── Weekly usage chart ── */
   .weekly-chart {
@@ -1360,69 +1301,6 @@
     margin-bottom: 8px;
   }
 
-  /* ── Onboarding overlay ── */
-  .onboard-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-  .onboard-modal {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 32px 24px 24px;
-    max-width: 360px;
-    width: 100%;
-    position: relative;
-    text-align: center;
-  }
-  .onboard-skip {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 0.85rem;
-    color: var(--text-2);
-    cursor: pointer;
-    padding: 4px 8px;
-  }
-  .onboard-screen { display: none; }
-  .onboard-screen.active { display: block; }
-  .onboard-emoji { font-size: 3rem; margin-bottom: 16px; }
-  .onboard-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 10px;
-    line-height: 1.3;
-  }
-  .onboard-sub {
-    font-size: 0.88rem;
-    color: var(--text-2);
-    line-height: 1.5;
-    margin-bottom: 24px;
-  }
-  .onboard-next { width: 100%; margin-bottom: 16px; }
-  .onboard-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-  }
-  .onboard-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--border);
-    transition: background 0.2s;
-  }
-  .onboard-dot.active {
-    background: var(--p1);
-  }
 
   /* ── Category bubbles ── */
   .category-section {
@@ -1750,6 +1628,33 @@
 </style>
 </head>
 <body>
+
+<div id="onboardOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid var(--border-bright);border-radius:28px;padding:30px 24px 24px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow-lg)">
+    <div id="obDots" style="display:flex;justify-content:center;gap:7px;margin-bottom:24px">
+      <span class="ob-dot" style="height:6px;border-radius:3px;background:var(--p2);width:20px;transition:all 0.3s"></span>
+      <span class="ob-dot" style="height:6px;border-radius:3px;background:var(--border);width:6px;transition:all 0.3s"></span>
+      <span class="ob-dot" style="height:6px;border-radius:3px;background:var(--border);width:6px;transition:all 0.3s"></span>
+    </div>
+    <div id="obScreen0">
+      <div style="font-size:56px;margin-bottom:16px">📸</div>
+      <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 12px;line-height:1.2">Understand anything, instantly</h2>
+      <p style="font-size:15px;color:var(--text-2);line-height:1.5;margin:0 0 28px">Snap, upload, or drop any confusing document. Get plain English back in seconds.</p>
+    </div>
+    <div id="obScreen1" style="display:none">
+      <div style="font-size:56px;margin-bottom:16px">🚩</div>
+      <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 12px;line-height:1.2">Catch what's buried in the fine print</h2>
+      <p style="font-size:15px;color:var(--text-2);line-height:1.5;margin:0 0 28px">ScanPlain automatically flags suspicious clauses, unusual charges, and things that need your attention.</p>
+    </div>
+    <div id="obScreen2" style="display:none">
+      <div style="font-size:56px;margin-bottom:16px">✦</div>
+      <h2 style="font-size:24px;font-weight:800;color:var(--text);margin:0 0 12px;line-height:1.2">Meet Luminos</h2>
+      <p style="font-size:15px;color:var(--text-2);line-height:1.5;margin:0 0 28px">Ask questions, get flashcards, build an action plan — your AI guide knows exactly what you scanned.</p>
+    </div>
+    <button class="btn-primary" onclick="onboardNext()" id="obNextBtn" style="width:100%;margin-bottom:10px">Next →</button>
+    <button class="btn-ghost" onclick="finishOnboarding()" style="width:100%">Skip</button>
+  </div>
+</div>
 
 <div class="ambient">
   <div class="blob b1"></div>
@@ -2125,43 +2030,6 @@
 
 </div>
 
-<div class="onboard-bg" id="onboarding" style="display:none">
-  <div class="onboard-modal">
-    <button class="onboard-skip" onclick="skipOnboarding()">Skip</button>
-
-    <!-- Screen 1 -->
-    <div class="onboard-screen active" id="ob1">
-      <div class="onboard-emoji">📷</div>
-      <h2 class="onboard-title">Understand anything, instantly</h2>
-      <p class="onboard-sub">Snap or upload any document and get a plain-English explanation in seconds.</p>
-      <button class="btn-primary onboard-next" onclick="nextOnboard(2)">Next</button>
-    </div>
-
-    <!-- Screen 2 -->
-    <div class="onboard-screen" id="ob2">
-      <div class="onboard-emoji">🚩</div>
-      <h2 class="onboard-title">Catch what's in the fine print</h2>
-      <p class="onboard-sub">Luminos flags red flags, hidden fees, and important terms you might otherwise miss.</p>
-      <button class="btn-primary onboard-next" onclick="nextOnboard(3)">Next</button>
-    </div>
-
-    <!-- Screen 3 -->
-    <div class="onboard-screen" id="ob3">
-      <div class="onboard-emoji">✨</div>
-      <h2 class="onboard-title">Meet Luminos</h2>
-      <p class="onboard-sub">Ask follow-up questions, run tools, and dig deeper into any document with AI.</p>
-      <button class="btn-primary onboard-next" onclick="skipOnboarding()">Get started</button>
-    </div>
-
-    <!-- Dots -->
-    <div class="onboard-dots">
-      <span class="onboard-dot active" id="odot1"></span>
-      <span class="onboard-dot" id="odot2"></span>
-      <span class="onboard-dot" id="odot3"></span>
-    </div>
-  </div>
-</div>
-
 <script>
 'use strict';
 
@@ -2438,54 +2306,38 @@ function setLoading(on, text) {
 }
 
 function parseResult(text) {
-  const get = (pat) => { const m = text.match(pat); return m ? m[1].trim() : ''; };
-  const title = get(/TITLE:\s*(.+?)(?:\n|$)/i) || 'Scan result';
-  const docType = get(/DOC_TYPE:\s*(.+?)(?:\n|$)/i) || '';
-  const confidence = (get(/CONFIDENCE:\s*(.+?)(?:\n|$)/i) || 'medium').toLowerCase();
+  const title = (text.match(/^TITLE:\s*(.+)/m)||[])[1]?.trim() || 'Scan result';
+  const docType = (text.match(/^DOC_TYPE:\s*(.+)/m)||[])[1]?.trim() || '';
+  const confidence = ((text.match(/^CONFIDENCE:\s*(.+)/m)||[])[1]?.trim() || 'medium').toLowerCase().split(/\s/)[0];
 
-  // EXPLANATION: everything between EXPLANATION: and the next section
-  const expMatch = text.match(/EXPLANATION:\s*([\s\S]*?)(?:\nRED_FLAGS:|\nKEY_TERMS:|$)/i);
-  const explanation = expMatch ? expMatch[1].trim() : text;
+  const expM = text.match(/EXPLANATION:\s*\n?([\s\S]*?)(?=\nRED_FLAGS:|\nKEY_TERMS:|$)/i);
+  const explanation = expM ? expM[1].trim() : text;
 
-  // RED_FLAGS: lines starting with HIGH:, MEDIUM:, LOW:
-  const rfMatch = text.match(/RED_FLAGS:\s*([\s\S]*?)(?:\nKEY_TERMS:|$)/i);
-  const rfText = rfMatch ? rfMatch[1].trim() : '';
-  let redFlags = [];
-  if (rfText && rfText.toLowerCase() !== 'none') {
-    redFlags = rfText.split('\n')
-      .map(l => l.trim())
-      .filter(l => /^(HIGH|MEDIUM|LOW):/i.test(l))
-      .map(l => {
-        const sev = l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase();
-        const desc = l.replace(/^(HIGH|MEDIUM|LOW):\s*/i, '').trim();
-        return { sev, desc };
-      });
-  }
+  const rfM = text.match(/RED_FLAGS:\s*\n([\s\S]*?)(?=\nKEY_TERMS:|$)/i);
+  const rfText = rfM ? rfM[1].trim() : '';
+  const redFlags = (!rfText || /^none$/i.test(rfText)) ? [] :
+    rfText.split('\n').map(l=>l.trim()).filter(l=>/^(HIGH|MEDIUM|LOW):/i.test(l)).map(l=>({
+      sev: l.match(/^(HIGH|MEDIUM|LOW):/i)[1].toUpperCase(),
+      desc: l.replace(/^(HIGH|MEDIUM|LOW):\s*/i,'').trim()
+    }));
 
-  // KEY_TERMS: lines as "term: definition"
-  const ktMatch = text.match(/KEY_TERMS:\s*([\s\S]*?)$/i);
-  const ktText = ktMatch ? ktMatch[1].trim() : '';
-  let keyTerms = [];
-  if (ktText && ktText.toLowerCase() !== 'none') {
-    keyTerms = ktText.split('\n')
-      .map(l => l.trim())
-      .filter(l => l.includes(':'))
-      .map(l => {
-        const idx = l.indexOf(':');
-        return { term: l.slice(0, idx).trim(), def: l.slice(idx+1).trim() };
-      })
-      .filter(t => t.term && t.def);
-  }
+  const ktM = text.match(/KEY_TERMS:\s*\n([\s\S]*?)$/i);
+  const ktText = ktM ? ktM[1].trim() : '';
+  const keyTerms = (!ktText || /^none$/i.test(ktText)) ? [] :
+    ktText.split('\n').map(l=>l.trim()).filter(l=>l.includes(':')).map(l=>{
+      const idx = l.indexOf(':');
+      return { term: l.slice(0,idx).trim(), def: l.slice(idx+1).trim() };
+    }).filter(t=>t.term && t.def);
 
   return { title, docType, confidence, explanation, redFlags, keyTerms };
 }
 
 function toggleKt(btn) {
   const def = btn.nextElementSibling;
-  const isOpen = def.classList.contains('open');
-  btn.closest('.kt-section').querySelectorAll('.kt-def').forEach(d => d.classList.remove('open'));
-  btn.closest('.kt-section').querySelectorAll('.kt-term').forEach(b => b.classList.remove('active'));
-  if (!isOpen) { def.classList.add('open'); btn.classList.add('active'); }
+  const chevron = btn.querySelector('span:last-child');
+  const isOpen = def.style.display !== 'none';
+  def.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.textContent = isOpen ? '+' : '−';
 }
 
 async function runScan() {
@@ -2505,88 +2357,75 @@ async function runScan() {
     ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
     : { type: 'image', source: { type: 'base64', media_type: state.currentMediaType, data: base64 } };
 
+  const categoryHint = (typeof CATEGORY_HINTS !== 'undefined' && CATEGORY_HINTS[state.category]) ? CATEGORY_HINTS[state.category] : '';
+
   try {
     const data = await safeApiCall({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
+      max_tokens: 1400,
       messages: [{
         role: 'user',
         content: [
           contentBlock,
-          { type: 'text', text: (() => {
-            const catModifier = CATEGORY_PROMPTS[state.category] || CATEGORY_PROMPTS['General'];
-            return `Category: ${state.category}. ${catModifier}
+          { type: 'text', text: `You are ScanPlain. ${categoryHint}
 
-Analyze this document and respond in EXACTLY this format:
+Analyze this and respond in EXACTLY this format with these exact labels:
 
 TITLE: [4-7 word title]
-DOC_TYPE: [document type, e.g. "Lease Agreement", "Pay Stub", "Nutrition Facts"]
-CONFIDENCE: [high|medium|low]
+DOC_TYPE: [Medical Bill | Lease/Contract | Tax Form | Nutrition Label | Prescription | Receipt | Insurance | Terms of Service | Foreign Language | ID/Document | Ingredients | General Document]
+CONFIDENCE: [high | medium | low]
+
 EXPLANATION:
-[3-5 sentences in plain English]
+[3-5 sentences in plain everyday English, no jargon, like explaining to a smart friend]
+
 RED_FLAGS:
-[Each risk on its own line starting with HIGH:, MEDIUM:, or LOW: followed by description. If none, write "None"]
+[Each on its own line as: HIGH: description  OR  MEDIUM: description  OR  LOW: description]
+[If none, write exactly: None]
+
 KEY_TERMS:
-[Each term on its own line as "term: definition". If none, write "None"]`;
-          })() }
+[Each on its own line as: term: plain English definition]
+[Max 4 terms. If none needed, write exactly: None]` }
         ]
       }]
     });
 
     const responseText = sanitize(data.content[0].text);
-    const parsed = parseResult(responseText);
-    const { title, docType, confidence, explanation, redFlags, keyTerms } = parsed;
+    const { title, docType, confidence, explanation, redFlags, keyTerms } = parseResult(responseText);
 
-    // Confidence dot colors
-    const confColor = { high: '#22c55e', medium: '#f59e0b', low: '#ef4444' }[confidence] || '#f59e0b';
-    const confLabel = confidence.charAt(0).toUpperCase() + confidence.slice(1);
+    const confDot = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#ef4444';
+    const badgeHtml = docType ? `<div style="margin-bottom:12px"><span style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);padding:5px 13px;border-radius:99px;font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.6px"><span style="width:7px;height:7px;border-radius:50%;background:${confDot};flex-shrink:0"></span>${escapeHtml(docType)}</span></div>` : '';
 
-    // Doc type badge + confidence dot
-    const docTypeBadge = docType ? `
-      <div class="result-meta">
-        <span class="doc-type-badge">${escapeHtml(docType)}</span>
-        <span class="confidence-dot" style="background:${confColor}" title="Confidence: ${escapeHtml(confLabel)}"></span>
-        <span class="confidence-label">${escapeHtml(confLabel)} confidence</span>
-      </div>
-    ` : '';
-
-    // Red flags cards
-    let redFlagsHtml = '';
+    let rfHtml = '';
     if (redFlags.length > 0) {
-      const rfCards = redFlags.map(rf => {
-        const cls = rf.sev === 'HIGH' ? 'rf-high' : rf.sev === 'MEDIUM' ? 'rf-medium' : 'rf-low';
-        return `<div class="rf-card ${cls}"><span class="rf-badge">${rf.sev}</span> <span class="rf-desc">${escapeHtml(rf.desc)}</span></div>`;
+      const cards = redFlags.map(rf => {
+        const bg = rf.sev==='HIGH'?'rgba(220,38,38,0.08)':rf.sev==='MEDIUM'?'rgba(217,119,6,0.08)':'rgba(245,158,11,0.06)';
+        const brd = rf.sev==='HIGH'?'rgba(220,38,38,0.2)':rf.sev==='MEDIUM'?'rgba(217,119,6,0.2)':'rgba(245,158,11,0.15)';
+        const bb = rf.sev==='HIGH'?'#dc2626':rf.sev==='MEDIUM'?'#d97706':'#92400e';
+        const bc = rf.sev==='LOW'?'#1a1200':'white';
+        return `<div style="border-radius:12px;padding:11px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;background:${bg};border:1px solid ${brd}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;color:${bc};background:${bb};flex-shrink:0;margin-top:1px">${escapeHtml(rf.sev)}</span><span style="color:var(--text)">${escapeHtml(rf.desc)}</span></div>`;
       }).join('');
-      redFlagsHtml = `<div class="rf-section"><div class="rf-section-title">Red Flags</div>${rfCards}</div>`;
+      rfHtml = `<div style="margin-top:16px"><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Red flags</div>${cards}</div>`;
     }
 
-    // Key terms accordion
-    let keyTermsHtml = '';
+    let ktHtml = '';
     if (keyTerms.length > 0) {
-      const ktItems = keyTerms.map((kt, i) => `
-        <div class="kt-item">
-          <button class="kt-term" onclick="toggleKt(this)">${escapeHtml(kt.term)}</button>
-          <div class="kt-def">${escapeHtml(kt.def)}</div>
+      const items = keyTerms.map(kt => `
+        <div style="border-bottom:1px solid var(--border)">
+          <button onclick="toggleKt(this)" style="width:100%;text-align:left;padding:11px 0;background:none;border:none;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:inherit">
+            ${escapeHtml(kt.term)}<span style="font-size:16px;color:var(--text-3);margin-left:8px;flex-shrink:0">+</span>
+          </button>
+          <div class="kt-def-inline" style="display:none;padding-bottom:12px;border-top:1px solid var(--border);padding-top:10px;color:var(--text-2);font-size:13.5px;line-height:1.5">${escapeHtml(kt.def)}</div>
         </div>
       `).join('');
-      keyTermsHtml = `<div class="kt-section"><div class="kt-section-title">Key Terms</div>${ktItems}</div>`;
+      ktHtml = `<div style="margin-top:16px"><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Key terms</div>${items}</div>`;
     }
 
-    const resultCard = document.getElementById('resultCard');
-    const resultText = document.getElementById('resultText');
-    resultText.textContent = explanation;
+    const resultEl = document.getElementById('resultText');
+    if (resultEl) resultEl.innerHTML = badgeHtml +
+      `<p style="font-size:15px;line-height:1.6;color:var(--text);margin:0">${escapeHtml(explanation)}</p>` +
+      rfHtml + ktHtml;
 
-    // Remove any previously injected meta/flags/terms
-    resultCard.querySelectorAll('.result-meta, .rf-section, .kt-section').forEach(el => el.remove());
-
-    // Insert doc type badge before result text
-    if (docTypeBadge) {
-      resultText.insertAdjacentHTML('beforebegin', docTypeBadge);
-    }
-    // Append red flags and key terms after result text
-    resultText.insertAdjacentHTML('afterend', redFlagsHtml + keyTermsHtml);
-
-    resultCard.style.display = 'block';
+    document.getElementById('resultCard').style.display = 'block';
     document.getElementById('postScanCTA').style.display = 'block';
 
     state.scansUsed++;
@@ -3447,26 +3286,29 @@ function exportData() {
 }
 
 // ============ ONBOARDING ============
-function showOnboarding() {
-  if (!localStorage.getItem('sp_onboarded')) {
-    const ob = document.getElementById('onboarding');
-    if (ob) ob.style.display = 'flex';
+let onboardStep = 0;
+
+function onboardNext() {
+  onboardStep++;
+  if (onboardStep >= 3) { finishOnboarding(); return; }
+  for (let i = 0; i < 3; i++) {
+    const s = document.getElementById('obScreen' + i);
+    if (s) s.style.display = i === onboardStep ? 'block' : 'none';
+  }
+  document.querySelectorAll('.ob-dot').forEach((d, i) => {
+    d.style.width = i === onboardStep ? '20px' : '6px';
+    d.style.background = i === onboardStep ? 'var(--p2)' : 'var(--border)';
+  });
+  if (onboardStep === 2) {
+    const btn = document.getElementById('obNextBtn');
+    if (btn) btn.textContent = 'Get started';
   }
 }
 
-function skipOnboarding() {
+function finishOnboarding() {
   localStorage.setItem('sp_onboarded', '1');
-  const ob = document.getElementById('onboarding');
-  if (ob) ob.style.display = 'none';
-}
-
-function nextOnboard(n) {
-  document.querySelectorAll('.onboard-screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.onboard-dot').forEach(d => d.classList.remove('active'));
-  const screen = document.getElementById('ob' + n);
-  const dot = document.getElementById('odot' + n);
-  if (screen) screen.classList.add('active');
-  if (dot) dot.classList.add('active');
+  const el = document.getElementById('onboardOverlay');
+  if (el) el.style.display = 'none';
 }
 
 // ============ DESKTOP LAYOUT ============
@@ -3503,11 +3345,14 @@ updateThemeIcon();
 updatePlanUI();
 updateLibraryCount();
 renderBgTasks();
-showOnboarding();
 renderRecentlyViewed();
 updateStreakBanner();
 updateSidebarUsage();
 initReferral();
+if (localStorage.getItem('sp_onboarded') === '1') {
+  const el = document.getElementById('onboardOverlay');
+  if (el) el.style.display = 'none';
+}
 
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
