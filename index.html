@@ -7,6 +7,11 @@
 <meta name="referrer" content="strict-origin-when-cross-origin"/>
 <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
 <meta http-equiv="Permissions-Policy" content="camera=(self), geolocation=(), microphone=()"/>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ScanPlain">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22ScanPlain%22%2C%22short_name%22%3A%22ScanPlain%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fefbf3%22%2C%22theme_color%22%3A%22%23F5A623%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%23FFD56A%27%2F%3E%3Ctext%20y%3D%27.9em%27%20font-size%3D%2770%27%20x%3D%2715%27%3E%E2%9C%A6%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <title>ScanPlain — Light up anything</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -675,42 +680,9 @@
   .chat-send svg { width: 16px; height: 16px; }
   .chat-send:disabled { opacity: 0.4; }
 
-  /* Loading */
-  .loading {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 40px 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    margin-bottom: 14px;
-  }
-  .loading.show { display: flex; }
-  .pulse-ring {
-    width: 48px; height: 48px;
-    position: relative;
-  }
-  .pulse-ring::before, .pulse-ring::after {
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--p1), var(--p3));
-  }
-  .pulse-ring::before { animation: pulse 1.5s ease-out infinite; }
-  .pulse-ring::after { animation: pulse 1.5s ease-out infinite 0.5s; }
-  @keyframes pulse {
-    0% { transform: scale(0.3); opacity: 1; }
-    100% { transform: scale(1.4); opacity: 0; }
-  }
-  .pulse-core {
-    position: absolute; inset: 14px;
-    background: linear-gradient(135deg, var(--p1), var(--p3));
-    border-radius: 50%;
-    box-shadow: 0 0 20px var(--glow-strong);
-  }
-  .loading p { color: var(--text-2); font-size: 14px; font-weight: 500; }
+  /* Loading skeleton */
+  .skel-line { height: 14px; border-radius: 8px; background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; margin-bottom: 12px }
+  @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
   /* Error */
   .error {
@@ -770,6 +742,15 @@
   }
   .history-action-btn:hover { background: var(--p2); color: white; border-color: var(--p2); }
   .history-action-btn svg { width: 14px; height: 14px; }
+
+  /* Filter chips */
+  .filter-strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none }
+  .filter-strip::-webkit-scrollbar { display: none }
+  .filter-chip { flex-shrink: 0; padding: 7px 14px; border-radius: 99px; font-size: 12.5px; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap }
+  .filter-chip.active { background: var(--p2); color: white; border-color: var(--p2) }
+
+  /* Result text transition */
+  #resultText { transition: opacity 0.3s }
 
   /* Search bar */
   .search-bar {
@@ -1038,6 +1019,10 @@
   .theme-preview.dark { background: linear-gradient(135deg, #14110a, #1f1a11); }
   .theme-preview.dark::after { content: ''; position: absolute; top: 6px; right: 6px; width: 12px; height: 12px; background: linear-gradient(135deg, #FFD56A, #E8851A); border-radius: 4px; }
   .theme-name { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  /* Notification toggle */
+  #notifToggle:checked + span { background: var(--p2); border-color: var(--p2) }
+  #notifToggle:checked + span + span { transform: translateX(20px); background: white }
 
   /* Bottom tabs */
   .tabbar {
@@ -1600,7 +1585,10 @@
         <p>Snap, upload, drop. Get plain English back in seconds.</p>
       </div>
 
-      <div class="streak-banner" id="streakBanner" style="display:none">🔥 <span id="streakCount">2</span>-day streak! Keep it up</div>
+      <div class="streak-banner" id="streakBanner" style="display:none;display:flex;align-items:center;justify-content:space-between">
+        <span>🔥 <span id="streakCount">2</span>-day streak! Keep it up</span>
+        <button id="notifBtn" onclick="requestStreakNotif()" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;color:white;font-size:11px;font-weight:600;font-family:inherit;display:none">🔔 Remind me</button>
+      </div>
       <div class="section-label">What are you scanning?</div>
       <div class="category-strip" id="categoryStrip"></div>
       <div id="recentSection" style="display:none">
@@ -1657,6 +1645,14 @@
                 <div class="preview-file-meta" id="previewFileMeta">PDF</div>
               </div>
             </div>
+            <div id="modelToggle" style="display:none;margin-bottom:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">Model</div>
+              <div style="display:flex;gap:8px;margin-bottom:6px">
+                <button id="modelHaiku" onclick="setModel('haiku')" style="flex:1;padding:9px;border-radius:12px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s">⚡ Haiku — Fast</button>
+                <button id="modelSonnet" onclick="setModel('sonnet')" style="flex:1;padding:9px;border-radius:12px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s">🎯 Sonnet — Accurate</button>
+              </div>
+              <div id="modelInfo" style="font-size:11px;color:var(--text-3);text-align:center"></div>
+            </div>
             <button class="btn-primary" id="scanBtn" onclick="runScan()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
               Light it up
@@ -1668,9 +1664,12 @@
         <div class="scan-right">
           <div class="error" id="errorMsg"></div>
 
-          <div class="loading" id="loading">
-            <div class="pulse-ring"><div class="pulse-core"></div></div>
-            <p id="loadingText">Reading your scan…</p>
+          <div id="loading" style="display:none" class="result-card">
+            <div class="skel-line" style="width:40%;height:24px;border-radius:99px;margin-bottom:16px"></div>
+            <div class="skel-line" style="width:100%"></div>
+            <div class="skel-line" style="width:90%"></div>
+            <div class="skel-line" style="width:70%"></div>
+            <div class="skel-line" style="width:80%;margin-top:8px"></div>
           </div>
 
           <div class="result-card" id="resultCard" style="display:none">
@@ -1678,12 +1677,38 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
               Plain English
             </div>
+            <div id="normalityBadge" style="display:none;margin-bottom:12px"></div>
             <div class="result-text" id="resultText"></div>
+            <button id="eli5Btn" class="btn-ghost" style="display:none;padding:10px 16px;font-size:13.5px;width:auto;margin-top:12px;align-items:center;gap:8px" onclick="explainSimpler()">
+              <span>&#x1F9D2;</span> Explain like I'm 5
+            </button>
             <div id="postScanCTA" style="margin-top:16px;display:none">
               <button class="btn-primary" onclick="openCurrentInLuminos()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
                 Open in Luminos
               </button>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn-ghost" style="margin-top:0;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px" onclick="shareResult()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                  Share
+                </button>
+                <button class="btn-ghost" style="margin-top:0;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px" onclick="exportResult()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export
+                </button>
+              </div>
+            </div>
+            <div id="quickQA" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+              <div style="font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Quick questions</div>
+              <div id="qqChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+              <div id="qqMessages" style="margin-bottom:12px"></div>
+              <div id="qqInputWrap" style="display:flex;gap:8px">
+                <input id="qqInput" type="text" placeholder="Ask anything about this document…" style="flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')sendQQ()">
+                <button onclick="sendQQ()" style="padding:10px 16px;border-radius:12px;background:var(--p2);color:white;border:none;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit">Ask</button>
+              </div>
+              <div id="qqLimitMsg" style="display:none;text-align:center;margin-top:12px">
+                <button class="btn-ghost" style="font-size:13px;padding:10px 16px;width:auto" onclick="openCurrentInLuminos()">Continue in Luminos &#x2192;</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1696,11 +1721,32 @@
         <h1>Your <span class="serif">library</span></h1>
         <p>Every scan, searchable and organized.</p>
       </div>
+      <div id="libraryHeaderControls" style="display:none;gap:8px;margin-bottom:12px;align-items:center;justify-content:flex-end">
+        <button onclick="cycleSortOrder()" id="sortBtn" style="background:none;border:1px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          <span id="sortLabel">Newest</span>
+        </button>
+        <button id="selectModeBtn" onclick="toggleSelectMode()" style="background:none;border:1px solid var(--border);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit">Select</button>
+      </div>
       <div class="search-bar" id="historySearchBar" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
         <input id="historySearch" placeholder="Search scans…" oninput="renderHistory()"/>
       </div>
+      <div class="filter-strip" id="filterStrip" style="display:none">
+        <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">All</button>
+        <button class="filter-chip" data-filter="today" onclick="setFilter('today')">Today</button>
+        <button class="filter-chip" data-filter="week" onclick="setFilter('week')">This week</button>
+        <button class="filter-chip" data-filter="starred" onclick="setFilter('starred')">&#11088; Starred</button>
+        <button class="filter-chip" data-filter="medical" onclick="setFilter('medical')">Medical</button>
+        <button class="filter-chip" data-filter="contracts" onclick="setFilter('contracts')">Contracts</button>
+        <button class="filter-chip" data-filter="tax" onclick="setFilter('tax')">Tax</button>
+        <button class="filter-chip" data-filter="other" onclick="setFilter('other')">Other</button>
+      </div>
       <div id="historyList"></div>
+      <div id="bulkDeleteBar" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 8px 8px 16px;box-shadow:var(--shadow-lg);z-index:100;align-items:center;gap:10px;font-size:13px;color:var(--text-2)">
+        <span>Select items to delete</span>
+        <button onclick="bulkDelete()" disabled style="background:var(--danger);color:white;border:none;border-radius:99px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Delete selected (0)</button>
+      </div>
     </div>
 
     <!-- LUMINOS -->
@@ -1793,7 +1839,7 @@
       </div>
 
       <div class="section-label">Appearance</div>
-      <div class="theme-picker">
+      <div class="theme-picker" style="grid-template-columns:repeat(3,1fr)">
         <div class="theme-option" id="theme-light" onclick="setTheme('light')">
           <div class="theme-preview light"></div>
           <div class="theme-name">Light</div>
@@ -1801,6 +1847,23 @@
         <div class="theme-option" id="theme-dark" onclick="setTheme('dark')">
           <div class="theme-preview dark"></div>
           <div class="theme-name">Dark</div>
+        </div>
+        <div class="theme-option" id="theme-auto" onclick="setTheme('auto')">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#fefbf3 50%,#14110a 50%)"></div>
+          <div class="theme-name">Auto</div>
+        </div>
+      </div>
+
+      <div class="settings-group" style="margin-top:14px">
+        <div class="settings-row" id="accountModelRow" style="display:none">
+          <div>
+            <div class="settings-label">Default model</div>
+            <div class="settings-desc" style="font-size:12.5px;color:var(--text-3);margin-top:2px">Haiku is fast; Sonnet is more accurate</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="setModel('haiku')" id="acctHaiku" style="padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit">⚡ Haiku</button>
+            <button onclick="setModel('sonnet')" id="acctSonnet" style="padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit">🎯 Sonnet</button>
+          </div>
         </div>
       </div>
 
@@ -1812,6 +1875,17 @@
             <div class="settings-sub">Your scans stay on this device</div>
           </div>
           <div class="toggle on"></div>
+        </div>
+        <div class="settings-row" id="notifSettingRow">
+          <div>
+            <div class="settings-label">Scan reminders</div>
+            <div class="settings-sub">Notify you to maintain your streak</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+            <input type="checkbox" id="notifToggle" onchange="toggleNotifications(this.checked)" style="opacity:0;width:0;height:0">
+            <span style="position:absolute;inset:0;background:var(--surface2);border-radius:99px;transition:0.2s;border:1px solid var(--border)"></span>
+            <span id="notifThumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:var(--text-3);border-radius:50%;transition:0.2s"></span>
+          </label>
         </div>
         <div class="settings-row" onclick="exportData()">
           <div>
@@ -1835,6 +1909,10 @@
           <span class="settings-value">›</span>
         </div>
       </div>
+
+      <div class="section-label" style="margin-top:24px">Reminders</div>
+      <div id="remindersList" style="margin-bottom:8px"></div>
+      <div id="noReminders" style="color:var(--text-3);font-size:13.5px;padding:12px 0">No reminders saved yet. Run an action plan in Luminos to create some.</div>
 
       <div class="section-label">About</div>
       <div class="settings-group">
@@ -1986,6 +2064,7 @@ const LIMITS = {
   plus:      { scans: 20, luminos: 3 },
   unlimited: { scans: Infinity, luminos: Infinity }
 };
+const SONNET_LIMITS = { free: 0, plus: 10, unlimited: Infinity };
 
 // State
 let state = {
@@ -2001,7 +2080,13 @@ let state = {
   currentMediaType: null,
   category: 'general',
   streak: parseInt(localStorage.getItem('sp_streak') || '0') || 0,
-  lastScanDate: localStorage.getItem('sp_lastScan') || null
+  lastScanDate: localStorage.getItem('sp_lastScan') || null,
+  activeFilter: 'all',
+  sortOrder: localStorage.getItem('sp_sort') || 'newest',
+  selectMode: false,
+  selectedIds: new Set(),
+  model: localStorage.getItem('sp_model') || 'haiku',
+  sonnetUsed: parseInt(localStorage.getItem('sp_sonnet_used') || '0')
 };
 
 try { state.history = JSON.parse(localStorage.getItem('sp_history') || '[]'); } catch(e) {}
@@ -2017,6 +2102,8 @@ function save() {
     localStorage.setItem('sp_theme', state.theme);
     localStorage.setItem('sp_streak', state.streak);
     if (state.lastScanDate) localStorage.setItem('sp_lastScan', state.lastScanDate);
+    localStorage.setItem('sp_model', state.model);
+    localStorage.setItem('sp_sonnet_used', state.sonnetUsed.toString());
   } catch(e) {
     showToast('Storage full — clear some history');
   }
@@ -2025,16 +2112,27 @@ function save() {
 
 // ============ THEME ============
 function setTheme(t) {
-  state.theme = t;
-  document.documentElement.setAttribute('data-theme', t);
-  document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#fefbf3' : '#14110a';
+  if (t === 'auto') {
+    state.theme = 'auto';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    localStorage.setItem('sp_theme', 'auto');
+  } else {
+    state.theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('sp_theme', t);
+    document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#fefbf3' : '#14110a';
+  }
   document.getElementById('theme-light').classList.toggle('active', t === 'light');
   document.getElementById('theme-dark').classList.toggle('active', t === 'dark');
+  const autoBtn = document.getElementById('theme-auto');
+  if (autoBtn) autoBtn.classList.toggle('active', t === 'auto');
   updateThemeIcon();
   save();
 }
 function toggleTheme() {
-  setTheme(state.theme === 'light' ? 'dark' : 'light');
+  const cur = state.theme;
+  setTheme(cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light');
 }
 function updateThemeIcon() {
   const icon = document.getElementById('themeIcon');
@@ -2048,6 +2146,56 @@ function updateThemeIcon() {
   }
 }
 
+// ============ MODEL TOGGLE ============
+function getModel() {
+  if (state.model === 'sonnet') {
+    const limit = SONNET_LIMITS[state.plan] || 0;
+    if (limit === Infinity || state.sonnetUsed < limit) return 'claude-sonnet-4-6';
+  }
+  return 'claude-haiku-4-5-20251001';
+}
+
+function setModel(m) {
+  state.model = m;
+  save();
+  updateModelToggle();
+}
+
+function updateModelToggle() {
+  const toggle = document.getElementById('modelToggle');
+  if (toggle) {
+    toggle.style.display = state.plan !== 'free' ? 'block' : 'none';
+  }
+  const hBtn = document.getElementById('modelHaiku');
+  const sBtn = document.getElementById('modelSonnet');
+  const info = document.getElementById('modelInfo');
+  const activeStyle = 'flex:1;padding:9px;border-radius:12px;font-size:13px;font-weight:600;border:1px solid var(--p2);background:linear-gradient(135deg,var(--p1),var(--p2));color:white;cursor:pointer;font-family:inherit;transition:all 0.15s';
+  const inactiveStyle = 'flex:1;padding:9px;border-radius:12px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s';
+  if (hBtn) hBtn.style.cssText = (state.model === 'haiku' ? activeStyle : inactiveStyle);
+  if (sBtn) {
+    const sonnetLimit = SONNET_LIMITS[state.plan] || 0;
+    const remaining = sonnetLimit === Infinity ? Infinity : Math.max(0, sonnetLimit - state.sonnetUsed);
+    sBtn.style.cssText = (state.model === 'sonnet' ? activeStyle : inactiveStyle);
+    sBtn.disabled = remaining === 0;
+    if (info) {
+      info.textContent = state.model === 'haiku'
+        ? 'Fast · within your plan limit'
+        : remaining === Infinity ? 'Unlimited Sonnet scans'
+        : remaining > 0 ? `${remaining} Sonnet scan${remaining !== 1 ? 's' : ''} remaining this month`
+        : '0 remaining — upgrade for more';
+    }
+  }
+  // Account page model row
+  const acctRow = document.getElementById('accountModelRow');
+  if (acctRow) acctRow.style.display = state.plan !== 'free' ? 'flex' : 'none';
+  const acctH = document.getElementById('acctHaiku');
+  const acctS = document.getElementById('acctSonnet');
+  const acctActiveStyle = 'padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--p2);background:linear-gradient(135deg,var(--p1),var(--p2));color:white;cursor:pointer;font-family:inherit';
+  const acctInactiveStyle = 'padding:7px 14px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit';
+  if (acctH) acctH.style.cssText = (state.model === 'haiku' ? acctActiveStyle : acctInactiveStyle);
+  if (acctS) acctS.style.cssText = (state.model === 'sonnet' ? acctActiveStyle : acctInactiveStyle);
+}
+
 // ============ TABS / NAV ============
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
@@ -2055,7 +2203,7 @@ function switchTab(name) {
   document.getElementById('page-' + name).classList.add('active');
   if (name === 'scan') { renderRecentStrip(); updateStreakBanner(); }
   if (name === 'history') renderHistory();
-  if (name === 'account') { updatePlanUI(); renderWeeklyChart(); initReferral(); }
+  if (name === 'account') { updatePlanUI(); renderWeeklyChart(); initReferral(); renderReminders(); }
   if (name === 'luminos') renderLuminos();
   document.querySelector('.content').scrollTo(0, 0);
   // Sync sidebar tabs
@@ -2091,9 +2239,15 @@ function selectCategory(id, idx) {
 function updateStreakBanner() {
   const banner = document.getElementById('streakBanner');
   const countEl = document.getElementById('streakCount');
+  const notifBtn = document.getElementById('notifBtn');
   if (!banner) return;
-  banner.style.display = state.streak >= 2 ? 'block' : 'none';
+  const show = state.streak >= 2;
+  banner.style.display = show ? 'flex' : 'none';
   if (countEl) countEl.textContent = state.streak;
+  if (notifBtn) {
+    const showNotif = show && 'Notification' in window && Notification.permission !== 'granted';
+    notifBtn.style.display = showNotif ? 'inline-block' : 'none';
+  }
 }
 
 function recordScanStreak() {
@@ -2200,9 +2354,8 @@ function showError(msg) {
   el.classList.add('show');
 }
 
-function setLoading(on, text) {
-  if (text) document.getElementById('loadingText').textContent = text;
-  document.getElementById('loading').classList.toggle('show', on);
+function setLoading(on) {
+  document.getElementById('loading').style.display = on ? 'block' : 'none';
   document.getElementById('scanBtn').disabled = on;
 }
 
@@ -2244,7 +2397,7 @@ function toggleKt(btn) {
 async function runScan() {
   const limit = LIMITS[state.plan].scans;
   if (state.scansUsed >= limit) {
-    showError(`You've used all ${limit} scans this month. Upgrade for more.`);
+    showUpgradeModal();
     return;
   }
   if (!state.currentDataUrl) return;
@@ -2262,7 +2415,7 @@ async function runScan() {
 
   try {
     const data = await safeApiCall({
-      model: 'claude-haiku-4-5-20251001',
+      model: getModel(),
       max_tokens: 1400,
       messages: [{
         role: 'user',
@@ -2330,6 +2483,7 @@ KEY_TERMS:
     document.getElementById('postScanCTA').style.display = 'block';
 
     state.scansUsed++;
+    if (state.model === 'sonnet') { state.sonnetUsed++; save(); }
 
     const scanId = 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
     const newScan = {
@@ -2370,18 +2524,95 @@ function openCurrentInLuminos() {
 // ============ HISTORY ============
 function getFilteredHistory() {
   const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
-  if (!q) return state.history;
-  return state.history.filter(h =>
-    h.title.toLowerCase().includes(q) ||
-    h.explanation.toLowerCase().includes(q) ||
-    h.fileName.toLowerCase().includes(q)
-  );
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  let items = state.history.filter(h => {
+    if (q && !h.title?.toLowerCase().includes(q) && !h.explanation?.toLowerCase().includes(q) && !h.docType?.toLowerCase().includes(q)) return false;
+    const f = state.activeFilter;
+    if (f === 'all') return true;
+    if (f === 'starred') return h.starred;
+    if (f === 'today') return new Date(h.date) >= today;
+    if (f === 'week') return new Date(h.date) >= weekAgo;
+    if (f === 'medical') return /medical|prescription|health|bill/i.test(h.docType || '');
+    if (f === 'contracts') return /contract|lease|agreement/i.test(h.docType || '');
+    if (f === 'tax') return /tax/i.test(h.docType || '');
+    if (f === 'other') return true;
+    return true;
+  });
+  const s = state.sortOrder;
+  if (s === 'oldest') items = items.slice().sort((a,b) => new Date(a.date)-new Date(b.date));
+  else if (s === 'type') items = items.slice().sort((a,b) => (a.docType||'').localeCompare(b.docType||''));
+  else items = items.slice().sort((a,b) => new Date(b.date)-new Date(a.date));
+  return items;
+}
+
+function setFilter(f) {
+  state.activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+  renderHistory();
+}
+
+function cycleSortOrder() {
+  const orders = ['newest','oldest','type'];
+  const labels = { newest: 'Newest', oldest: 'Oldest', type: 'By type' };
+  const idx = orders.indexOf(state.sortOrder);
+  state.sortOrder = orders[(idx + 1) % orders.length];
+  localStorage.setItem('sp_sort', state.sortOrder);
+  const lbl = document.getElementById('sortLabel');
+  if (lbl) lbl.textContent = labels[state.sortOrder];
+  renderHistory();
+}
+
+function toggleStar(id) {
+  const h = state.history.find(x => x.id === id);
+  if (h) { h.starred = !h.starred; save(); renderHistory(); }
+}
+
+function toggleSelectMode() {
+  state.selectMode = !state.selectMode;
+  state.selectedIds = new Set();
+  document.getElementById('selectModeBtn').textContent = state.selectMode ? 'Cancel' : 'Select';
+  const bar = document.getElementById('bulkDeleteBar');
+  if (bar) bar.style.display = state.selectMode ? 'flex' : 'none';
+  renderHistory();
+}
+
+function toggleSelect(id) {
+  if (state.selectedIds.has(id)) state.selectedIds.delete(id);
+  else state.selectedIds.add(id);
+  const bar = document.getElementById('bulkDeleteBar');
+  if (bar) {
+    const n = state.selectedIds.size;
+    bar.querySelector('button').textContent = `Delete selected (${n})`;
+    bar.querySelector('button').disabled = n === 0;
+  }
+  const cb = document.querySelector(`[data-select-id="${id}"]`);
+  if (cb) cb.checked = state.selectedIds.has(id);
+}
+
+function bulkDelete() {
+  const n = state.selectedIds.size;
+  if (!n) return;
+  if (!confirm(`Delete ${n} scan${n>1?'s':''}?`)) return;
+  state.history = state.history.filter(h => !state.selectedIds.has(h.id));
+  state.selectedIds = new Set();
+  state.selectMode = false;
+  document.getElementById('selectModeBtn').textContent = 'Select';
+  const bar = document.getElementById('bulkDeleteBar');
+  if (bar) bar.style.display = 'none';
+  save();
+  renderHistory();
 }
 
 function renderHistory() {
   const list = document.getElementById('historyList');
   const searchBar = document.getElementById('historySearchBar');
+  const filterStrip = document.getElementById('filterStrip');
+  const headerControls = document.getElementById('libraryHeaderControls');
+  const hasItems = state.history.length > 0;
   searchBar.style.display = state.history.length > 3 ? 'flex' : 'none';
+  if (filterStrip) filterStrip.style.display = hasItems ? 'flex' : 'none';
+  if (headerControls) headerControls.style.display = hasItems ? 'flex' : 'none';
 
   if (!state.history.length) {
     list.innerHTML = `
@@ -2397,7 +2628,7 @@ function renderHistory() {
 
   const filtered = getFilteredHistory();
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty"><h3>No results</h3><p>Try a different search</p></div>`;
+    list.innerHTML = `<div class="empty"><h3>No results</h3><p>Try a different search or filter</p></div>`;
     return;
   }
 
@@ -2405,14 +2636,18 @@ function renderHistory() {
     const thumb = h.isPDF
       ? `<div class="history-thumb doc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`
       : `<img class="history-thumb" src="${escapeHtml(h.thumb)}"/>`;
-    return `<div class="history-item" onclick="openLuminosWithScan('${h.id}')">
+    const starBtn = `<button onclick="event.stopPropagation();toggleStar('${escapeHtml(h.id)}')" style="background:none;border:none;padding:6px;cursor:pointer;font-size:16px;line-height:1;color:${h.starred ? 'var(--p2)' : 'var(--text-3)'}">${h.starred ? '&#9733;' : '&#9734;'}</button>`;
+    const checkbox = state.selectMode ? `<input type="checkbox" data-select-id="${escapeHtml(h.id)}" onchange="toggleSelect('${escapeHtml(h.id)}')" style="width:18px;height:18px;accent-color:var(--p2);flex-shrink:0" ${state.selectedIds.has(h.id) ? 'checked' : ''}>` : '';
+    return `<div class="history-item" onclick="${state.selectMode ? `toggleSelect('${h.id}')` : `openLuminosWithScan('${h.id}')`}">
+      ${checkbox}
       ${thumb}
       <div class="history-info">
         <div class="history-title-text">${escapeHtml(h.title)}</div>
         <div class="history-date">${new Date(h.date).toLocaleDateString([], {month:'short', day:'numeric'})} · ${new Date(h.date).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
       </div>
       <div class="history-actions">
-        <button class="history-action-btn" onclick="event.stopPropagation();deleteScan('${h.id}')" title="Delete">
+        ${starBtn}
+        <button class="history-action-btn" onclick="event.stopPropagation();deleteScan('${escapeHtml(h.id)}')" title="Delete">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
       </div>
@@ -2434,6 +2669,137 @@ function deleteScan(id) {
 function updateLibraryCount() {
   const el = document.getElementById('libraryCount');
   if (el) el.textContent = state.history.length + ' scan' + (state.history.length === 1 ? '' : 's');
+}
+
+// ============ NORMATIVITY BADGE ============
+function renderNormalityBadge(flags) {
+  const el = document.getElementById('normalityBadge');
+  if (!el) return;
+  const highCount = flags.filter(f => f.sev === 'HIGH').length;
+  const anyFlags = flags.length > 0;
+  let bg, border, color, text;
+  if (!anyFlags) {
+    bg = 'rgba(22,163,74,0.1)'; border = 'rgba(22,163,74,0.3)'; color = 'var(--success)';
+    text = '✓ Looks standard for this type of document';
+  } else if (highCount > 0) {
+    bg = 'rgba(220,38,38,0.08)'; border = 'rgba(220,38,38,0.2)'; color = 'var(--danger)';
+    text = '⚠ Has unusual or concerning clauses';
+  } else {
+    bg = 'rgba(217,119,6,0.08)'; border = 'rgba(217,119,6,0.2)'; color = 'var(--warn)';
+    text = '~ A few things worth reviewing';
+  }
+  el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;background:${bg};border:1px solid ${border};color:${color}">${escapeHtml(text)}</span>`;
+  el.style.display = 'block';
+}
+
+// ============ ELI5 ============
+let _originalExplanation = '';
+let _eli5Mode = false;
+
+function explainSimpler() {
+  const btn = document.getElementById('eli5Btn');
+  if (_eli5Mode) { restoreOriginal(); return; }
+  if (!_originalExplanation) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Simplifying…';
+  safeApiCall({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 400,
+    messages: [{ role: 'user', content: [{ type: 'text', text: `Take this explanation and rewrite it like you're explaining to a curious 5-year-old. Use simple words, short sentences, and a friendly tone. Explanation: ${_originalExplanation}` }] }]
+  }).then(data => {
+    const simple = sanitize(data.content[0].text);
+    const el = document.getElementById('resultText');
+    if (el) {
+      el.style.opacity = '0';
+      setTimeout(() => { el.innerHTML = escapeHtml(simple).replace(/\n/g,'<br>'); el.style.opacity = '1'; }, 300);
+    }
+    _eli5Mode = true;
+    btn.disabled = false;
+    btn.innerHTML = '<span>↩</span> Restore original';
+  }).catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<span>&#x1F9D2;</span> Explain like I\'m 5';
+  });
+}
+
+function restoreOriginal() {
+  const el = document.getElementById('resultText');
+  if (el && _originalExplanation) {
+    el.style.opacity = '0';
+    setTimeout(() => { el.innerHTML = escapeHtml(_originalExplanation).replace(/\n/g,'<br>'); el.style.opacity = '1'; }, 300);
+  }
+  _eli5Mode = false;
+  const btn = document.getElementById('eli5Btn');
+  if (btn) { btn.innerHTML = '<span>&#x1F9D2;</span> Explain like I\'m 5'; }
+}
+
+// ============ QUICK Q&A ============
+let _qqContext = '';
+let _qqCount = 0;
+
+const QQ_DEFAULTS = {
+  'Lease/Contract': ['What are my main obligations?', 'Can I cancel early?', 'What happens if I miss a payment?'],
+  'Medical Bill': ['Is this amount correct?', 'What can I dispute?', 'Do I have appeal rights?'],
+  'Prescription': ['What are the side effects?', 'Can I take this with other meds?', 'What if I miss a dose?'],
+  'Tax Form': ['What do I need to fill in?', 'What are the deadlines?', 'Do I owe money?'],
+  'Insurance': ['What is covered?', 'What are the exclusions?', 'How do I file a claim?'],
+  default: ['Can you simplify this?', 'What should I do next?', 'Is there anything I should worry about?']
+};
+
+function initQuickQA(explanation, docType) {
+  _qqContext = explanation;
+  _qqCount = 0;
+  const chips = QQ_DEFAULTS[docType] || QQ_DEFAULTS.default;
+  const chipsEl = document.getElementById('qqChips');
+  if (chipsEl) {
+    chipsEl.innerHTML = chips.map(q =>
+      `<button onclick="sendQQChip(${JSON.stringify(escapeHtml(q))})" style="padding:7px 12px;border-radius:99px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:inherit">${escapeHtml(q)}</button>`
+    ).join('');
+  }
+  const msgs = document.getElementById('qqMessages');
+  if (msgs) msgs.innerHTML = '';
+  const lim = document.getElementById('qqLimitMsg');
+  if (lim) lim.style.display = 'none';
+  const wrap = document.getElementById('qqInputWrap');
+  if (wrap) wrap.style.display = 'flex';
+  document.getElementById('quickQA').style.display = 'block';
+}
+
+function sendQQChip(q) {
+  const input = document.getElementById('qqInput');
+  if (input) input.value = q;
+  sendQQ();
+}
+
+async function sendQQ() {
+  const input = document.getElementById('qqInput');
+  const q = input?.value.trim();
+  if (!q || _qqCount >= 3) return;
+  input.value = '';
+  _qqCount++;
+  const msgs = document.getElementById('qqMessages');
+  if (msgs) {
+    msgs.innerHTML += `<div style="background:var(--surface2);border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13.5px;color:var(--text)">${escapeHtml(q)}</div>`;
+    msgs.innerHTML += `<div id="qqLoading${_qqCount}" style="color:var(--text-3);font-size:13px;padding:4px 0 8px">Thinking…</div>`;
+  }
+  const loadEl = document.getElementById(`qqLoading${_qqCount}`);
+  try {
+    const data = await safeApiCall({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: [{ type: 'text', text: `Context: ${_qqContext}\n\nQuestion: ${q}\n\nAnswer briefly and clearly in plain English (2-4 sentences max).` }] }]
+    });
+    const ans = sanitize(data.content[0].text);
+    if (loadEl) loadEl.outerHTML = `<div style="background:linear-gradient(135deg,rgba(255,213,106,0.08),rgba(245,166,35,0.06));border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13.5px;color:var(--text);line-height:1.5">${escapeHtml(ans).replace(/\n/g,'<br>')}</div>`;
+  } catch (e) {
+    if (loadEl) loadEl.outerHTML = `<div style="color:var(--danger);font-size:13px;padding:4px 0 8px">Could not get answer.</div>`;
+  }
+  if (_qqCount >= 3) {
+    const wrap = document.getElementById('qqInputWrap');
+    if (wrap) wrap.style.display = 'none';
+    const lim = document.getElementById('qqLimitMsg');
+    if (lim) lim.style.display = 'block';
+  }
 }
 
 // ============ LUMINOS ============
@@ -2575,6 +2941,9 @@ function renderLuminosSession() {
       <div class="chat-input-wrap">
         <button class="chat-attach" onclick="document.getElementById('followUpInput').click()" title="Attach document">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.57 8.57a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg>
+        </button>
+        <button id="voiceBtn" class="chat-attach" onclick="toggleVoice()" title="Voice input">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </button>
         <input type="text" class="chat-input" id="chatInput" placeholder="Ask Luminos anything…" onkeydown="if(event.key==='Enter')sendChat()" autocomplete="off" maxlength="2000"/>
         <button class="chat-send" onclick="sendChat()" title="Send">
@@ -2760,7 +3129,7 @@ ${scan.followUps && scan.followUps.length ? `Additional documents the user attac
     ];
 
     const data = await safeApiCall({
-      model: 'claude-haiku-4-5-20251001',
+      model: getModel(),
       max_tokens: 800,
       messages: [
         { role: 'user', content: systemContent },
@@ -2799,7 +3168,7 @@ async function runTool(tool) {
   document.querySelector('.tools-trigger').classList.remove('open');
 
   const out = document.getElementById('toolOutput');
-  out.innerHTML = '<div class="loading show"><div class="pulse-ring"><div class="pulse-core"></div></div><p>Working on it…</p></div>';
+  out.innerHTML = '<div class="result-card" style="margin-top:12px"><div class="skel-line" style="width:40%;height:18px;border-radius:99px;margin-bottom:16px"></div><div class="skel-line" style="width:100%"></div><div class="skel-line" style="width:85%"></div><div class="skel-line" style="width:70%"></div></div>';
 
   const prompts = {
     actionplan: `Based on this:\n\n${scan.title}\n${scan.explanation}\n\nGive 4-6 specific, actionable steps. Format as a numbered list, one step per line. Be concrete.`,
@@ -2823,7 +3192,7 @@ async function runTool(tool) {
     const rfPrompt = `Perform a thorough red flags analysis of this document:\n\nTitle: ${scan.title}\nContent: ${scan.explanation}\n\nList every concern, each on its own line formatted as:\nHIGH: [serious issue requiring immediate attention]\nMEDIUM: [moderate concern to be aware of]\nLOW: [minor note]\n\nIf no issues found, write: None found.`;
     try {
       const data = await safeApiCall({
-        model: 'claude-haiku-4-5-20251001',
+        model: getModel(),
         max_tokens: 1200,
         messages: [{ role: 'user', content: rfPrompt }]
       });
@@ -2864,7 +3233,7 @@ async function runTool(tool) {
     });
     try {
       const data = await safeApiCall({
-        model: 'claude-haiku-4-5-20251001',
+        model: getModel(),
         max_tokens: 1200,
         messages: [{ role: 'user', content: [{ type: 'text', text: fillPrompt }, ...followUpContent] }]
       });
@@ -2896,7 +3265,7 @@ async function runTool(tool) {
     ];
     try {
       const data = await safeApiCall({
-        model: 'claude-haiku-4-5-20251001',
+        model: getModel(),
         max_tokens: 1200,
         messages: [{ role: 'user', content: systemContext }]
       });
@@ -2913,7 +3282,7 @@ async function runTool(tool) {
 
   try {
     const data = await safeApiCall({
-      model: 'claude-haiku-4-5-20251001',
+      model: getModel(),
       max_tokens: 1200,
       messages: [{ role: 'user', content: messageContent }]
     });
@@ -2945,7 +3314,8 @@ async function runTool(tool) {
 
     if (tool === 'actionplan') {
       const steps = text.split(/\n?\s*\d+[\.\)]\s+/).filter(s => s.trim());
-      out.innerHTML = `<div class="result-card" style="margin-bottom:0;"><div class="result-tag">Action plan</div><div class="step-list">${steps.map((s, i) => `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${escapeHtml(s.trim())}</div></div>`).join('')}</div></div>`;
+      const checklistHtml = renderActionChecklist(steps, state.activeLuminosId);
+      out.innerHTML = `<div class="result-card" id="toolResult" style="margin-bottom:0;"><div class="result-tag">Action plan</div>${checklistHtml}</div>`;
       return;
     }
 
@@ -3030,7 +3400,7 @@ function runBackgroundTask(scan) {
   setTimeout(async () => {
     try {
       const data = await safeApiCall({
-        model: 'claude-haiku-4-5-20251001',
+        model: getModel(),
         max_tokens: 800,
         messages: [{ role: 'user', content: `Deep research on:\n\n${scan.title}\n${scan.explanation}\n\nGive thorough but plain-English findings in 3-4 paragraphs.` }]
       });
@@ -3092,6 +3462,7 @@ function updatePlanUI() {
   renderWeeklyChart();
   initReferral();
   renderReferral();
+  updateModelToggle();
 }
 
 function renderWeeklyChart() {
@@ -3233,18 +3604,50 @@ function updateSidebarUsage() {
 }
 
 // ============ INIT ============
-document.documentElement.setAttribute('data-theme', state.theme);
-document.querySelector('meta[name="theme-color"]').content = state.theme === 'light' ? '#fefbf3' : '#14110a';
+// Auto-detect OS theme preference on first launch
+if (!localStorage.getItem('sp_theme')) {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  state.theme = prefersDark ? 'dark' : 'light';
+}
+document.documentElement.setAttribute('data-theme', state.theme === 'auto'
+  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  : state.theme);
+document.querySelector('meta[name="theme-color"]').content = (state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? '#14110a' : '#fefbf3';
 updateThemeIcon();
 updatePlanUI();
+updateModelToggle();
 updateLibraryCount();
 renderBgTasks();
-showOnboarding();
+if (typeof showOnboarding === 'function') showOnboarding();
 initCategoryStrip();
 updateStreakBanner();
 renderRecentStrip();
 updateSidebarUsage();
 initReferral();
+// Set notifToggle state
+(function() {
+  const nt = document.getElementById('notifToggle');
+  if (nt) nt.checked = localStorage.getItem('sp_notif') === '1';
+})();
+// Check if streak notification should fire
+if (localStorage.getItem('sp_notif') === '1' && 'Notification' in window && Notification.permission === 'granted') {
+  const lastScan = state.lastScanDate;
+  if (lastScan) {
+    const hoursSince = (Date.now() - new Date(lastScan).getTime()) / 36e5;
+    if (hoursSince > 20) {
+      new Notification('Keep your ScanPlain streak alive 🔥', {
+        body: "You haven't scanned anything today. Don't break your streak!",
+        icon: '/icon.png'
+      });
+    }
+  }
+}
+// OS theme change listener for auto mode
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if (state.theme === 'auto') {
+    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+  }
+});
 if (localStorage.getItem('sp_onboarded') === '1') {
   const el = document.getElementById('onboardOverlay');
   if (el) el.style.display = 'none';
@@ -3260,6 +3663,211 @@ if (localStorage.getItem('sp_onboarded') === '1') {
   if (usageEl) usageEl.textContent = `${state.plan.charAt(0).toUpperCase()+state.plan.slice(1)} plan · ${state.scansUsed} / ${lim === 9999 ? '∞' : lim} scans`;
 })();
 
+// ============ NOTIFICATIONS ============
+function requestStreakNotif() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(perm => {
+    if (perm === 'granted') {
+      localStorage.setItem('sp_notif', '1');
+      const btn = document.getElementById('notifBtn');
+      if (btn) { btn.textContent = '✓ Reminders on'; setTimeout(() => { btn.style.display = 'none'; }, 2000); }
+      const nt = document.getElementById('notifToggle');
+      if (nt) nt.checked = true;
+    }
+  });
+}
+
+function toggleNotifications(on) {
+  localStorage.setItem('sp_notif', on ? '1' : '0');
+}
+
+// ============ VOICE INPUT ============
+let _voiceRec = null;
+function toggleVoice() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) { if (typeof showToast === 'function') showToast('Voice not supported on this browser'); return; }
+  const btn = document.getElementById('voiceBtn');
+  if (_voiceRec) {
+    _voiceRec.stop();
+    _voiceRec = null;
+    if (btn) { btn.style.background = ''; btn.style.color = ''; }
+    return;
+  }
+  _voiceRec = new SpeechRec();
+  _voiceRec.continuous = false;
+  _voiceRec.interimResults = false;
+  _voiceRec.lang = 'en-US';
+  _voiceRec.onstart = () => {
+    if (btn) { btn.style.background = 'var(--danger)'; btn.style.color = 'white'; }
+    if (typeof showToast === 'function') showToast('Listening…');
+  };
+  _voiceRec.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const input = document.getElementById('chatInput');
+    if (input) input.value = transcript;
+  };
+  _voiceRec.onend = () => {
+    _voiceRec = null;
+    if (btn) { btn.style.background = ''; btn.style.color = ''; }
+  };
+  _voiceRec.onerror = () => {
+    _voiceRec = null;
+    if (btn) { btn.style.background = ''; btn.style.color = ''; }
+  };
+  _voiceRec.start();
+}
+
+// ============ ACTION CHECKLIST ============
+function renderActionChecklist(steps, scanId) {
+  const scan = state.history.find(h => h.id === scanId);
+  const checklist = scan?.actionChecklist || {};
+  const completed = steps.filter((_, i) => checklist[i]).length;
+  let html = `<div class="checklist-progress" style="font-size:12px;color:var(--text-3);margin-bottom:10px">${completed} of ${steps.length} steps completed</div>`;
+  html += `<div style="background:var(--surface2);border-radius:8px;height:6px;margin-bottom:16px;overflow:hidden"><div class="checklist-bar" style="height:100%;background:var(--p2);border-radius:8px;transition:width 0.3s;width:${steps.length ? Math.round(completed/steps.length*100) : 0}%"></div></div>`;
+  steps.forEach((step, i) => {
+    const checked = !!checklist[i];
+    html += `<label style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleChecklistItem('${escapeHtml(scanId)}',${i},this.checked)" style="width:18px;height:18px;accent-color:var(--p2);margin-top:1px;flex-shrink:0">
+      <span style="${checked ? 'text-decoration:line-through;color:var(--text-3)' : 'color:var(--text)'}">${escapeHtml(step)}</span>
+    </label>`;
+  });
+  html += `<button class="btn-ghost" style="margin-top:12px;font-size:13px;padding:10px 16px;width:auto" onclick="saveReminders(${JSON.stringify(steps.map(s => escapeHtml(s)))})">📅 Save steps as reminders</button>`;
+  return html;
+}
+
+function toggleChecklistItem(scanId, index, checked) {
+  const scan = state.history.find(h => h.id === scanId);
+  if (!scan) return;
+  if (!scan.actionChecklist) scan.actionChecklist = {};
+  scan.actionChecklist[index] = checked;
+  save();
+  const labels = document.querySelectorAll('#toolOutput label input[type=checkbox]');
+  const total = labels.length;
+  const done = Array.from(labels).filter(c => c.checked).length;
+  const bar = document.querySelector('#toolOutput .checklist-bar');
+  if (bar) bar.style.width = `${total ? Math.round(done/total*100) : 0}%`;
+  const prog = document.querySelector('#toolOutput .checklist-progress');
+  if (prog) prog.textContent = `${done} of ${total} steps completed`;
+  const lbl = labels[index]?.closest('label');
+  if (lbl) {
+    const span = lbl.querySelector('span');
+    if (span) span.style.cssText = checked ? 'text-decoration:line-through;color:var(--text-3)' : 'color:var(--text)';
+  }
+}
+
+function saveReminders(steps) {
+  const reminders = JSON.parse(localStorage.getItem('sp_reminders') || '[]');
+  const newOnes = steps.map(s => ({ text: s, dueDate: null, done: false, id: Date.now() + Math.random() }));
+  localStorage.setItem('sp_reminders', JSON.stringify([...reminders, ...newOnes]));
+  if (typeof showToast === 'function') showToast(`Saved ${steps.length} reminder${steps.length !== 1 ? 's' : ''}`);
+}
+
+// ============ REMINDERS ============
+function renderReminders() {
+  const reminders = JSON.parse(localStorage.getItem('sp_reminders') || '[]');
+  const list = document.getElementById('remindersList');
+  const empty = document.getElementById('noReminders');
+  if (!list) return;
+  if (reminders.length === 0) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = reminders.map((r, i) =>
+    `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <input type="checkbox" ${r.done ? 'checked' : ''} onchange="toggleReminder(${i},this.checked)" style="width:18px;height:18px;accent-color:var(--p2);flex-shrink:0">
+      <span style="flex:1;font-size:14px;color:var(--text);${r.done ? 'text-decoration:line-through;color:var(--text-3)' : ''}">${escapeHtml(r.text)}</span>
+      <button onclick="deleteReminder(${i})" style="background:none;border:none;color:var(--text-3);cursor:pointer;padding:4px;font-size:16px">×</button>
+    </div>`
+  ).join('');
+}
+
+function toggleReminder(i, done) {
+  const reminders = JSON.parse(localStorage.getItem('sp_reminders') || '[]');
+  if (reminders[i]) { reminders[i].done = done; localStorage.setItem('sp_reminders', JSON.stringify(reminders)); renderReminders(); }
+}
+
+function deleteReminder(i) {
+  const reminders = JSON.parse(localStorage.getItem('sp_reminders') || '[]');
+  reminders.splice(i, 1);
+  localStorage.setItem('sp_reminders', JSON.stringify(reminders));
+  renderReminders();
+}
+
+// ============ SHARE / EXPORT ============
+function shareResult() {
+  const scan = state.history[0];
+  if (!scan) return;
+  const text = `${scan.title}\n\n${scan.explanation || ''}`;
+  if (navigator.share) {
+    navigator.share({ title: scan.title, text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('Copied to clipboard')).catch(() => showToast('Could not copy'));
+  }
+}
+
+function exportResult() {
+  const scan = state.history[0];
+  if (!scan) return;
+  let out = `${scan.title}\n${'='.repeat(scan.title.length)}\n\n`;
+  if (scan.docType) out += `Type: ${scan.docType}\n`;
+  out += `Date: ${new Date(scan.date).toLocaleDateString()}\n\n`;
+  if (scan.explanation) out += `EXPLANATION\n-----------\n${scan.explanation}\n\n`;
+  if (scan.redFlags && scan.redFlags.length > 0) {
+    out += `RED FLAGS\n---------\n`;
+    scan.redFlags.forEach(f => { out += `[${f.sev}] ${f.desc}\n`; });
+    out += '\n';
+  }
+  if (scan.keyTerms && scan.keyTerms.length > 0) {
+    out += `KEY TERMS\n---------\n`;
+    scan.keyTerms.forEach(t => { out += `${t.term}: ${t.def}\n`; });
+  }
+  const blob = new Blob([out], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(scan.title || 'scan').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ============ UPGRADE MODAL ============
+function upgradePlanFromModal(tier) {
+  if (state.plan === tier) { showToast("You're already on " + tier); closeModal(); return; }
+  if (confirm(`Upgrade to ${tier.charAt(0).toUpperCase() + tier.slice(1)}?\n(Demo — Stripe payment integration coming soon)`)) {
+    state.plan = tier;
+    save();
+    updatePlanUI();
+    showToast(`Upgraded to ${tier}! ✨`);
+    closeModal();
+  }
+  // If user cancels confirm, modal stays open
+}
+
+function showUpgradeModal() {
+  const title = "You've hit your limit";
+  const body = `
+    <p style="color:var(--text-2);font-size:14px;margin-bottom:16px">You're on the <strong>${state.plan}</strong> plan. Upgrade to keep scanning.</p>
+    <div onclick="upgradePlanFromModal('plus')" style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">Plus <span style="color:var(--p3)">$7.99/mo</span></div>
+      <div style="font-size:13px;color:var(--text-2)">20 scans/month · 3 Luminos sessions · Priority support</div>
+    </div>
+    <div onclick="upgradePlanFromModal('unlimited')" style="background:linear-gradient(135deg,rgba(255,213,106,0.1),rgba(245,166,35,0.1));border:1px solid var(--p2);border-radius:16px;padding:16px;margin-bottom:16px;cursor:pointer">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">Unlimited <span style="color:var(--p3)">$25/mo</span></div>
+      <div style="font-size:13px;color:var(--text-2)">Unlimited scans · Unlimited Luminos · All features</div>
+    </div>
+    <div style="text-align:center"><button onclick="closeModal()" style="background:none;border:none;color:var(--text-3);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline">Maybe later</button></div>
+  `;
+  const titleEl = document.getElementById('modalTitle');
+  const subEl = document.getElementById('modalSub');
+  const bodyEl = document.getElementById('modalBody');
+  if (titleEl) titleEl.textContent = title;
+  if (subEl) subEl.textContent = '';
+  if (bodyEl) bodyEl.innerHTML = body;
+  const modal = document.getElementById('modal');
+  if (modal) modal.classList.add('show');
+}
+
 // Click outside tools menu closes it
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.tools-trigger') && !e.target.closest('.tools-menu')) {
@@ -3274,6 +3882,13 @@ window.addEventListener('resize', () => {
   const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   document.documentElement.setAttribute('data-layout', (isMobileUA || (isCoarse && isNarrow)) ? 'mobile' : 'desktop');
 });
+
+// ============ SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))});`;
+  const blob = new Blob([sw], {type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
 </script>
 </body>
 </html>
