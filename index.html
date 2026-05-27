@@ -1745,10 +1745,18 @@
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                   Share
                 </button>
-                <button class="btn-ghost" style="margin-top:0;flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px" onclick="exportResult()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Export
-                </button>
+                <div style="position:relative;display:inline-block;flex:1" id="copyDropWrap">
+                  <button class="btn-ghost" style="margin-top:0;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px" onclick="toggleCopyMenu()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div id="copyMenu" style="display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);padding:6px;z-index:100;min-width:180px;white-space:nowrap">
+                    <button onclick="copyAs('plain')" style="display:block;width:100%;text-align:left;padding:9px 12px;background:none;border:none;border-radius:10px;font-size:13px;color:var(--text);cursor:pointer;font-family:inherit">📄 Copy plain text</button>
+                    <button onclick="copyAs('markdown')" style="display:block;width:100%;text-align:left;padding:9px 12px;background:none;border:none;border-radius:10px;font-size:13px;color:var(--text);cursor:pointer;font-family:inherit">✦ Copy as Markdown</button>
+                    <button onclick="copyAs('email')" style="display:block;width:100%;text-align:left;padding:9px 12px;background:none;border:none;border-radius:10px;font-size:13px;color:var(--text);cursor:pointer;font-family:inherit">✉️ Copy for email</button>
+                  </div>
+                </div>
               </div>
             </div>
             <div id="quickQA" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -2285,9 +2293,17 @@ function switchTab(name) {
 
 function showToast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
+  if (msg.includes('<')) {
+    el.innerHTML = msg;
+    el.style.pointerEvents = 'auto';
+  } else {
+    el.textContent = msg;
+    el.style.pointerEvents = '';
+  }
+  el.style.opacity = '1';
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2400);
+  clearTimeout(el._toastTid);
+  el._toastTid = setTimeout(() => { el.classList.remove('show'); el.style.opacity = ''; el.style.pointerEvents = ''; }, 4000);
 }
 
 function initCategoryStrip() {
@@ -2589,6 +2605,7 @@ async function runScan() {
   }
   if (!state.currentDataUrl) return;
 
+  haptic(30);
   const loadingMsg = state.scanQueue && state.scanQueue.length > 1
     ? `Scanning ${state.scanQueueIndex + 1} of ${state.scanQueue.length}…`
     : 'Reading your scan…';
@@ -2751,8 +2768,15 @@ KEY_TERMS:
     updateLibraryCount();
     recordScanStreak();
     renderRecentStrip();
+    haptic([50, 30, 50]);
+
+    if (state.history.length === 1 && !localStorage.getItem('sp_first_confetti_done')) {
+      localStorage.setItem('sp_first_confetti_done', '1');
+      fireConfetti();
+    }
 
   } catch (err) {
+    haptic(200);
     showError('Something went wrong: ' + err.message);
   } finally {
     setLoading(false);
@@ -2870,49 +2894,113 @@ function renderHistory() {
     return;
   }
 
-  const filtered = getFilteredHistory();
-  if (!filtered.length) {
+  const visibleHistory = getFilteredHistory().filter(h => !h._deleted);
+  if (!visibleHistory.length) {
     list.innerHTML = `<div class="empty"><h3>No results</h3><p>Try a different search or filter</p></div>`;
     return;
   }
 
-  list.innerHTML = '<div class="history-grid">' + filtered.map(h => {
+  list.innerHTML = '<div class="history-grid">' + visibleHistory.map(h => {
     const thumb = h.isPDF
       ? `<div class="history-thumb doc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`
       : `<img class="history-thumb" src="${escapeHtml(h.thumb)}"/>`;
     const starBtn = `<button onclick="event.stopPropagation();toggleStar('${escapeHtml(h.id)}')" style="background:none;border:none;padding:6px;cursor:pointer;font-size:16px;line-height:1;color:${h.starred ? 'var(--p2)' : 'var(--text-3)'}">${h.starred ? '&#9733;' : '&#9734;'}</button>`;
+    const hasNotes = !!(h.notes && h.notes.trim());
+    const noteBtn = `<button onclick="event.stopPropagation();toggleNote('${escapeHtml(h.id)}')" title="Add note" style="background:none;border:none;padding:6px;cursor:pointer;font-size:15px;color:${hasNotes ? 'var(--p2)' : 'var(--text-3)'}">${hasNotes ? '📝' : '📄'}</button>`;
     const checkbox = state.selectMode ? `<input type="checkbox" data-select-id="${escapeHtml(h.id)}" onchange="toggleSelect('${escapeHtml(h.id)}')" style="width:18px;height:18px;accent-color:var(--p2);flex-shrink:0" ${state.selectedIds.has(h.id) ? 'checked' : ''}>` : '';
-    return `<div class="history-item" onclick="${state.selectMode ? `toggleSelect('${h.id}')` : `openLuminosWithScan('${h.id}')`}">
+    return `<div class="history-item" onclick="${state.selectMode ? `toggleSelect('${h.id}')` : `openLuminosWithScan('${h.id}')`}" style="flex-wrap:wrap">
       ${checkbox}
       ${thumb}
-      <div class="history-info">
+      <div class="history-info" style="flex:1;min-width:0">
         <div class="history-title-text">${escapeHtml(h.title)}</div>
         <div class="history-date">${new Date(h.date).toLocaleDateString([], {month:'short', day:'numeric'})} · ${new Date(h.date).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
       </div>
       <div class="history-actions">
+        ${noteBtn}
         ${starBtn}
-        <button class="history-action-btn" onclick="event.stopPropagation();deleteScan('${escapeHtml(h.id)}')" title="Delete">
+        <button class="history-action-btn" onclick="event.stopPropagation();deleteHistoryItem('${escapeHtml(h.id)}')" title="Delete">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         </button>
+      </div>
+      <div id="note-${escapeHtml(h.id)}" style="display:none;padding:8px 0 4px;width:100%" onclick="event.stopPropagation()">
+        <textarea placeholder="Add a note about this document…" onclick="event.stopPropagation()" onblur="saveNote('${escapeHtml(h.id)}', this.value)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px;font-family:inherit;font-size:14px;color:var(--text);resize:vertical;min-height:72px;box-sizing:border-box;outline:none">${escapeHtml(h.notes || '')}</textarea>
       </div>
     </div>`;
   }).join('') + '</div>';
 }
 
-function deleteScan(id) {
-  if (!confirm('Delete this scan?')) return;
-  state.history = state.history.filter(h => h.id !== id);
-  if (state.activeLuminosId === id) state.activeLuminosId = null;
+function toggleNote(id) {
+  const el = document.getElementById('note-' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el && el.style.display === 'block') {
+    const ta = el.querySelector('textarea');
+    if (ta) ta.focus();
+  }
+}
+
+function saveNote(id, text) {
+  const h = state.history.find(x => x.id === id);
+  if (!h) return;
+  h.notes = text;
   save();
+  const btn = document.querySelector(`[onclick*="toggleNote('${id}')"]`);
+  if (btn) {
+    const hasNote = text.trim().length > 0;
+    btn.style.color = hasNote ? 'var(--p2)' : 'var(--text-3)';
+    btn.textContent = hasNote ? '📝' : '📄';
+  }
+}
+
+function deleteScan(id) {
+  deleteHistoryItem(id);
+}
+
+function deleteHistoryItem(id) {
+  const idx = state.history.findIndex(h => h.id === id);
+  if (idx === -1) return;
+  state.history[idx]._deleted = true;
+  save(); // persist soft-delete so page refresh doesn't resurrect it
   renderHistory();
   updateLibraryCount();
-  renderRecentStrip();
-  showToast('Scan deleted');
+  const undoHtml = `Scan deleted · <span onclick="undoDelete('${escapeHtml(id)}')" style="font-weight:700;text-decoration:underline;cursor:pointer;color:var(--p1)">Undo</span>`;
+  const toastEl = document.getElementById('toastEl');
+  if (toastEl) {
+    toastEl.innerHTML = undoHtml;
+    toastEl.style.opacity = '1';
+    toastEl.style.pointerEvents = 'auto';
+  }
+  clearTimeout(window._pendingDeleteTid);
+  const deleteToken = id; // capture for closure
+  const tid = setTimeout(() => {
+    // Only hide toast if it still shows this delete's undo (not a newer toast)
+    state.history = state.history.filter(h => h.id !== deleteToken);
+    if (state.activeLuminosId === deleteToken) state.activeLuminosId = null;
+    save();
+    updateLibraryCount();
+    renderRecentStrip();
+    if (toastEl && toastEl.innerHTML.includes(deleteToken)) {
+      toastEl.style.opacity = '0';
+      toastEl.style.pointerEvents = '';
+    }
+  }, 5000);
+  window._pendingDeleteId = id;
+  window._pendingDeleteTid = tid;
+}
+
+function undoDelete(id) {
+  clearTimeout(window._pendingDeleteTid);
+  const h = state.history.find(x => x.id === id);
+  if (h) {
+    delete h._deleted;
+    save();
+    renderHistory();
+    showToast('Restored');
+  }
 }
 
 function updateLibraryCount() {
   const el = document.getElementById('libraryCount');
-  if (el) el.textContent = state.history.length + ' scan' + (state.history.length === 1 ? '' : 's');
+  if (el) { const n = state.history.filter(h => !h._deleted).length; el.textContent = n + ' scan' + (n === 1 ? '' : 's'); }
 }
 
 // ============ NORMATIVITY BADGE ============
@@ -3149,7 +3237,11 @@ function renderLuminosSession() {
       <button class="back-btn" onclick="exitLuminosSession()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
       </button>
-      <h2>Luminos</h2>
+      <h2 style="flex:1">Luminos</h2>
+      <button onclick="exportLuminosSession()" title="Export chat" style="background:none;border:1px solid var(--border);border-radius:10px;padding:7px 10px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;font-family:inherit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
     </div>
 
     <div class="luminos-card">
@@ -3361,13 +3453,14 @@ async function sendChat() {
       return { type: 'image', source: { type: 'base64', media_type: f.mediaType, data: base64 } };
     });
 
+    let contextText = `You are Luminos — a tailored AI assistant for what the user scanned. Context:\n\nTITLE: ${scan.title}\nEXPLANATION: ${scan.explanation}`;
+    if (scan.notes && scan.notes.trim()) {
+      contextText += `\n\nUser's notes on this document: ${scan.notes}`;
+    }
+    contextText += `\n\n${scan.followUps && scan.followUps.length ? `Additional documents the user attached:` : ''}`;
+
     const systemContent = [
-      { type: 'text', text: `You are Luminos — a tailored AI assistant for what the user scanned. Context:
-
-TITLE: ${scan.title}
-EXPLANATION: ${scan.explanation}
-
-${scan.followUps && scan.followUps.length ? `Additional documents the user attached:` : ''}` },
+      { type: 'text', text: contextText },
       ...followUpContext,
       { type: 'text', text: `Answer naturally and helpfully in plain English. Be specific to their situation.` }
     ];
@@ -4136,6 +4229,126 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('.tools-trigger') && !e.target.closest('.tools-menu')) {
     document.querySelector('.tools-menu')?.classList.remove('show');
     document.querySelector('.tools-trigger')?.classList.remove('open');
+  }
+  // Close copy menu when clicking outside
+  if (!e.target.closest('#copyDropWrap')) {
+    const m = document.getElementById('copyMenu');
+    if (m) m.style.display = 'none';
+  }
+});
+
+// ============ HAPTIC ============
+function haptic(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
+}
+
+// ============ CONFETTI ============
+function fireConfetti() {
+  const colors = ['#FFD56A','#F5A623','#E8851A','#fff','#fef3c7','#fed7aa'];
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden';
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const size = 6 + Math.random() * 8;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.8;
+    const dur = 1.5 + Math.random() * 1.5;
+    el.style.cssText = `position:absolute;top:-20px;left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};animation:confettiFall ${dur}s ${delay}s ease-in forwards`;
+    container.appendChild(el);
+  }
+  document.body.appendChild(container);
+  if (!document.getElementById('confettiStyle')) {
+    const s = document.createElement('style');
+    s.id = 'confettiStyle';
+    s.textContent = '@keyframes confettiFall { to { transform: translateY(100vh) rotate(720deg); opacity: 0 } }';
+    document.head.appendChild(s);
+  }
+  setTimeout(() => container.remove(), 3500);
+}
+
+// ============ COPY DROPDOWN ============
+function toggleCopyMenu() {
+  const m = document.getElementById('copyMenu');
+  if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function copyAs(format) {
+  const m = document.getElementById('copyMenu');
+  if (m) m.style.display = 'none';
+  // Use the last-scanned ID so we copy the result currently shown, even if it's soft-deleted
+  const scan = (state.lastScanId && state.history.find(h => h.id === state.lastScanId))
+    || state.history.find(h => !h._deleted) || state.history[0];
+  if (!scan) return;
+  let text = '';
+  if (format === 'plain') {
+    text = `${scan.title}\n\n${scan.explanation || ''}`;
+    if (scan.redFlags && scan.redFlags.length) {
+      text += '\n\nRed Flags:\n' + scan.redFlags.map(f => `[${f.sev}] ${f.desc}`).join('\n');
+    }
+  } else if (format === 'markdown') {
+    text = `## ${scan.title}\n\n${scan.explanation || ''}`;
+    if (scan.redFlags && scan.redFlags.length) {
+      text += '\n\n## Red Flags\n' + scan.redFlags.map(f => `**${f.sev}:** ${f.desc}`).join('\n');
+    }
+    if (scan.keyTerms && scan.keyTerms.length) {
+      text += '\n\n## Key Terms\n' + scan.keyTerms.map(t => `**${t.term}:** ${t.def}`).join('\n');
+    }
+  } else if (format === 'email') {
+    text = `Subject: Summary of ${scan.title}\n\nHi,\n\nHere's a plain-English breakdown of the document:\n\n${scan.explanation || ''}`;
+    if (scan.redFlags && scan.redFlags.length) {
+      text += '\n\nThings to note:\n' + scan.redFlags.map(f => `• [${f.sev}] ${f.desc}`).join('\n');
+    }
+    text += '\n\n---\nGenerated by ScanPlain';
+  }
+  navigator.clipboard?.writeText(text).then(() => showToast('Copied!')).catch(() => showToast('Could not copy'));
+}
+
+// ============ LUMINOS EXPORT ============
+function exportLuminosSession() {
+  const scan = state.history.find(h => h.id === state.activeLuminosId);
+  if (!scan) { showToast('No active session'); return; }
+  let out = `ScanPlain — Luminos Session\n`;
+  out += `${'='.repeat(40)}\n\n`;
+  out += `Document: ${scan.title}\n`;
+  out += `Date: ${new Date(scan.date).toLocaleDateString()}\n`;
+  if (scan.docType) out += `Type: ${scan.docType}\n`;
+  out += `\n--- Original Explanation ---\n${scan.explanation || ''}\n\n`;
+  out += `--- Luminos Chat ---\n`;
+  const messages = scan.chatHistory || [];
+  messages.forEach(m => {
+    const role = m.role === 'user' ? 'You' : 'Luminos';
+    const text = typeof m.content === 'string' ? m.content : (Array.isArray(m.content) ? (m.content.find(c => c.type === 'text')?.text || '') : '');
+    if (text) out += `${role}: ${text}\n\n`;
+  });
+  const blob = new Blob([out], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `luminos-${(scan.title || 'session').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ============ KEYBOARD SHORTCUTS ============
+document.addEventListener('keydown', e => {
+  if (document.documentElement.dataset.layout !== 'desktop') return;
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || document.activeElement?.isContentEditable) return;
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'u' || e.key === 'U') {
+      e.preventDefault();
+      document.getElementById('fileInput')?.click();
+    } else if (e.key === 'k' || e.key === 'K') {
+      e.preventDefault();
+      switchTab('history');
+      setTimeout(() => document.getElementById('historySearch')?.focus(), 100);
+    } else if (e.key === 'l' || e.key === 'L') {
+      e.preventDefault();
+      switchTab('luminos');
+    } else if (e.key === '/') {
+      e.preventDefault();
+      showToast('Shortcuts: Ctrl+U Upload · Ctrl+K Library search · Ctrl+L Luminos');
+    }
   }
 });
 
