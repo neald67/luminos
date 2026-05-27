@@ -1637,7 +1637,7 @@
                 </div>
                 <h3>Drop anything</h3>
                 <p>Photos · screenshots · PDFs · docs</p>
-                <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this.files[0])"/>
+                <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFileInputChange(this)"/>
               </div>
 
               <div class="camera-card-wrap">
@@ -1683,11 +1683,24 @@
               </div>
               <div id="modelInfo" style="font-size:11px;color:var(--text-3);text-align:center"></div>
             </div>
+            <div style="margin-bottom:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">Summary length</div>
+              <div style="display:flex;gap:6px" id="summaryLengthToggle">
+                <button onclick="setSummaryLength('brief')" id="slBrief" data-sl="brief" style="flex:1;padding:8px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s">Brief</button>
+                <button onclick="setSummaryLength('standard')" id="slStandard" data-sl="standard" style="flex:1;padding:8px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s">Standard</button>
+                <button onclick="setSummaryLength('detailed')" id="slDetailed" data-sl="detailed" style="flex:1;padding:8px;border-radius:10px;font-size:12.5px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s">Detailed</button>
+              </div>
+            </div>
             <button class="btn-primary" id="scanBtn" onclick="runScan()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.937 15.5 1.581 6.135a.5.5 0 0 0 .964 0L14.063 15.5A2 2 0 0 1 15.5 14.063l6.135-1.582a.5.5 0 0 0 0-.962L15.5 9.937A2 2 0 0 1 14.063 8.5l-1.581-6.135a.5.5 0 0 0-.964 0L9.937 8.5A2 2 0 0 1 8.5 9.937L2.365 11.518a.5.5 0 0 0 0 .964L8.5 14.063A2 2 0 0 1 9.937 15.5"/></svg>
               Light it up
             </button>
             <button class="btn-ghost" onclick="clearScan()">Choose different</button>
+          </div>
+          <div id="scanQueueStrip" style="display:none;margin-top:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">Queue</div>
+            <div id="scanQueueItems" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none"></div>
+            <button onclick="scanAllQueue()" id="scanAllBtn" class="btn-primary" style="width:100%;margin-top:10px;font-size:13.5px;padding:12px">Scan all (0)</button>
           </div>
         </div>
 
@@ -2021,6 +2034,7 @@
   window.addEventListener('resize', () => {
     if (document.documentElement.dataset.layout !== 'mobile') {
       document.documentElement.setAttribute('data-layout', window.innerWidth < 1024 ? 'tablet' : 'desktop');
+      if (typeof updateFileInputMultiple === 'function') updateFileInputMultiple();
     }
   });
 })();
@@ -2134,7 +2148,10 @@ let state = {
   selectMode: false,
   selectedIds: new Set(),
   model: localStorage.getItem('sp_model') || 'haiku',
-  sonnetUsed: parseInt(localStorage.getItem('sp_sonnet_used') || '0')
+  sonnetUsed: parseInt(localStorage.getItem('sp_sonnet_used') || '0'),
+  summaryLength: localStorage.getItem('sp_summary_len') || 'standard',
+  scanQueue: [],
+  scanQueueIndex: 0
 };
 
 try { state.history = JSON.parse(localStorage.getItem('sp_history') || '[]'); } catch(e) {}
@@ -2152,6 +2169,7 @@ function save() {
     if (state.lastScanDate) localStorage.setItem('sp_lastScan', state.lastScanDate);
     localStorage.setItem('sp_model', state.model);
     localStorage.setItem('sp_sonnet_used', state.sonnetUsed.toString());
+    localStorage.setItem('sp_summary_len', state.summaryLength);
   } catch(e) {
     showToast('Storage full — clear some history');
   }
@@ -2348,35 +2366,102 @@ function handleDrop(e) {
   handleFile(e.dataTransfer.files[0]);
 }
 
+function handleFileInputChange(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  if (files.length > 1 && document.documentElement.dataset.layout !== 'desktop') {
+    state.scanQueue = files;
+    state.scanQueueIndex = 0;
+    renderScanQueue();
+    loadFileForScan(files[0]); // non-queue first file — no await needed
+  } else {
+    state.scanQueue = [];
+    state.scanQueueIndex = 0;
+    renderScanQueue();
+    loadFileForScan(files[0]);
+  }
+}
+
 function handleFile(file) {
   if (!file) return;
+  state.scanQueue = [];
+  state.scanQueueIndex = 0;
+  renderScanQueue();
+  loadFileForScan(file);
+}
+
+function loadFileForScan(file) {
+  if (!file) return Promise.resolve();
   const err = validateFile(file);
-  if (err) { showError(err); return; }
+  if (err) { showError(err); return Promise.resolve(); }
   state.currentFile = file;
   state.currentMediaType = file.type;
-  const reader = new FileReader();
-  reader.onload = e => {
-    state.currentDataUrl = e.target.result;
-    document.getElementById('uploadSection').style.display = 'none';
-    document.getElementById('previewCard').classList.add('show');
-    document.getElementById('errorMsg').classList.remove('show');
-    document.getElementById('resultCard').style.display = 'none';
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.currentDataUrl = e.target.result;
+      document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('previewCard').classList.add('show');
+      document.getElementById('errorMsg').classList.remove('show');
+      document.getElementById('resultCard').style.display = 'none';
 
-    const img = document.getElementById('previewImg');
-    const fileBox = document.getElementById('previewFile');
-    if (file.type === 'application/pdf') {
-      img.style.display = 'none';
-      fileBox.style.display = 'flex';
-      document.getElementById('previewFileName').textContent = file.name;
-      document.getElementById('previewFileMeta').textContent = 'PDF · ' + formatSize(file.size);
-    } else {
-      img.style.display = 'block';
-      img.src = state.currentDataUrl;
-      fileBox.style.display = 'none';
-    }
-  };
-  reader.onerror = () => showError('Could not read file');
-  reader.readAsDataURL(file);
+      const img = document.getElementById('previewImg');
+      const fileBox = document.getElementById('previewFile');
+      if (file.type === 'application/pdf') {
+        img.style.display = 'none';
+        fileBox.style.display = 'flex';
+        document.getElementById('previewFileName').textContent = file.name;
+        document.getElementById('previewFileMeta').textContent = 'PDF · ' + formatSize(file.size);
+      } else {
+        img.style.display = 'block';
+        img.src = state.currentDataUrl;
+        fileBox.style.display = 'none';
+      }
+      resolve();
+    };
+    reader.onerror = () => { showError('Could not read file'); reject(new Error('Could not read file')); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateFileInputMultiple() {
+  const inp = document.getElementById('fileInput');
+  if (!inp) return;
+  if (document.documentElement.dataset.layout === 'desktop') {
+    inp.removeAttribute('multiple');
+  } else {
+    inp.setAttribute('multiple', '');
+  }
+}
+
+function renderScanQueue() {
+  const strip = document.getElementById('scanQueueStrip');
+  const itemsEl = document.getElementById('scanQueueItems');
+  const btn = document.getElementById('scanAllBtn');
+  if (!strip || !itemsEl) return;
+  if (!state.scanQueue || state.scanQueue.length <= 1) { strip.style.display = 'none'; return; }
+  strip.style.display = 'block';
+  if (btn) btn.textContent = `Scan all (${state.scanQueue.length})`;
+  itemsEl.innerHTML = state.scanQueue.map((f, i) => {
+    const isActive = i === state.scanQueueIndex;
+    return `<div style="flex-shrink:0;width:56px;height:56px;border-radius:10px;background:var(--surface2);border:2px solid ${isActive ? 'var(--p2)' : 'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3);text-align:center;overflow:hidden;position:relative">
+      ${i < state.scanQueueIndex ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:16px">✓</div>' : ''}
+      <span style="font-size:10px;padding:4px;word-break:break-all;line-height:1.2">${escapeHtml(f.name.slice(0,12))}</span>
+    </div>`;
+  }).join('');
+}
+
+async function scanAllQueue() {
+  if (!state.scanQueue || state.scanQueue.length === 0) return;
+  for (let i = state.scanQueueIndex; i < state.scanQueue.length; i++) {
+    state.scanQueueIndex = i;
+    renderScanQueue();
+    await loadFileForScan(state.scanQueue[i]);
+    await runScan();
+  }
+  state.scanQueue = [];
+  state.scanQueueIndex = 0;
+  renderScanQueue();
 }
 
 function captureCamera() {
@@ -2437,6 +2522,57 @@ function parseResult(text) {
   return { title, docType, confidence, explanation, redFlags, keyTerms };
 }
 
+// ============ COMPLEXITY SCORE ============
+function computeScore(confidence, redFlags, docType) {
+  let score = 3; // base
+  const highFlags = redFlags.filter(f => f.sev === 'HIGH').length;
+  const medFlags = redFlags.filter(f => f.sev === 'MEDIUM').length;
+  score += highFlags * 2;
+  score += medFlags * 1;
+  if (confidence === 'low') score += 2;
+  else if (confidence === 'medium') score += 1;
+  const complexTypes = /contract|lease|tax|insurance|terms/i;
+  if (complexTypes.test(docType)) score += 1;
+  return Math.min(10, Math.max(1, score));
+}
+
+function scoreColor(s) {
+  if (s <= 3) return { bg: 'rgba(22,163,74,0.12)', border: 'rgba(22,163,74,0.3)', text: 'var(--success)' };
+  if (s <= 6) return { bg: 'rgba(217,119,6,0.1)', border: 'rgba(217,119,6,0.25)', text: 'var(--warn)' };
+  return { bg: 'rgba(220,38,38,0.1)', border: 'rgba(220,38,38,0.25)', text: 'var(--danger)' };
+}
+
+// ============ DEADLINE DETECTION ============
+function extractDeadlines(text) {
+  const patterns = [
+    /\b(\w+ \d{1,2},?\s*\d{4})\b/g,           // "January 15, 2025"
+    /\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/g, // "01/15/2025"
+    /\b(\d{4}-\d{2}-\d{2})\b/g,                 // "2025-01-15"
+    /\bby\s+([A-Z][a-z]+ \d{1,2}(?:st|nd|rd|th)?(?:,?\s*\d{4})?)\b/gi,
+    /\bdue\s+(?:on\s+)?([A-Z][a-z]+ \d{1,2}(?:,?\s*\d{4})?)\b/gi
+  ];
+  const found = new Set();
+  patterns.forEach(p => { let m; while ((m = p.exec(text)) !== null) found.add(m[1]); });
+  return Array.from(found).map(dateStr => {
+    const parsed = new Date(dateStr);
+    const daysAway = isNaN(parsed) ? null : Math.round((parsed - Date.now()) / 86400000);
+    return { raw: dateStr, date: parsed, daysAway };
+  }).filter(d => d.daysAway !== null);
+}
+
+// ============ SUMMARY LENGTH ============
+function setSummaryLength(l) {
+  state.summaryLength = l;
+  save();
+  const activeGrad = 'linear-gradient(135deg,var(--p1),var(--p2))';
+  document.querySelectorAll('#summaryLengthToggle button').forEach(b => {
+    const isActive = b.dataset.sl === l;
+    b.style.background = isActive ? activeGrad : 'var(--surface2)';
+    b.style.borderColor = isActive ? 'var(--p2)' : 'var(--border)';
+    b.style.color = isActive ? 'white' : 'var(--text-2)';
+  });
+}
+
 function toggleKt(btn) {
   const def = btn.nextElementSibling;
   const chevron = btn.querySelector('span:last-child');
@@ -2453,7 +2589,10 @@ async function runScan() {
   }
   if (!state.currentDataUrl) return;
 
-  setLoading(true, 'Reading your scan…');
+  const loadingMsg = state.scanQueue && state.scanQueue.length > 1
+    ? `Scanning ${state.scanQueueIndex + 1} of ${state.scanQueue.length}…`
+    : 'Reading your scan…';
+  setLoading(true, loadingMsg);
   document.getElementById('errorMsg').classList.remove('show');
 
   const base64 = state.currentDataUrl.split(',')[1];
@@ -2464,10 +2603,19 @@ async function runScan() {
 
   const categoryHint = (typeof CATEGORY_HINTS !== 'undefined' && CATEGORY_HINTS[state.category]) ? CATEGORY_HINTS[state.category] : '';
 
+  const lengthInstructions = {
+    brief: 'EXPLANATION:\n[Exactly 2 clear sentences. Be concise.]',
+    standard: 'EXPLANATION:\n[3-5 sentences in plain everyday English, no jargon, like explaining to a smart friend]',
+    detailed: 'EXPLANATION:\n[6-8 sentences with full context. Cover the main purpose, key obligations, important dates or numbers, and what the recipient should do next.]'
+  };
+  const maxTokensMap = { brief: 800, standard: 1400, detailed: 2000 };
+  const lengthInstruction = lengthInstructions[state.summaryLength] || lengthInstructions.standard;
+  const maxTok = maxTokensMap[state.summaryLength] || 1400;
+
   try {
     const data = await safeApiCall({
       model: getModel(),
-      max_tokens: 1400,
+      max_tokens: maxTok,
       messages: [{
         role: 'user',
         content: [
@@ -2480,8 +2628,7 @@ TITLE: [4-7 word title]
 DOC_TYPE: [Medical Bill | Lease/Contract | Tax Form | Nutrition Label | Prescription | Receipt | Insurance | Terms of Service | Foreign Language | ID/Document | Ingredients | General Document]
 CONFIDENCE: [high | medium | low]
 
-EXPLANATION:
-[3-5 sentences in plain everyday English, no jargon, like explaining to a smart friend]
+${lengthInstruction}
 
 RED_FLAGS:
 [Each on its own line as: HIGH: description  OR  MEDIUM: description  OR  LOW: description]
@@ -2497,8 +2644,13 @@ KEY_TERMS:
     const responseText = sanitize(data.content[0].text);
     const { title, docType, confidence, explanation, redFlags, keyTerms } = parseResult(responseText);
 
+    const score = computeScore(confidence, redFlags, docType);
+    const deadlines = extractDeadlines(explanation);
+
     const confDot = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#ef4444';
-    const badgeHtml = docType ? `<div style="margin-bottom:12px"><span style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);padding:5px 13px;border-radius:99px;font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.6px"><span style="width:7px;height:7px;border-radius:50%;background:${confDot};flex-shrink:0"></span>${escapeHtml(docType)}</span></div>` : '';
+    const sc = scoreColor(score);
+    const scoreBadgeHtml = `<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:12px;font-weight:800;background:${sc.bg};border:1.5px solid ${sc.border};color:${sc.text};margin-left:8px" title="Complexity score">${score}</span>`;
+    const badgeHtml = docType ? `<div style="margin-bottom:12px;display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);padding:5px 13px;border-radius:99px;font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.6px"><span style="width:7px;height:7px;border-radius:50%;background:${confDot};flex-shrink:0"></span>${escapeHtml(docType)}</span>${scoreBadgeHtml}</div>` : '';
 
     let rfHtml = '';
     if (redFlags.length > 0) {
@@ -2510,6 +2662,32 @@ KEY_TERMS:
         return `<div style="border-radius:12px;padding:11px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;background:${bg};border:1px solid ${brd}"><span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;color:${bc};background:${bb};flex-shrink:0;margin-top:1px">${escapeHtml(rf.sev)}</span><span style="color:var(--text)">${escapeHtml(rf.desc)}</span></div>`;
       }).join('');
       rfHtml = `<div style="margin-top:16px"><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Red flags</div>${cards}</div>`;
+    }
+
+    let dlHtml = '';
+    if (deadlines.length > 0) {
+      const items = deadlines.map(d => {
+        const label = d.daysAway > 0 ? `in ${d.daysAway}d` : d.daysAway === 0 ? 'today' : `${Math.abs(d.daysAway)}d ago`;
+        const color = d.daysAway < 0 ? 'var(--text-3)' : d.daysAway <= 7 ? 'var(--danger)' : d.daysAway <= 30 ? 'var(--warn)' : 'var(--success)';
+        const gcUrl = `https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent('Document deadline: ' + d.raw)}&dates=${d.date.toISOString().replace(/[-:]/g,'').slice(0,8)}`;
+        return `<a href="${gcUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;font-size:12.5px;text-decoration:none;color:var(--text);white-space:nowrap">
+      <span style="font-size:11px;font-weight:700;color:${color}">${escapeHtml(label)}</span>
+      <span>${escapeHtml(d.raw)}</span>
+    </a>`;
+      }).join('');
+      dlHtml = `<div style="margin-top:16px"><div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">📅 Deadlines found</div><div style="display:flex;gap:8px;flex-wrap:wrap">${items}</div></div>`;
+    }
+
+    let professionalBannerHtml = '';
+    if (redFlags.some(f => f.sev === 'HIGH')) {
+      const isLegal = /contract|lease|agreement|terms/i.test(docType);
+      const isMedical = /medical|prescription|health|insurance/i.test(docType);
+      const prof = isLegal ? 'lawyer' : isMedical ? 'doctor or pharmacist' : 'qualified professional';
+      professionalBannerHtml = `<div id="profBanner" style="background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.25);border-radius:14px;padding:14px 16px;margin-top:16px;display:flex;align-items:flex-start;gap:10px">
+    <span style="font-size:18px;flex-shrink:0">⚠️</span>
+    <div style="flex:1;font-size:13.5px;color:var(--text-2);line-height:1.5">This document has serious clauses. Consider consulting a <strong>${escapeHtml(prof)}</strong> before signing or proceeding.</div>
+    <button onclick="this.closest('#profBanner').style.display='none'" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px;padding:0;line-height:1;flex-shrink:0">×</button>
+  </div>`;
     }
 
     let ktHtml = '';
@@ -2528,7 +2706,7 @@ KEY_TERMS:
     const resultEl = document.getElementById('resultText');
     if (resultEl) resultEl.innerHTML = badgeHtml +
       `<p style="font-size:15px;line-height:1.6;color:var(--text);margin:0">${escapeHtml(explanation)}</p>` +
-      rfHtml + ktHtml;
+      rfHtml + dlHtml + professionalBannerHtml + ktHtml;
 
     document.getElementById('resultCard').style.display = 'block';
     document.getElementById('postScanCTA').style.display = 'block';
@@ -2563,6 +2741,7 @@ KEY_TERMS:
       confidence: confidence,
       redFlags: redFlags,
       keyTerms: keyTerms,
+      score,
       chatHistory: [],
       followUps: [] // additional docs added in luminos
     };
@@ -3691,6 +3870,8 @@ updateStreakBanner();
 renderRecentStrip();
 updateSidebarUsage();
 initReferral();
+setSummaryLength(state.summaryLength);
+updateFileInputMultiple();
 // Set notifToggle state
 (function() {
   const nt = document.getElementById('notifToggle');
