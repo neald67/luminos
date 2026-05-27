@@ -2160,17 +2160,14 @@ function save() {
 
 // ============ THEME ============
 function setTheme(t) {
-  if (t === 'auto') {
-    state.theme = 'auto';
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-    localStorage.setItem('sp_theme', 'auto');
-  } else {
-    state.theme = t;
-    document.documentElement.setAttribute('data-theme', t);
-    localStorage.setItem('sp_theme', t);
-    document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#fefbf3' : '#14110a';
-  }
+  state.theme = t;
+  localStorage.setItem('sp_theme', t);
+  const effectiveTheme = t === 'auto'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : t;
+  document.documentElement.setAttribute('data-theme', effectiveTheme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = effectiveTheme === 'dark' ? '#14110a' : '#fefbf3';
   document.getElementById('theme-light').classList.toggle('active', t === 'light');
   document.getElementById('theme-dark').classList.toggle('active', t === 'dark');
   const autoBtn = document.getElementById('theme-auto');
@@ -2185,13 +2182,17 @@ function toggleTheme() {
 function updateThemeIcon() {
   const icon = document.getElementById('themeIcon');
   const sidebarIcon = document.getElementById('sidebarThemeIcon');
-  if (state.theme === 'light') {
-    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-    if (sidebarIcon) sidebarIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  if (!icon) return;
+  let svg;
+  if (state.theme === 'auto') {
+    svg = '<circle cx="12" cy="12" r="10" stroke-width="2" fill="none"/><path d="M12 2a10 10 0 0 1 0 20V2z" fill="currentColor" stroke="none"/>';
+  } else if (state.theme === 'light') {
+    svg = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   } else {
-    icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
-    if (sidebarIcon) sidebarIcon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+    svg = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
   }
+  icon.innerHTML = svg;
+  if (sidebarIcon) sidebarIcon.innerHTML = svg;
 }
 
 // ============ MODEL TOGGLE ============
@@ -2404,7 +2405,7 @@ function showError(msg) {
   el.classList.add('show');
 }
 
-function setLoading(on) {
+function setLoading(on, _msg) {
   document.getElementById('loading').style.display = on ? 'block' : 'none';
   document.getElementById('scanBtn').disabled = on;
 }
@@ -3678,11 +3679,8 @@ if (!localStorage.getItem('sp_theme')) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   state.theme = prefersDark ? 'dark' : 'light';
 }
-document.documentElement.setAttribute('data-theme', state.theme === 'auto'
-  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-  : state.theme);
-document.querySelector('meta[name="theme-color"]').content = (state.theme === 'dark' || (state.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) ? '#14110a' : '#fefbf3';
-updateThemeIcon();
+// Apply theme (setTheme handles data-theme, meta, active class on buttons, and icon)
+setTheme(state.theme);
 updatePlanUI();
 updateModelToggle();
 updateLibraryCount();
@@ -3704,10 +3702,12 @@ if (localStorage.getItem('sp_notif') === '1' && 'Notification' in window && Noti
   if (lastScan) {
     const hoursSince = (Date.now() - new Date(lastScan).getTime()) / 36e5;
     if (hoursSince > 20) {
-      new Notification('Keep your ScanPlain streak alive 🔥', {
-        body: "You haven't scanned anything today. Don't break your streak!",
-        icon: '/icon.png'
-      });
+      try {
+        new Notification('Keep your ScanPlain streak alive 🔥', {
+          body: "You haven't scanned anything today. Don't break your streak!",
+          icon: '/icon.png'
+        });
+      } catch(e) {}
     }
   }
 }
