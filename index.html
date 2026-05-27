@@ -1435,8 +1435,10 @@
 [data-layout="desktop"] .tabbar { display: none; }
 [data-layout="desktop"] .app { flex-direction: row; max-width: none; height: 100vh; }
 [data-layout="desktop"] .content { flex: 1; max-width: none; padding-bottom: 40px; overflow-y: auto; height: 100vh; }
-[data-layout="desktop"] .page { max-width: 1100px; margin: 0 auto; padding: 32px 40px; }
+[data-layout="desktop"] .page { max-width: 1100px; margin: 0 auto; padding: 36px 48px; }
 [data-layout="desktop"] .sidebar { display: flex; }
+[data-layout="desktop"] .camera-card-wrap { display: none }
+[data-layout="desktop"] .upload-card { padding: 48px 32px }
 
 .sidebar {
   width: 240px;
@@ -1506,6 +1508,31 @@
 [data-layout="desktop"] .scan-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
 [data-layout="desktop"] .scan-right { position: sticky; top: 24px; }
 [data-layout="desktop"] .history-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+[data-layout="desktop"] .hero h1 { font-size: 52px }
+[data-layout="desktop"] .mini-card { padding: 20px }
+[data-layout="desktop"] .history-item,
+[data-layout="tablet"] .history-item { flex-direction: column; align-items: flex-start }
+[data-layout="desktop"] .history-thumb,
+[data-layout="tablet"] .history-thumb { width: 100%; height: 120px; border-radius: 14px; object-fit: cover }
+
+/* ── Tablet layout ── */
+[data-layout="tablet"] .topbar,
+[data-layout="tablet"] .tabbar { display: none }
+
+[data-layout="tablet"] .app { flex-direction: row; max-width: none; height: 100vh }
+[data-layout="tablet"] .sidebar { display: flex }
+[data-layout="tablet"] .content { flex: 1; padding-bottom: 40px }
+[data-layout="tablet"] .page { padding: 28px 32px; max-width: 1100px }
+[data-layout="tablet"] .scan-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start }
+[data-layout="tablet"] .scan-right { position: sticky; top: 28px }
+[data-layout="tablet"] .history-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px }
+[data-layout="tablet"] .camera-card-wrap { display: block }
+[data-layout="tablet"] .hero h1 { font-size: 40px }
+
+/* ── Scan placeholder ── */
+.scan-right-placeholder { background: var(--surface); border: 1.5px dashed var(--border); border-radius: 24px; padding: 48px 32px; text-align: center; display: none }
+[data-layout="desktop"] .scan-right-placeholder,
+[data-layout="tablet"] .scan-right-placeholder { display: block }
 </style>
 </head>
 <body>
@@ -1624,6 +1651,7 @@
                 <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this.files[0])"/>
               </div>
 
+              <div class="camera-card-wrap">
               <div class="mini-card" onclick="captureCamera()">
                 <div class="mini-icon camera">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -1632,6 +1660,7 @@
                   <div class="mini-title">Camera</div>
                   <div class="mini-sub">Take a photo</div>
                 </div>
+              </div>
               </div>
 
               <div class="mini-card" onclick="switchTab('history')">
@@ -1666,6 +1695,16 @@
         </div>
 
         <div class="scan-right">
+          <div class="scan-right-placeholder" id="scanPlaceholder">
+            <div class="empty-orb" style="width:64px;height:64px;margin:0 auto 20px">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5Z" fill="var(--p2)"/></svg>
+            </div>
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-2)">Your explanation appears here</h3>
+            <p style="font-size:14px;color:var(--text-3);line-height:1.5;margin-bottom:20px">Upload or scan something on the left to see a plain-English breakdown, red flags, and key terms.</p>
+            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:100%"></div>
+            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:80%"></div>
+            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:60%"></div>
+          </div>
           <div class="error" id="errorMsg"></div>
 
           <div class="loading" id="loading">
@@ -1890,13 +1929,21 @@
 </div>
 
 <script>
-(function() {
+(function detectLayout() {
   const ua = navigator.userAgent;
-  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isIPad = /iPad/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua));
+  const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-  const isNarrow = window.innerWidth < 1024;
-  const mobile = isMobileUA || (isCoarse && isNarrow);
-  document.documentElement.setAttribute('data-layout', mobile ? 'mobile' : 'desktop');
+  const w = window.innerWidth;
+  let layout = 'mobile';
+  if (isIPad || (isCoarse && w >= 768 && !isMobileUA)) layout = 'tablet';
+  else if (!isMobileUA && !isCoarse && w >= 1024) layout = 'desktop';
+  document.documentElement.setAttribute('data-layout', layout);
+  window.addEventListener('resize', () => {
+    if (document.documentElement.dataset.layout !== 'mobile') {
+      document.documentElement.setAttribute('data-layout', window.innerWidth < 1024 ? 'tablet' : 'desktop');
+    }
+  });
 })();
 'use strict';
 
@@ -2192,6 +2239,8 @@ function clearScan() {
   document.getElementById('resultCard').style.display = 'none';
   document.getElementById('errorMsg').classList.remove('show');
   document.getElementById('postScanCTA').style.display = 'none';
+  const ph = document.getElementById('scanPlaceholder');
+  if (ph) ph.style.display = '';
 }
 
 function showError(msg) {
@@ -2328,6 +2377,8 @@ KEY_TERMS:
 
     document.getElementById('resultCard').style.display = 'block';
     document.getElementById('postScanCTA').style.display = 'block';
+    const ph = document.getElementById('scanPlaceholder');
+    if (ph) ph.style.display = 'none';
 
     state.scansUsed++;
 
@@ -3268,12 +3319,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-window.addEventListener('resize', () => {
-  const isNarrow = window.innerWidth < 1024;
-  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  document.documentElement.setAttribute('data-layout', (isMobileUA || (isCoarse && isNarrow)) ? 'mobile' : 'desktop');
-});
 </script>
 </body>
 </html>
