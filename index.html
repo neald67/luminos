@@ -1334,7 +1334,28 @@
     color: white;
     box-shadow: 0 4px 12px var(--glow);
   }
-  [data-layout="desktop"] .category-strip { flex-wrap: wrap; overflow-x: visible; }
+  [data-layout="desktop"] .category-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  overflow-x: visible;
+  padding-bottom: 0;
+  flex-wrap: unset;
+}
+[data-layout="desktop"] .cat-bubble {
+  justify-content: center;
+  width: 100%;
+  font-size: 12.5px;
+  padding: 10px 8px;
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+  white-space: normal;
+}
+[data-layout="desktop"] .cat-bubble svg {
+  width: 18px;
+  height: 18px;
+}
   .recent-strip {
     display: flex;
     gap: 10px;
@@ -1494,8 +1515,12 @@
 [data-layout="desktop"] .scan-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
 [data-layout="desktop"] .scan-right { position: sticky; top: 24px; }
 [data-layout="desktop"] .history-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-[data-layout="desktop"] .hero h1 { font-size: 52px }
-[data-layout="desktop"] .mini-card { padding: 20px }
+[data-layout="desktop"] .hero h1 { font-size: 48px; margin-bottom: 8px; line-height: 1.1 }
+[data-layout="desktop"] .hero { padding-top: 0; margin-bottom: 16px }
+[data-layout="desktop"] .mini-card { padding: 22px 24px }
+[data-layout="desktop"] .camera-card-wrap + .mini-card,
+[data-layout="desktop"] .mini-card:last-child { grid-column: 1 / -1 }
+[data-layout="desktop"] .scan-left > .section-label:first-of-type { margin-top: 0; margin-bottom: 10px }
 [data-layout="desktop"] .history-item,
 [data-layout="tablet"] .history-item { flex-direction: column; align-items: flex-start }
 [data-layout="desktop"] .history-thumb,
@@ -1513,7 +1538,8 @@
 [data-layout="tablet"] .scan-right { position: sticky; top: 28px }
 [data-layout="tablet"] .history-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px }
 [data-layout="tablet"] .camera-card-wrap { display: block }
-[data-layout="tablet"] .hero h1 { font-size: 40px }
+[data-layout="tablet"] .hero h1 { font-size: 38px; margin-bottom: 8px }
+[data-layout="tablet"] .hero { padding-top: 0; margin-bottom: 16px }
 
 /* ── Scan placeholder ── */
 .scan-right-placeholder { background: var(--surface); border: 1.5px dashed var(--border); border-radius: 24px; padding: 48px 32px; text-align: center; display: none }
@@ -1619,6 +1645,7 @@
       </div>
       <div class="section-label">What are you scanning?</div>
       <div class="category-strip" id="categoryStrip"></div>
+      <div id="catContext" style="display:none;transition:opacity 0.2s;opacity:0"></div>
       <div id="recentSection" style="display:none">
         <div class="section-label">Recently viewed</div>
         <div class="recent-strip" id="recentStrip"></div>
@@ -1659,6 +1686,7 @@
                 <div>
                   <div class="mini-title">Library</div>
                   <div class="mini-sub" id="libraryCount">0 scans</div>
+                  <div id="libraryMiniPreview"></div>
                 </div>
               </div>
             </div>
@@ -1706,14 +1734,23 @@
 
         <div class="scan-right">
           <div class="scan-right-placeholder" id="scanPlaceholder">
-            <div class="empty-orb" style="width:64px;height:64px;margin:0 auto 20px">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5Z" fill="var(--p2)"/></svg>
+            <div style="text-align:center;padding:48px 32px 32px;min-height:420px;display:flex;flex-direction:column;justify-content:center">
+              <div class="empty-orb" style="width:56px;height:56px;margin:0 auto 20px">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+              </div>
+              <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-2);letter-spacing:-0.4px">Your explanation appears here</h3>
+              <p style="font-size:14px;color:var(--text-3);line-height:1.5;max-width:280px;margin:0 auto 28px">Upload or scan something on the left to get a plain-English breakdown, red flags, and key terms.</p>
+              <div style="text-align:left">
+                <div style="width:140px;height:22px;background:var(--surface2);border-radius:99px;margin-bottom:14px"></div>
+                <div style="width:70%;height:20px;background:var(--surface2);border-radius:8px;margin-bottom:16px"></div>
+                <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:8px;width:100%"></div>
+                <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:8px;width:90%"></div>
+                <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:8px;width:80%"></div>
+                <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:20px;width:60%"></div>
+                <div style="height:48px;background:var(--surface2);border-radius:12px;margin-bottom:8px"></div>
+                <div style="height:48px;background:var(--surface2);border-radius:12px"></div>
+              </div>
             </div>
-            <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text-2)">Your explanation appears here</h3>
-            <p style="font-size:14px;color:var(--text-3);line-height:1.5;margin-bottom:20px">Upload or scan something on the left to see a plain-English breakdown, red flags, and key terms.</p>
-            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:100%"></div>
-            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:80%"></div>
-            <div style="height:14px;background:var(--surface2);border-radius:8px;margin-bottom:10px;width:60%"></div>
           </div>
           <div class="error" id="errorMsg"></div>
 
@@ -2101,18 +2138,18 @@ async function safeApiCall(body) {
 const WORKER_URL = "https://throbbing-glitter-f07d.fortniterichard2.workers.dev";
 
 const CATEGORIES = [
-  {id:'general',emoji:'📄',label:'General'},
-  {id:'nutrition',emoji:'🍎',label:'Nutrition Label'},
-  {id:'contract',emoji:'📋',label:'Contract / Lease'},
-  {id:'prescription',emoji:'💊',label:'Prescription'},
-  {id:'medical',emoji:'🏥',label:'Medical Bill'},
-  {id:'receipt',emoji:'🧾',label:'Receipt'},
-  {id:'tax',emoji:'💰',label:'Tax Form'},
-  {id:'foreign',emoji:'🌍',label:'Foreign Language'},
-  {id:'tos',emoji:'📜',label:'Terms of Service'},
-  {id:'insurance',emoji:'🏦',label:'Insurance'},
-  {id:'id',emoji:'🪪',label:'ID / Document'},
-  {id:'ingredients',emoji:'📦',label:'Ingredients'}
+  {id:'general',label:'General',svgPath:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>'},
+  {id:'nutrition',label:'Nutrition Label',svgPath:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>'},
+  {id:'contract',label:'Contract / Lease',svgPath:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95z"/>'},
+  {id:'medical',label:'Medical Bill',svgPath:'<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 10h6"/><path d="M12 7v6"/><path d="M9 17h4"/>'},
+  {id:'tax',label:'Tax Form',svgPath:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9.5 12.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M14.5 16.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="m9 16 6-5"/>'},
+  {id:'tos',label:'Terms of Service',svgPath:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>'},
+  {id:'prescription',label:'Prescription',svgPath:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>'},
+  {id:'receipt',label:'Receipt',svgPath:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h4"/>'},
+  {id:'foreign',label:'Foreign Language',svgPath:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+  {id:'insurance',label:'Insurance',svgPath:'<path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 7a3 3 0 0 1-6 0v-7"/>'},
+  {id:'id',label:'ID / Document',svgPath:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1"/><path d="M11 15h6"/>'},
+  {id:'ingredients',label:'Ingredients',svgPath:'<path d="M9 3h6l3 9H6L9 3z"/><path d="M5.5 12c-1.9 0-3.5 1.3-3.5 3s1.6 3 3.5 3h13c1.9 0 3.5-1.3 3.5-3s-1.6-3-3.5-3"/><path d="M9 15h.01"/><path d="M13 15h.01"/>'}
 ];
 
 const CATEGORY_HINTS = {
@@ -2128,6 +2165,20 @@ const CATEGORY_HINTS = {
   insurance: 'Explain what is covered, what is excluded, the deductible amount, premium, and how to file a claim.',
   id: 'Describe what type of identification or document this is, the key identifying information, and any expiry dates.',
   ingredients: 'List the main ingredients, flag any common allergens, artificial additives, or concerning substances.'
+};
+const CAT_CONTEXT = {
+  general:      { title: 'General Document',           desc: 'Works on anything — a catch-all for documents that don\'t fit another category.',                                                                              examples: ['Letters', 'Reports', 'Notices', 'Mixed content'] },
+  nutrition:    { title: 'Nutrition & Food Labels',    desc: 'Decode what\'s actually in your food. Covers daily values, real vs. marketing health claims, and whether a product is worth buying.',                         examples: ['Nutrition Facts panel', 'Supplement Facts', 'Ingredient lists', 'Health claims', 'Serving size math', 'Scan a bag or box for a full health report'] },
+  contract:     { title: 'Contracts & Legal Agreements', desc: 'Understand what you\'re signing before you sign it. Flags unfair clauses, hidden obligations, and exit terms.',                                              examples: ['Lease agreements', 'NDAs', 'Employment contracts', 'Service agreements', 'Waivers'] },
+  prescription: { title: 'Prescriptions & Medications', desc: 'Plain-English dosage, side effects, and interaction warnings before you take anything.',                                                                       examples: ['Rx bottle labels', 'Dosage instructions', 'Drug info leaflets', 'Pharmacy printouts'] },
+  medical:      { title: 'Medical Bills & Insurance',  desc: 'Break down what was billed, what insurance covered, and what you actually owe — including suspicious line items.',                                             examples: ['Hospital bills', 'EOB statements', 'Lab result invoices', 'Claim forms', 'Denial letters'] },
+  receipt:      { title: 'Receipts & Invoices',        desc: 'Review charges, spot hidden fees, and understand return or refund terms.',                                                                                     examples: ['Store receipts', 'Online order confirmations', 'Service invoices', 'Subscription charges'] },
+  tax:          { title: 'Tax Forms & Financials',     desc: 'Decode IRS forms, understand what\'s being reported, and know exactly what to do next.',                                                                       examples: ['W-2', '1099', 'W-4', 'Tax notices', 'Pay stubs', 'Financial statements'] },
+  foreign:      { title: 'Foreign Language',           desc: 'Translate and explain any text in another language — signs, menus, documents, packaging.',                                                                     examples: ['Street signs', 'Foreign menus', 'Overseas receipts', 'Product packaging', 'Official letters'] },
+  tos:          { title: 'Terms of Service & Policies', desc: 'Find out what you\'re actually agreeing to — auto-renewals, data sharing, rights you give up, and opt-outs buried in the fine print.',                     examples: ['App & website terms', 'Privacy policies', 'EULAs', 'Cookie consent', 'Subscription fine print'] },
+  insurance:    { title: 'Insurance Documents',        desc: 'Understand coverage limits, exclusions, and what you\'d actually receive in a real claim scenario.',                                                            examples: ['Policy documents', 'Coverage summaries', 'Claim forms', 'Denial letters', 'EOBs'] },
+  id:           { title: 'IDs & Official Documents',   desc: 'Verify and understand official document fields, what each number means, and expiry information.',                                                              examples: ['Driver\'s license', 'Passport', 'Government ID', 'Birth certificate', 'Official government letters'] },
+  ingredients:  { title: 'Ingredients & Product Labels', desc: 'Find out exactly what\'s in a product — additives, allergens, and whether the health claims on the front are backed up by what\'s inside.',              examples: ['Food ingredient lists', 'Supplement labels', 'Cosmetic ingredients', 'Cleaning products', 'Scan any bag or bottle'] },
 };
 const LIMITS = {
   free:      { scans: 3, luminos: 1 },
@@ -2310,13 +2361,33 @@ function initCategoryStrip() {
   const strip = document.getElementById('categoryStrip');
   if (!strip) return;
   strip.innerHTML = CATEGORIES.map((c, i) =>
-    `<button class="cat-bubble${state.category === c.id ? ' active' : ''}" onclick="selectCategory('${c.id}',${i})">${c.emoji} ${escapeHtml(c.label)}</button>`
+    `<button class="cat-bubble${state.category === c.id ? ' active' : ''}" onclick="selectCategory('${c.id}',${i})" style="display:flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${c.svgPath}</svg>${escapeHtml(c.label)}</button>`
   ).join('');
+  renderCatContext(state.category);
 }
 
 function selectCategory(id, idx) {
   state.category = id;
   document.querySelectorAll('.cat-bubble').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderCatContext(id);
+}
+
+function renderCatContext(id) {
+  const el = document.getElementById('catContext');
+  if (!el) return;
+  const ctx = CAT_CONTEXT[id];
+  if (!ctx) { el.style.display = 'none'; return; }
+  const chips = ctx.examples.map(e =>
+    `<span style="background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px 11px;font-size:12px;color:var(--text-3);white-space:nowrap">${escapeHtml(e)}</span>`
+  ).join('');
+  el.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-0.2px">${escapeHtml(ctx.title)}</div>
+    <div style="font-size:13.5px;color:var(--text-2);line-height:1.5;margin-bottom:12px">${escapeHtml(ctx.desc)}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${chips}</div>
+  </div>`;
+  el.style.opacity = '0';
+  el.style.display = 'block';
+  requestAnimationFrame(() => { el.style.opacity = '1'; });
 }
 
 function updateStreakBanner() {
@@ -2357,12 +2428,12 @@ function renderRecentStrip() {
   const section = document.getElementById('recentSection');
   const strip = document.getElementById('recentStrip');
   if (!section || !strip) return;
-  const recent = state.history.slice(0, 4);
+  const recent = state.history.filter(h => !h._deleted).slice(0, 4);
   section.style.display = recent.length > 0 ? 'block' : 'none';
   strip.innerHTML = recent.map(s => `
     <div class="recent-thumb-item" onclick="openLuminosWithScan('${s.id}')">
       <div class="recent-thumb-img">
-        ${s.thumb ? `<img src="${escapeHtml(s.thumb)}" style="width:100%;height:100%;object-fit:cover" alt="">` : '<span style="font-size:22px">📄</span>'}
+        ${s.thumb ? `<img src="${escapeHtml(s.thumb)}" style="width:100%;height:100%;object-fit:cover" alt="">` : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>'}
       </div>
       <div class="recent-thumb-title">${escapeHtml(s.title || 'Scan')}</div>
     </div>
@@ -2927,6 +2998,17 @@ function renderHistory() {
       </div>
     </div>`;
   }).join('') + '</div>';
+  updateLibraryMiniPreview();
+}
+
+function updateLibraryMiniPreview() {
+  const el = document.getElementById('libraryMiniPreview');
+  if (!el) return;
+  const recent = state.history.filter(h => !h._deleted).slice(0, 2);
+  if (recent.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = recent.map(h =>
+    `<div style="font-size:11px;color:var(--text-3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${escapeHtml(h.title || 'Untitled scan')}</div>`
+  ).join('');
 }
 
 function toggleNote(id) {
@@ -2963,25 +3045,15 @@ function deleteHistoryItem(id) {
   renderHistory();
   updateLibraryCount();
   const undoHtml = `Scan deleted · <span onclick="undoDelete('${escapeHtml(id)}')" style="font-weight:700;text-decoration:underline;cursor:pointer;color:var(--p1)">Undo</span>`;
-  const toastEl = document.getElementById('toastEl');
-  if (toastEl) {
-    toastEl.innerHTML = undoHtml;
-    toastEl.style.opacity = '1';
-    toastEl.style.pointerEvents = 'auto';
-  }
+  showToast(undoHtml);
   clearTimeout(window._pendingDeleteTid);
   const deleteToken = id; // capture for closure
   const tid = setTimeout(() => {
-    // Only hide toast if it still shows this delete's undo (not a newer toast)
     state.history = state.history.filter(h => h.id !== deleteToken);
     if (state.activeLuminosId === deleteToken) state.activeLuminosId = null;
     save();
     updateLibraryCount();
     renderRecentStrip();
-    if (toastEl && toastEl.innerHTML.includes(deleteToken)) {
-      toastEl.style.opacity = '0';
-      toastEl.style.pointerEvents = '';
-    }
   }, 5000);
   window._pendingDeleteId = id;
   window._pendingDeleteTid = tid;
@@ -3965,6 +4037,7 @@ updateSidebarUsage();
 initReferral();
 setSummaryLength(state.summaryLength);
 updateFileInputMultiple();
+updateLibraryMiniPreview();
 // Set notifToggle state
 (function() {
   const nt = document.getElementById('notifToggle');
