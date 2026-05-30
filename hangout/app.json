@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Hangout",
+    "slug": "hangout",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "hangout",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#050505",
+    "splash": { "backgroundColor": "#050505" },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hangout.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Hangout uses your approximate location to show who is free nearby. Your exact location is never shared with other users."
+      }
+    },
+    "android": {
+      "package": "com.hangout.app",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      ["expo-camera", { "cameraPermission": "Hangout uses the camera to scan QR codes during hangout verification." }]
+    ]
+  }
+}

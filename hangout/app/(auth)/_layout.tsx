@@ -1,0 +1,15 @@
+import React from 'react';
+import { Stack } from 'expo-router';
+import { COLORS } from '@/lib/types';
+
+export default function AuthLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: COLORS.bg },
+        animation: 'slide_from_right',
+      }}
+    />
+  );
+}
