@@ -7,6 +7,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
+const MOCK_MODE = process.env.EXPO_PUBLIC_MOCK_MODE === 'true';
+const HAS_SUPABASE = !!(
+  process.env.EXPO_PUBLIC_SUPABASE_URL &&
+  !process.env.EXPO_PUBLIC_SUPABASE_URL.includes('placeholder')
+);
+
 function AuthGate({ session }: { session: Session | null }) {
   const router = useRouter();
   const segments = useSegments();
@@ -14,16 +20,13 @@ function AuthGate({ session }: { session: Session | null }) {
   const [profileComplete, setProfileComplete] = useState(false);
 
   useEffect(() => {
-    // Reset state on every session change to avoid stale values
-    // when a user signs out and a different account signs in.
     setProfileChecked(false);
     setProfileComplete(false);
 
-    if (!session) {
+    if (!session || !HAS_SUPABASE) {
       setProfileChecked(true);
       return;
     }
-    // Check profile completion status
     supabase
       .from('profiles')
       .select('profile_completed, safety_onboarding_completed')
@@ -35,9 +38,7 @@ function AuthGate({ session }: { session: Session | null }) {
         }
         setProfileChecked(true);
       })
-      .catch(() => {
-        setProfileChecked(true);
-      });
+      .catch(() => setProfileChecked(true));
   }, [session]);
 
   useEffect(() => {
@@ -47,20 +48,11 @@ function AuthGate({ session }: { session: Session | null }) {
     const inTabsGroup = segments[0] === '(tabs)';
 
     if (!session) {
-      // Not signed in — redirect to welcome
-      if (!inAuthGroup) {
-        router.replace('/(auth)/welcome');
-      }
+      if (!inAuthGroup) router.replace('/(auth)/welcome');
     } else if (profileComplete) {
-      // Signed in and profile complete — go to tabs
-      if (!inTabsGroup) {
-        router.replace('/(tabs)');
-      }
+      if (!inTabsGroup) router.replace('/(tabs)');
     } else {
-      // Signed in but onboarding not done
-      if (!inAuthGroup) {
-        router.replace('/(auth)/onboarding-profile');
-      }
+      if (!inAuthGroup) router.replace('/(auth)/onboarding-profile');
     }
   }, [session, profileChecked, profileComplete, segments, router]);
 
@@ -69,13 +61,15 @@ function AuthGate({ session }: { session: Session | null }) {
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!MOCK_MODE && HAS_SUPABASE);
 
   useEffect(() => {
+    if (MOCK_MODE || !HAS_SUPABASE) return;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
