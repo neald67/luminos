@@ -12,7 +12,7 @@ export function InterestChips({ interests, scrollable = true }: InterestChipsPro
   const chips = interests.map((key) => {
     const config = ACTIVITY_CONFIG[key as keyof typeof ACTIVITY_CONFIG];
     const label = config?.label ?? key;
-    const icon = config?.icon ?? '●';
+    const icon = config?.emoji ?? '✌️';
     return { key, label, icon };
   });
 

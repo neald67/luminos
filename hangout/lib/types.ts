@@ -29,7 +29,7 @@ export type DistanceBucket = 'super_close' | 'nearby' | 'bit_further' | 'far';
 export type HangoutMode = 'casual' | 'verified';
 
 export type HangoutStatus =
-  | 'planned' | 'active' | 'completed' | 'canceled'
+  | 'planned' | 'active' | 'completed' | 'canceled' | 'cancelled' | 'bailed'
   | 'safety_cancelled' | 'disputed' | 'expired';
 
 export type RequestStatus =
@@ -37,7 +37,9 @@ export type RequestStatus =
 
 export type PointsLedgerType =
   | 'onboarding_bonus' | 'stake_lock' | 'stake_return'
+  | 'stake_locked' | 'stake_returned' | 'stake_forfeit'
   | 'completion_bonus' | 'cancellation_penalty' | 'no_show_penalty'
+  | 'profile_bonus' | 'safety_bonus'
   | 'respect_rebate' | 'reversal' | 'admin_adjustment';
 
 export type PointsStatus =
@@ -118,13 +120,25 @@ export interface Hangout {
   mode: HangoutMode;
   status: HangoutStatus;
   activity: ActivityType;
-  start_time: string;
-  end_time: string | null;
+  // Flat mock-friendly fields (used in mock-data and screens)
+  host_id: string;
+  participant_ids: string[];
+  proposed_time: string;
+  estimated_duration_minutes: number;
+  qr_code_token: string | null;
+  qr_expires_at: string | null;
+  host_checked_in: boolean;
+  guest_checked_in: boolean;
+  completed_at: string | null;
+  points_awarded: boolean;
+  // Optional DB fields
+  start_time?: string;
+  end_time?: string | null;
   general_location: string;
   place_name: string;
-  verification_status: 'not_started' | 'in_progress' | 'completed' | 'failed';
-  verified_duration_minutes: number;
-  risk_score: number;
+  verification_status?: 'not_started' | 'in_progress' | 'completed' | 'failed';
+  verified_duration_minutes?: number;
+  risk_score?: number;
   created_at: string;
   updated_at: string;
   participants?: HangoutParticipant[];
@@ -195,15 +209,23 @@ export interface Message {
   sender_id: string;
   body: string;
   created_at: string;
-  deleted_at: string | null;
+  deleted_at?: string | null;
+  read_at?: string | null;
   sender?: Profile;
 }
 
 export interface Conversation {
   id: string;
-  hangout_id: string | null;
-  crew_id: string | null;
+  hangout_id?: string | null;
+  hangout_request_id?: string | null;
+  crew_id?: string | null;
+  // Flat mock-friendly fields
+  participant_ids: string[];
+  last_message_body?: string | null;
+  last_message_at?: string | null;
+  unread_count: number;
   created_at: string;
+  // Optional DB fields
   members?: Profile[];
   last_message?: Message;
 }

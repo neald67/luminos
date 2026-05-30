@@ -113,7 +113,7 @@ export function RequestComposer({
                       onPress={() => setActivity(key)}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.actIcon}>{config?.icon ?? '●'}</Text>
+                      <Text style={styles.actIcon}>{config?.emoji ?? '✌️'}</Text>
                       <Text style={[styles.actLabel, active && styles.actLabelActive]}>
                         {config?.label ?? key}
                       </Text>
@@ -128,16 +128,16 @@ export function RequestComposer({
               <Text style={styles.sectionLabel}>Duration</Text>
               <View style={styles.durationRow}>
                 {HANGOUT_DURATIONS.map((d) => {
-                  const active = d === duration;
+                  const active = d.value === duration;
                   return (
                     <TouchableOpacity
-                      key={d}
+                      key={d.value}
                       style={[styles.durationPill, active && styles.durationPillActive]}
-                      onPress={() => setDuration(d)}
+                      onPress={() => setDuration(d.value)}
                       activeOpacity={0.7}
                     >
                       <Text style={[styles.durationText, active && styles.durationTextActive]}>
-                        {formatDuration(d)}
+                        {d.label}
                       </Text>
                     </TouchableOpacity>
                   );

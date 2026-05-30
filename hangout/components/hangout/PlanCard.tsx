@@ -38,7 +38,7 @@ function formatDuration(minutes: number): string {
 
 export function PlanCard({ request, senderProfile }: PlanCardProps) {
   const actConfig = ACTIVITY_CONFIG[request.activity as keyof typeof ACTIVITY_CONFIG];
-  const icon = actConfig?.icon ?? '●';
+  const icon = actConfig?.emoji ?? '✌️';
   const actLabel = actConfig?.label ?? request.activity;
   const isVerified = request.mode === 'verified';
 

@@ -25,7 +25,7 @@ export function AvailableForChips({ selected, onToggle }: AvailableForChipsProps
               onPress={() => onToggle(key)}
               activeOpacity={0.7}
             >
-              <Text style={styles.icon}>{config?.icon ?? '●'}</Text>
+              <Text style={styles.icon}>{config?.emoji ?? '✌️'}</Text>
               <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
                 {config?.label ?? key}
               </Text>

@@ -21,7 +21,7 @@ export function HangoutStatusCard({ hangout, pointsAwarded }: HangoutStatusCardP
   const statusInfo = STATUS_CONFIG[hangout.status] ?? STATUS_CONFIG.planned;
   const actConfig = ACTIVITY_CONFIG[hangout.activity as keyof typeof ACTIVITY_CONFIG];
   const actLabel = actConfig?.label ?? hangout.activity;
-  const actIcon = actConfig?.icon ?? '●';
+  const actIcon = actConfig?.emoji ?? '✌️';
 
   return (
     <View style={styles.card}>

@@ -40,7 +40,7 @@ function ActivityChips({ activities }: { activities: string[] }) {
     <View style={styles.chipsRow}>
       {shown.map((key) => {
         const config = ACTIVITY_CONFIG[key as keyof typeof ACTIVITY_CONFIG];
-        const icon = config?.icon ?? '●';
+        const icon = config?.emoji ?? '✌️';
         const label = config?.label ?? key;
         return (
           <View key={key} style={styles.chip}>
