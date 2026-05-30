@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build": "cd hangout && npm install --legacy-peer-deps && npx expo export --platform web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
