@@ -18,6 +18,8 @@ npm run dev
 
 Open http://localhost:4321. Edits show up instantly.
 
+The audit and capture scripts drive a real browser. The first time you run them on a new computer, install it once with `npx playwright install chromium`.
+
 Other commands:
 
 | Command | What it does |
