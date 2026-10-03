@@ -10,3 +10,4 @@ dist/
 # republished, and this repo is public. Keep them local only.
 reference/screenshots/
 reference/raw/
+.audit-dist/

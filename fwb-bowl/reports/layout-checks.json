@@ -1,0 +1,173 @@
+[
+  {
+    "page": "home",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 27,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 27,
+      "under24": [],
+      "atLeast44": 21
+    }
+  },
+  {
+    "page": "prices",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 17,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 17,
+      "under24": [],
+      "atLeast44": 13
+    }
+  },
+  {
+    "page": "specials",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 16,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 16,
+      "under24": [],
+      "atLeast44": 12
+    }
+  },
+  {
+    "page": "parties",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 32,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 30,
+      "under24": [],
+      "atLeast44": 24
+    }
+  },
+  {
+    "page": "leagues",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 19,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 18,
+      "under24": [],
+      "atLeast44": 13
+    }
+  },
+  {
+    "page": "accessibility",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 17,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 17,
+      "under24": [],
+      "atLeast44": 13
+    }
+  },
+  {
+    "page": "privacy",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 16,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 16,
+      "under24": [],
+      "atLeast44": 12
+    }
+  },
+  {
+    "page": "party-thanks",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 16,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 16,
+      "under24": [],
+      "atLeast44": 14
+    }
+  },
+  {
+    "page": "not-found",
+    "reflow320": 0,
+    "text200": 0,
+    "zoom200": 0,
+    "tabStops": 19,
+    "focusProblems": [],
+    "firstStops": [
+      "a: Skip to main content",
+      "a: Call for lane availability",
+      "a: ",
+      "a: Prices"
+    ],
+    "targets": {
+      "total": 19,
+      "under24": [],
+      "atLeast44": 17
+    }
+  }
+]

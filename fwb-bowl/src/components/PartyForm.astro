@@ -150,17 +150,7 @@ import { business, previewMode } from '../data/site';
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
     date.min = today;
 
-    type Problem = { field: HTMLElement; errorId: string; message: string };
-
-    const setError = (input: HTMLInputElement | null, errorId: string, message: string | null) => {
-      const el = form.querySelector<HTMLElement>(`#${errorId}`)!;
-      el.textContent = message ?? '';
-      el.hidden = !message;
-      if (input) {
-        if (message) input.setAttribute('aria-invalid', 'true');
-        else input.removeAttribute('aria-invalid');
-      }
-    };
+    type Problem = { field: HTMLElement; message: string };
 
     const digits = (v: string) => v.replace(/\D/g, '');
     const phoneOk = (v: string) => {
@@ -169,47 +159,46 @@ import { business, previewMode } from '../data/site';
     };
     const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-    function check(): Problem[] {
-      const problems: Problem[] = [];
-      const add = (input: HTMLInputElement | null, field: HTMLElement, errorId: string, message: string) => {
-        setError(input, errorId, message);
-        problems.push({ field, errorId, message });
-      };
+    // One rule per field. Each returns an error message, or null when the field is fine.
+    const rules: Record<string, () => string | null> = {
+      'pf-name': () => (name.value.trim() ? null : 'Enter your name.'),
+      'pf-phone': () =>
+        phone.value.trim() && !phoneOk(phone.value) ? 'Enter a 10-digit phone number, like 850-555-0123.' : null,
+      'pf-email': () =>
+        email.value.trim() && !emailOk(email.value.trim()) ? 'Enter an email address like name@example.com.' : null,
+      'pf-contact': () =>
+        phone.value.trim() || email.value.trim() ? null : 'Enter a phone number or an email address so we can reply.',
+      'pf-date': () =>
+        !date.value ? 'Choose a date for your party.' : date.value < today ? "Choose a date that hasn't passed yet." : null,
+      'pf-guests': () => {
+        if (!guests.value) return 'Enter how many guests are coming.';
+        const g = Number(guests.value);
+        return Number.isInteger(g) && g >= 1 && g <= 200 ? null : 'Enter a whole number of guests between 1 and 200.';
+      },
+      'pf-adult': () => (adult.checked ? null : "Confirm you're 18 or older to send this form."),
+    };
 
-      if (!name.value.trim()) add(name, name, 'pf-name-error', 'Enter your name.');
-      else setError(name, 'pf-name-error', null);
-
-      const p = phone.value.trim();
-      const e = email.value.trim();
-      setError(null, 'pf-contact-error', null);
-      if (!p && !e) {
-        phone.setAttribute('aria-invalid', 'true');
-        email.setAttribute('aria-invalid', 'true');
-        add(null, phone, 'pf-contact-error', 'Enter a phone number or an email address so we can reply.');
+    // Shows or clears one rule's message and keeps aria-invalid in step with it.
+    function apply(id: string): Problem | null {
+      const message = rules[id]();
+      const errorEl = form!.querySelector<HTMLElement>(`#${id}-error`)!;
+      errorEl.textContent = message ?? '';
+      errorEl.hidden = !message;
+      const contactMissing = !!rules['pf-contact']();
+      const invalid = (el: HTMLElement, on: boolean) =>
+        on ? el.setAttribute('aria-invalid', 'true') : el.removeAttribute('aria-invalid');
+      if (id === 'pf-contact' || id === 'pf-phone' || id === 'pf-email') {
+        invalid(phone, contactMissing || !!rules['pf-phone']());
+        invalid(email, contactMissing || !!rules['pf-email']());
       } else {
-        phone.removeAttribute('aria-invalid');
-        email.removeAttribute('aria-invalid');
+        invalid(form!.querySelector<HTMLElement>(`#${id}`)!, !!message);
       }
-      if (p && !phoneOk(p)) add(phone, phone, 'pf-phone-error', 'Enter a 10-digit phone number, like 850-555-0123.');
-      else setError(phone, 'pf-phone-error', null);
-      if (e && !emailOk(e)) add(email, email, 'pf-email-error', 'Enter an email address like name@example.com.');
-      else setError(email, 'pf-email-error', null);
-
-      if (!date.value) add(date, date, 'pf-date-error', 'Choose a date for your party.');
-      else if (date.value < today) add(date, date, 'pf-date-error', "Choose a date that hasn't passed yet.");
-      else setError(date, 'pf-date-error', null);
-
-      const g = Number(guests.value);
-      if (!guests.value) add(guests, guests, 'pf-guests-error', 'Enter how many guests are coming.');
-      else if (!Number.isInteger(g) || g < 1 || g > 200)
-        add(guests, guests, 'pf-guests-error', 'Enter a whole number of guests between 1 and 200.');
-      else setError(guests, 'pf-guests-error', null);
-
-      if (!adult.checked) add(adult, adult, 'pf-adult-error', "Confirm you're 18 or older to send this form.");
-      else setError(adult, 'pf-adult-error', null);
-
-      return problems;
+      if (!message) return null;
+      const field = id === 'pf-contact' ? phone : form!.querySelector<HTMLElement>(`#${id}`)!;
+      return { field, message };
     }
+
+    const checkAll = () => Object.keys(rules).map(apply).filter((p): p is Problem => p !== null);
 
     function showSummary(problems: Problem[]) {
       const list = summary.querySelector('ul')!;
@@ -233,7 +222,7 @@ import { business, previewMode } from '../data/site';
 
     form.addEventListener('submit', (ev) => {
       status.hidden = true;
-      const problems = check();
+      const problems = checkAll();
       if (problems.length) {
         ev.preventDefault();
         showSummary(problems);
@@ -249,13 +238,20 @@ import { business, previewMode } from '../data/site';
       }
     });
 
-    // Clear a field's error as soon as it's fixed.
-    form.addEventListener('change', () => {
-      if (!summary.hidden) {
-        const remaining = check();
-        if (!remaining.length) summary.hidden = true;
+    // Once a field has been flagged, clear its message the moment it's fixed. This runs while
+    // typing (not on blur), so the layout never jumps under the pointer mid-click. New errors
+    // only appear when the form is submitted, and the summary only changes on submit.
+    const recheck = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      if (!el?.id || !(el.id in rules)) return;
+      const ids = el.id === 'pf-phone' || el.id === 'pf-email' ? [el.id, 'pf-contact'] : [el.id];
+      for (const id of ids) {
+        const shown = !form.querySelector<HTMLElement>(`#${id}-error`)!.hidden;
+        if (shown && !rules[id]()) apply(id);
       }
-    });
+    };
+    form.addEventListener('input', (ev) => recheck(ev.target));
+    form.addEventListener('change', (ev) => recheck(ev.target));
   }
 </script>
 
@@ -317,9 +313,11 @@ import { business, previewMode } from '../data/site';
   textarea {
     resize: vertical;
   }
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
+  /* Form fields always show focus. :focus-within catches the date picker's built-in calendar button. */
+  input:focus,
+  input:focus-within,
+  select:focus,
+  textarea:focus {
     outline: 3px solid var(--site-electric);
     outline-offset: 2px;
   }

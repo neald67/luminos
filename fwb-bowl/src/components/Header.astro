@@ -13,13 +13,13 @@ const links = [
 const path = Astro.url.pathname.replace(/\/?$/, '/');
 ---
 
-<div class="notice-bar">
+<section class="notice-bar" aria-label="League night notice">
   <p class="wrap">
     <Icon name="bowling-pin" />
     <span><strong>League nights.</strong> {leagueBlock.short}.</span>
     <a href={business.phoneHref}>Call for lane availability</a>
   </p>
-</div>
+</section>
 
 <header class="site-header">
   <div class="wrap header-inner">
@@ -104,12 +104,20 @@ const path = Astro.url.pathname.replace(/\/?$/, '/');
     padding-block: 0.5rem;
     text-align: center;
   }
-  .notice-bar svg {
+  .notice-bar :global(svg) {
     width: 1.1rem;
     height: 1.1rem;
     flex: none;
   }
+  @media (max-width: 30rem) {
+    .notice-bar :global(svg) {
+      display: none;
+    }
+  }
   .notice-bar a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
     color: #fff;
     font-weight: 800;
   }
@@ -151,7 +159,7 @@ const path = Astro.url.pathname.replace(/\/?$/, '/');
     background: var(--site-electric);
     color: #fff;
   }
-  .call-icon svg {
+  .call-icon :global(svg) {
     width: 1.35rem;
     height: 1.35rem;
   }
@@ -169,15 +177,15 @@ const path = Astro.url.pathname.replace(/\/?$/, '/');
     font-weight: 800;
     cursor: pointer;
   }
-  .nav-toggle svg {
+  .nav-toggle :global(svg) {
     width: 1.3rem;
     height: 1.3rem;
   }
-  .nav-toggle .icon-close,
-  .nav-toggle[aria-expanded='true'] .icon-open {
+  .nav-toggle :global(.icon-close),
+  .nav-toggle[aria-expanded='true'] :global(.icon-open) {
     display: none;
   }
-  .nav-toggle[aria-expanded='true'] .icon-close {
+  .nav-toggle[aria-expanded='true'] :global(.icon-close) {
     display: block;
   }
 

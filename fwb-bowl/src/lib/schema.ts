@@ -12,7 +12,7 @@ export function businessSchema() {
     alternateName: business.shortName,
     url: `${site}/`,
     logo: `${site}/brand/fwb-bowl-logo.png`,
-    image: `${site}/og-image.png`,
+    image: `${site}/og-image.jpg`,
     telephone: '+1-850-863-5603',
     address: {
       '@type': 'PostalAddress',

@@ -56,7 +56,7 @@ const evening = specials.filter((s) => s.id !== 'daytime');
             <caption>Shoes</caption>
             <tbody>
               <tr>
-                <th scope="row"><span class="row-name">{shoeRental.name}</span><span class="row-sub">{shoeRental.unit}</span></th>
+                <th scope="row"><span class="row-name">{shoeRental.name}</span></th>
                 <td class="num"><span class="frame-box">{shoeRental.price}</span></td>
               </tr>
             </tbody>
@@ -95,8 +95,8 @@ const evening = specials.filter((s) => s.id !== 'daytime');
   <section class="section night grain" aria-labelledby="deals-title">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Even cheaper</p>
-        <h2 id="deals-title">Nightly deals</h2>
+        <p class="eyebrow">After dark</p>
+        <h2 id="deals-title">Evening specials</h2>
       </div>
       <ul class="deal-list">
         {
@@ -137,7 +137,7 @@ const evening = specials.filter((s) => s.id !== 'daytime');
   }
   @media (min-width: 60rem) {
     .price-layout {
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     }
   }
   .side {

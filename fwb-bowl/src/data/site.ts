@@ -13,9 +13,12 @@
 /**
  * Preview mode is ON while this is a concept pitch.
  * It hides the site from Google, shows a "concept preview" banner, and stops
- * the party form from sending. Set to false on launch day (see README).
+ * the party form from sending. Change `true` to `false` on launch day (see README).
  */
-export const previewMode = true;
+const PREVIEW_MODE = true;
+
+declare const __FWB_PREVIEW_OVERRIDE__: string;
+export const previewMode = __FWB_PREVIEW_OVERRIDE__ === 'false' ? false : PREVIEW_MODE;
 
 export const business = {
   name: 'Fort Walton Beach Bowl',
@@ -39,7 +42,6 @@ export const business = {
   geo: { latitude: 30.44006, longitude: -86.63663 },
   timeZone: 'America/Chicago',
   payments: ['Visa', 'Mastercard', 'Discover', 'Cash', 'Debit', 'Credit', 'Apple Pay'],
-  amenities: ['Bowling', 'Leagues', 'Billiards', 'HD sports', 'Full bar (21+)', 'Parties'],
 };
 
 /** "745 Beal Pkwy NW, Fort Walton Beach, FL 32547" */
@@ -78,7 +80,7 @@ export const priceNotes = {
 
 export type Price = { name: string; price: string; unit: string; when?: string; who?: string[] };
 
-export const shoeRental: Price = { name: 'Shoe rental', price: '$3.75', unit: 'per pair' };
+export const shoeRental: Price = { name: 'Shoe rental', price: '$3.75', unit: '' };
 
 export const gamePrices: Price[] = [
   { name: 'Daytime Special', price: '$4.00', unit: 'per game', when: 'Mon–Fri, 9 AM–5 PM', who: ['All ages'] },
@@ -136,7 +138,7 @@ export const specials: Special[] = [
     id: 'daytime',
     name: 'Daytime Special',
     price: '$4.00',
-    unit: 'per game',
+    unit: 'per game, plus tax',
     days: [1, 2, 3, 4, 5],
     start: '09:00',
     end: '17:00',
@@ -175,7 +177,7 @@ export type League = {
 /** Fall season, from the "Fall Leagues" graphic. Meeting and start dates have passed. */
 export const leagueSeason = {
   name: 'Fall leagues',
-  status: 'The fall season is underway.',
+  status: 'Here is the fall league schedule.',
   signUp: 'Sign up at the front desk or call 850-863-5603 for more info.',
 };
 

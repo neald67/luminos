@@ -63,6 +63,7 @@ h4 {
   margin: 0 0 0.5em;
   line-height: 1.1;
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 h1,
 h2 {
@@ -95,6 +96,10 @@ a:hover {
 }
 a[href^='tel:'] {
   white-space: nowrap;
+}
+/* Buttons may wrap at very large text sizes rather than spill off the screen. */
+a.btn[href^='tel:'] {
+  white-space: normal;
 }
 strong {
   font-weight: 800;
@@ -346,10 +351,8 @@ td {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    animation-delay: 0ms !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }

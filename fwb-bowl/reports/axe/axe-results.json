@@ -1,0 +1,353 @@
+[
+  {
+    "page": "home",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 77
+      }
+    ],
+    "passes": 44
+  },
+  {
+    "page": "home",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 77
+      }
+    ],
+    "passes": 44
+  },
+  {
+    "page": "home",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 77
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "prices",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 46
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "prices",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 46
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "prices",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 46
+      }
+    ],
+    "passes": 42
+  },
+  {
+    "page": "specials",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 53
+      }
+    ],
+    "passes": 44
+  },
+  {
+    "page": "specials",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 53
+      }
+    ],
+    "passes": 44
+  },
+  {
+    "page": "specials",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 53
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "parties",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 35
+      }
+    ],
+    "passes": 50
+  },
+  {
+    "page": "parties",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 35
+      }
+    ],
+    "passes": 50
+  },
+  {
+    "page": "parties",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 35
+      }
+    ],
+    "passes": 50
+  },
+  {
+    "page": "leagues",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 50
+      }
+    ],
+    "passes": 49
+  },
+  {
+    "page": "leagues",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 50
+      }
+    ],
+    "passes": 48
+  },
+  {
+    "page": "leagues",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 50
+      }
+    ],
+    "passes": 47
+  },
+  {
+    "page": "accessibility",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "accessibility",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "accessibility",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 42
+  },
+  {
+    "page": "privacy",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "privacy",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "privacy",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 32
+      }
+    ],
+    "passes": 42
+  },
+  {
+    "page": "party-thanks",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 34
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "party-thanks",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 34
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "party-thanks",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 34
+      }
+    ],
+    "passes": 42
+  },
+  {
+    "page": "not-found",
+    "width": 375,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 37
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "not-found",
+    "width": 768,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 37
+      }
+    ],
+    "passes": 43
+  },
+  {
+    "page": "not-found",
+    "width": 1440,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 37
+      }
+    ],
+    "passes": 42
+  }
+]

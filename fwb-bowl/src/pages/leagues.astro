@@ -11,7 +11,7 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
 
 <Base
   title="Bowling Leagues | Fort Walton Beach Bowl"
-  description="Bowling leagues seven days a week at Fort Walton Beach Bowl: mixed, ladies, seniors (50+), youth and open leagues. League games are $2 weekday mornings and $3 other times."
+  description="Bowling leagues 7 days a week at Fort Walton Beach Bowl: mixed, ladies, seniors (50+), youth and open. All skill levels welcome. Call 850-863-5603."
 >
   <PageHero
     eyebrow="Leagues"
@@ -31,7 +31,7 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
         <p>{leagueSeason.status} <Fragment set:html={withPhoneLinks(leagueSeason.signUp)} /></p>
       </div>
 
-      <div class="table-wrap schedule">
+      <div class="table-wrap schedule" tabindex="0" role="region" aria-label="League schedule (scrolls sideways on small screens)">
         <table>
           <caption class="visually-hidden">Fall league schedule</caption>
           <thead>
@@ -39,7 +39,7 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
               <th scope="col">Day</th>
               <th scope="col">League</th>
               <th scope="col">Bowl time</th>
-              <th scope="col">Season started</th>
+              <th scope="col">Season start</th>
             </tr>
           </thead>
           <tbody>
@@ -61,8 +61,8 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
         </table>
       </div>
       <p class="fine-print">
-        League meetings for the fall season were held in August and September. Ask at the front desk about openings and
-        the next season.
+        The fall schedule listed league meetings in August and September. Ask at the front desk about openings and the
+        next season.
       </p>
     </div>
   </section>
@@ -129,6 +129,9 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
   .schedule table {
     min-width: 36rem;
   }
+  .schedule:focus-visible {
+    outline-offset: 4px;
+  }
   .schedule thead th {
     padding: var(--space-s) var(--space-m);
     background: var(--site-deep-plum);
@@ -175,7 +178,7 @@ const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple',
   }
   @media (min-width: 56rem) {
     .join-grid {
-      grid-template-columns: 1.4fr 1fr;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     }
   }
   .steps {

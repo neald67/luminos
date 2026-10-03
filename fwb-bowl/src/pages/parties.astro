@@ -9,7 +9,7 @@ import { birthdayPackage, business, corporateParties, partyRules, previewMode } 
 
 <Base
   title="Birthday Parties & Corporate Events | Fort Walton Beach Bowl"
-  description="Kids' birthday parties at Fort Walton Beach Bowl: the $150 Birthday Package includes 2 lanes for 2 hours, shoes, 2 one-topping pizzas and 2 pitchers of soda for up to 12 kids."
+  description="The $150 Birthday Package at Fort Walton Beach Bowl: 2 lanes for 2 hours, shoes, 2 one-topping pizzas and 2 pitchers of soda for up to 12 kids."
 >
   <PageHero
     eyebrow="Parties"
@@ -106,7 +106,7 @@ import { birthdayPackage, business, corporateParties, partyRules, previewMode } 
   }
   @media (min-width: 60rem) {
     .package-grid {
-      grid-template-columns: 1.15fr 1fr;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     }
   }
   .package {
@@ -122,6 +122,11 @@ import { birthdayPackage, business, corporateParties, partyRules, previewMode } 
     position: absolute;
     top: -2rem;
     right: -1.25rem;
+  }
+  @media (max-width: 48rem) {
+    .package :global(.package-burst) {
+      right: -0.5rem;
+    }
   }
   @media (max-width: 30rem) {
     .package {
@@ -213,7 +218,7 @@ import { birthdayPackage, business, corporateParties, partyRules, previewMode } 
   }
   @media (min-width: 60rem) {
     .inquiry-grid {
-      grid-template-columns: 1fr 1.6fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
     }
   }
   .photo-spot {

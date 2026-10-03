@@ -32,7 +32,7 @@ const amenities = [
   { icon: 'trophy', color: 'green', label: 'Leagues', text: `${leagues.length} leagues, mornings and nights.` },
   { icon: 'billiards', color: 'red', label: 'Billiards', text: 'A fully equipped billiard room.' },
   { icon: 'tv', color: 'blue', label: 'HD sports', text: 'Catch the game on hi-def screens.' },
-  { icon: 'drink', color: 'lime', label: 'Full bar', text: 'All your favorite drinks. 21+ only.' },
+  { icon: 'drink', color: 'lime', label: 'Full bar', text: 'All your favorite drinks. You must be 21+ to drink.' },
   { icon: 'cake', color: 'purple', label: 'Parties', text: 'Birthdays and corporate events.' },
 ] as const;
 ---
@@ -76,7 +76,7 @@ const amenities = [
       <aside class="cosmic-card" aria-labelledby="cosmic-title">
         <RainbowStrip class="cosmic-strip" />
         <div class="cosmic-body">
-          <p class="cosmic-kicker">Every Friday &amp; Saturday</p>
+          <p class="cosmic-kicker">Friday &amp; Saturday nights</p>
           <h2 id="cosmic-title" class="cosmic-title">Cosmic Bowling</h2>
           <p class="cosmic-when">{cosmic.when.replace('Friday & Saturday, ', '')}</p>
           <ul class="cosmic-list">
@@ -101,7 +101,7 @@ const amenities = [
   <div class="league-callout">
     <div class="wrap">
       <Icon name="bowling-pin" />
-      <p><strong>Heads up, it's league season.</strong> {leagueBlock.long} Bowling before or after? Call to check lanes.</p>
+      <p><strong>Heads up for league nights.</strong> {leagueBlock.long} Bowling before or after? Call to check lanes.</p>
     </div>
   </div>
 
@@ -156,12 +156,8 @@ const amenities = [
           ))
         }
         <li class="price-card" style="--panel: var(--logo-green)">
-          <span class="price-tag">
-            {shoeRental.price}
-            <small>{shoeRental.unit}</small>
-          </span>
+          <span class="price-tag">{shoeRental.price}</span>
           <h3>{shoeRental.name}</h3>
-          <p>Everyone needs a pair.</p>
         </li>
       </ul>
       <p class="fine-print">{priceNotes.tax} <Fragment set:html={withPhoneLinks(priceNotes.change)} /></p>
@@ -173,7 +169,7 @@ const amenities = [
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Specials</p>
-        <h2 id="specials-title">Deals all week</h2>
+        <h2 id="specials-title">Deals six days a week</h2>
         <p>From cheap daytime games to unlimited Cosmic Bowling under the lights.</p>
       </div>
       <div class="ticket-grid">
@@ -337,7 +333,7 @@ const amenities = [
   }
   @media (min-width: 64rem) {
     .hero-grid {
-      grid-template-columns: 1.25fr 1fr;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
     }
   }
   .hero-logo {
@@ -584,7 +580,7 @@ const amenities = [
   }
   @media (min-width: 56rem) {
     .party-split {
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     }
   }
   .lead {
@@ -669,7 +665,7 @@ const amenities = [
   }
   @media (min-width: 56rem) {
     .visit-grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
   }
   .hours-table th,
