@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import { business } from '../../data/site';
+---
+
+<Base title="Thanks for your party inquiry | Fort Walton Beach Bowl" description="We got your party inquiry." noindex>
+  <PageHero eyebrow="Party inquiry" title="Thanks! We got it." lede="We'll reach out soon about your party.">
+    <div class="btn-row">
+      <a class="btn btn--yellow" href={business.phoneHref}>Call {business.phone}</a>
+      <a class="btn btn--ghost" href="/">Back to home</a>
+    </div>
+  </PageHero>
+</Base>

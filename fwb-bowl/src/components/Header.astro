@@ -1,0 +1,269 @@
+---
+import { Picture } from 'astro:assets';
+import logo from '../assets/brand/fwb-bowl-logo.png';
+import Icon from './Icon.astro';
+import { business, leagueBlock } from '../data/site';
+
+const links = [
+  { href: '/prices/', label: 'Prices' },
+  { href: '/specials/', label: 'Specials' },
+  { href: '/parties/', label: 'Parties' },
+  { href: '/leagues/', label: 'Leagues' },
+];
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+---
+
+<div class="notice-bar">
+  <p class="wrap">
+    <Icon name="bowling-pin" />
+    <span><strong>League nights.</strong> {leagueBlock.short}.</span>
+    <a href={business.phoneHref}>Call for lane availability</a>
+  </p>
+</div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-current={path === '/' ? 'page' : undefined}>
+      <Picture
+        src={logo}
+        alt="FWB Bowl Bowling Center, home"
+        widths={[170, 340]}
+        sizes="170px"
+        formats={['avif', 'webp']}
+        class="brand-logo"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </a>
+
+    <a class="call-icon" href={business.phoneHref}>
+      <Icon name="phone" />
+      <span class="visually-hidden">Call {business.phone}</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <Icon name="menu" class="icon-open" />
+      <Icon name="close" class="icon-close" />
+      <span>Menu</span>
+    </button>
+
+    <nav id="site-nav" class="site-nav" aria-label="Main">
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="btn header-call" href={business.phoneHref}>
+        <Icon name="phone" />
+        <span>{business.phone}</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const nav = document.getElementById('site-nav');
+  if (toggle && nav) {
+    const set = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      nav.classList.toggle('is-open', open);
+    };
+    toggle.addEventListener('click', () => set(toggle.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        set(false);
+        toggle.focus();
+      }
+    });
+    window.matchMedia('(min-width: 56rem)').addEventListener('change', () => set(false));
+  }
+</script>
+
+<style>
+  .notice-bar {
+    background: var(--site-electric);
+    color: #fff;
+    font-size: var(--step--1);
+    line-height: 1.35;
+  }
+  .notice-bar p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem 0.9rem;
+    margin-block: 0;
+    margin-inline: auto;
+    padding-block: 0.5rem;
+    text-align: center;
+  }
+  .notice-bar svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+  }
+  .notice-bar a {
+    color: #fff;
+    font-weight: 800;
+  }
+  .notice-bar :focus-visible {
+    outline-color: #fff;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(255 251 243 / 0.94);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-height: var(--header-h);
+  }
+  .brand {
+    display: block;
+    flex: none;
+    padding-block: 0.4rem;
+    border-radius: 8px;
+  }
+  .brand :global(.brand-logo) {
+    width: 128px;
+    height: auto;
+  }
+  .call-icon {
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: var(--pill);
+    background: var(--site-electric);
+    color: #fff;
+  }
+  .call-icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .nav-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.9rem;
+    padding: 0 0.85rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--pill);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .nav-toggle svg {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+  .nav-toggle .icon-close,
+  .nav-toggle[aria-expanded='true'] .icon-open {
+    display: none;
+  }
+  .nav-toggle[aria-expanded='true'] .icon-close {
+    display: block;
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-l);
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    padding-bottom: var(--space-s);
+  }
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-nav ul a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.9rem;
+    border-radius: var(--pill);
+    color: var(--ink);
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .site-nav ul a:hover {
+    background: rgb(31 10 38 / 0.06);
+  }
+  .site-nav ul a[aria-current='page'] {
+    background: var(--site-deep-plum);
+    color: #fff;
+  }
+  .header-call {
+    min-height: 2.9rem;
+    padding: 0.5rem 1.2rem;
+    font-size: var(--step--1);
+  }
+
+  /* Small screens with JS: collapse the nav behind the Menu button */
+  @media (max-width: 55.99rem) {
+    :global(.js) .nav-toggle {
+      display: inline-flex;
+    }
+    .header-inner {
+      flex-wrap: wrap;
+    }
+    :global(.js) .site-nav {
+      display: none;
+    }
+    :global(.js) .site-nav.is-open {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-s);
+      padding-bottom: var(--space-m);
+    }
+    .site-nav.is-open ul {
+      flex-direction: column;
+    }
+    .site-nav.is-open ul a {
+      width: 100%;
+      font-size: var(--step-1);
+    }
+    .header-call {
+      display: none;
+    }
+    .site-nav.is-open .header-call {
+      display: inline-flex;
+    }
+  }
+  @media (min-width: 56rem) {
+    .call-icon {
+      display: none;
+    }
+    .site-nav {
+      flex-basis: auto;
+      margin-left: auto;
+      padding-bottom: 0;
+      flex-wrap: nowrap;
+    }
+    .brand :global(.brand-logo) {
+      width: 170px;
+    }
+  }
+</style>

@@ -1,0 +1,271 @@
+---
+import Base from '../layouts/Base.astro';
+import { withPhoneLinks } from '../lib/text';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { business, gamePrices, leaguePrices, priceNotes, shoeRental, specials } from '../data/site';
+
+const evening = specials.filter((s) => s.id !== 'daytime');
+---
+
+<Base
+  title="Bowling Prices | Fort Walton Beach Bowl"
+  description="Bowling prices at Fort Walton Beach Bowl: $4.00 daytime games Mon–Fri, $5.00 adults, $4.50 children, military and seniors, $3.75 shoe rental. Plus league rates."
+>
+  <PageHero eyebrow="Prices" title="Bowling prices" lede="Simple pricing, per game. Bring your crew and keep score.">
+    <p class="call-line">
+      <Icon name="phone" />
+      <span>Call <a href={business.phoneHref}>{business.phone}</a> for lane availability.</span>
+    </p>
+  </PageHero>
+
+  <section class="section" aria-labelledby="games-title">
+    <div class="wrap price-layout">
+      <div class="scorecard">
+        <div class="frames" aria-hidden="true">{Array.from({ length: 10 }, (_, i) => <span>{i + 1}</span>)}</div>
+        <table>
+          <caption id="games-title">Open bowling</caption>
+          <thead>
+            <tr>
+              <th scope="col">Who and when</th>
+              <th scope="col" class="num">Per game</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              gamePrices.map((p) => (
+                <tr>
+                  <th scope="row">
+                    <span class="row-name">{p.name}</span>
+                    {p.when && <span class="row-sub">{p.when}</span>}
+                    {p.who && <span class="row-sub">{p.who.join(', ')}</span>}
+                  </th>
+                  <td class="num">
+                    <span class="frame-box">{p.price}</span>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="side">
+        <div class="scorecard scorecard--compact">
+          <table>
+            <caption>Shoes</caption>
+            <tbody>
+              <tr>
+                <th scope="row"><span class="row-name">{shoeRental.name}</span><span class="row-sub">{shoeRental.unit}</span></th>
+                <td class="num"><span class="frame-box">{shoeRental.price}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="scorecard scorecard--compact">
+          <table>
+            <caption>League bowlers</caption>
+            <tbody>
+              {
+                leaguePrices.map((p) => (
+                  <tr>
+                    <th scope="row">
+                      <span class="row-name">{p.when}</span>
+                      <span class="row-sub">{p.unit}</span>
+                    </th>
+                    <td class="num">
+                      <span class="frame-box">{p.price}</span>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap notes">
+      <p><strong>{priceNotes.tax}</strong> <Fragment set:html={withPhoneLinks(priceNotes.change)} /></p>
+      <p>We accept {business.payments.slice(0, -1).join(', ')} and {business.payments.at(-1)}.</p>
+    </div>
+  </section>
+
+  <section class="section night grain" aria-labelledby="deals-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Even cheaper</p>
+        <h2 id="deals-title">Nightly deals</h2>
+      </div>
+      <ul class="deal-list">
+        {
+          evening.map((s) => (
+            <li class="card">
+              <h3>{s.name}</h3>
+              <p class="deal-price">
+                {s.price} <span>{s.unit}</span>
+              </p>
+              <p>{s.when}</p>
+              {s.details.length > 0 && <p>{s.details.join('. ')}.</p>}
+            </li>
+          ))
+        }
+      </ul>
+      <a class="btn btn--yellow" href="/specials/">Specials by day <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .call-line {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-weight: 700;
+  }
+  .call-line :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--logo-yellow);
+  }
+  .price-layout {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .price-layout {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+  .side {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  /* Score-sheet styled price table */
+  .scorecard {
+    background: var(--card);
+    border: 3px solid #08090b;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 8px 8px 0 var(--logo-purple);
+  }
+  .scorecard--compact {
+    box-shadow: 8px 8px 0 var(--logo-orange);
+  }
+  .frames {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    background: var(--logo-yellow);
+    border-bottom: 3px solid #08090b;
+  }
+  .frames span {
+    padding: 0.2rem 0;
+    border-right: 2px solid #08090b;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+  }
+  .frames span:last-child {
+    border-right: 0;
+  }
+  caption {
+    padding: var(--space-m) var(--space-l) var(--space-xs);
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+  thead th {
+    padding: 0.35rem var(--space-l);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+  }
+  tbody th,
+  tbody td {
+    padding: 0;
+    border-top: 2px solid #08090b;
+  }
+  tbody th {
+    padding: var(--space-m) var(--space-l);
+    font-weight: 400;
+  }
+  .row-name {
+    display: block;
+    font-weight: 800;
+    font-size: var(--step-1);
+    line-height: 1.25;
+  }
+  .row-sub {
+    display: block;
+    color: var(--ink-soft);
+  }
+  .num {
+    width: 8.5rem;
+    text-align: center;
+  }
+  td.num {
+    border-left: 2px solid #08090b;
+    vertical-align: middle;
+  }
+  .frame-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.5rem;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--site-electric);
+  }
+  .frame-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-left: 2px solid #08090b;
+    border-bottom: 2px solid #08090b;
+    background: var(--logo-yellow);
+  }
+  .notes {
+    margin-top: var(--space-xl);
+  }
+  .notes p {
+    margin-bottom: 0.4rem;
+  }
+  .deal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-xl);
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+  .deal-list h3 {
+    color: var(--logo-yellow);
+    font-size: var(--step-2);
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+  .deal-price {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    margin-bottom: 0.5rem;
+  }
+  .deal-price span {
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    font-weight: 700;
+    color: var(--on-night-soft);
+  }
+  .deal-list p {
+    margin-bottom: 0.3rem;
+  }
+</style>

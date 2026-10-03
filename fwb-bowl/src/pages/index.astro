@@ -1,0 +1,697 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { withPhoneLinks } from '../lib/text';
+import LaneArt from '../components/LaneArt.astro';
+import StatusChip from '../components/StatusChip.astro';
+import Starburst from '../components/Starburst.astro';
+import SpecialTicket from '../components/SpecialTicket.astro';
+import PanelIcon from '../components/PanelIcon.astro';
+import RainbowStrip from '../components/RainbowStrip.astro';
+import Icon from '../components/Icon.astro';
+import logo from '../assets/brand/fwb-bowl-logo.png';
+import {
+  business,
+  birthdayPackage,
+  fullAddress,
+  gamePrices,
+  hoursNote,
+  leagueBlock,
+  leagues,
+  previewMode,
+  priceNotes,
+  shoeRental,
+  specials,
+} from '../data/site';
+import { hoursRows } from '../lib/time';
+
+const cosmic = specials.find((s) => s.id === 'cosmic')!;
+const rows = hoursRows();
+const amenities = [
+  { icon: 'bowling-pin', color: 'orange', label: 'Bowling', text: 'Open bowling seven days a week.' },
+  { icon: 'trophy', color: 'green', label: 'Leagues', text: `${leagues.length} leagues, mornings and nights.` },
+  { icon: 'billiards', color: 'red', label: 'Billiards', text: 'A fully equipped billiard room.' },
+  { icon: 'tv', color: 'blue', label: 'HD sports', text: 'Catch the game on hi-def screens.' },
+  { icon: 'drink', color: 'lime', label: 'Full bar', text: 'All your favorite drinks. 21+ only.' },
+  { icon: 'cake', color: 'purple', label: 'Parties', text: 'Birthdays and corporate events.' },
+] as const;
+---
+
+<Base
+  title="Bowling in Fort Walton Beach, FL | Fort Walton Beach Bowl"
+  description="Open bowling, Cosmic Bowling, leagues, billiards, HD sports and birthday parties at Fort Walton Beach Bowl, 745 Beal Pkwy NW. Call 850-863-5603 for lane availability."
+>
+  <section class="hero night grain" aria-labelledby="hero-title">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 id="hero-title" class="hero-logo">
+          <Picture
+            src={logo}
+            alt="Fort Walton Beach Bowl"
+            widths={[360, 560, 720, 1125]}
+            sizes="(min-width: 64rem) 520px, 88vw"
+            formats={['avif', 'webp']}
+            loading="eager"
+            fetchpriority="high"
+          />
+        </h1>
+        <p class="hero-tagline">Where the balls keep rolling!</p>
+        <p class="hero-lede">
+          Bowling, leagues, billiards and the big game on HD, right on Beal Parkway in Fort Walton Beach.
+        </p>
+        <StatusChip class="hero-status" />
+        <div class="btn-row hero-ctas">
+          <a class="btn btn--yellow" href={business.phoneHref}>
+            <Icon name="phone" />
+            <span class="btn-stack">Call for lanes <small>{business.phone}</small></span>
+          </a>
+          <a class="btn btn--ghost" href="/parties/">
+            <Icon name="cake" />
+            Book a party
+          </a>
+        </div>
+      </div>
+
+      <aside class="cosmic-card" aria-labelledby="cosmic-title">
+        <RainbowStrip class="cosmic-strip" />
+        <div class="cosmic-body">
+          <p class="cosmic-kicker">Every Friday &amp; Saturday</p>
+          <h2 id="cosmic-title" class="cosmic-title">Cosmic Bowling</h2>
+          <p class="cosmic-when">{cosmic.when.replace('Friday & Saturday, ', '')}</p>
+          <ul class="cosmic-list">
+            {
+              cosmic.details.map((d) => (
+                <li>
+                  <Icon name="check" />
+                  {d}
+                </li>
+              ))
+            }
+          </ul>
+          <p class="cosmic-fine">{cosmic.price} {cosmic.unit}.</p>
+          <a class="cosmic-link" href="/specials/">All specials <Icon name="arrow-right" /></a>
+        </div>
+        <Starburst class="cosmic-burst">{cosmic.price.replace('.00', '')}<small>per person</small></Starburst>
+      </aside>
+    </div>
+    <LaneArt />
+  </section>
+
+  <div class="league-callout">
+    <div class="wrap">
+      <Icon name="bowling-pin" />
+      <p><strong>Heads up, it's league season.</strong> {leagueBlock.long} Bowling before or after? Call to check lanes.</p>
+    </div>
+  </div>
+
+  <section class="section" aria-labelledby="here-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Fun for everyone</p>
+        <h2 id="here-title">More than a bowling alley</h2>
+        <p>Family fun in Fort Walton Beach with something going on at every lane, table and screen.</p>
+      </div>
+      <ul class="amenities">
+        {
+          amenities.map((a, i) => (
+            <li>
+              <PanelIcon icon={a.icon} color={a.color} tilt={i % 2 ? 4 : -4} />
+              <span>
+                <strong>{a.label}</strong>
+                {a.text}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="prices-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Bowling prices</p>
+        <h2 id="prices-title">Grab a lane</h2>
+        <p>Prices are per game. Shoe rental is {shoeRental.price}.</p>
+      </div>
+      <ul class="price-cards">
+        {
+          gamePrices.map((p, i) => (
+            <li class="price-card" style={`--panel: var(--logo-${['yellow', 'orange', 'lime'][i]})`}>
+              <span class="price-tag">
+                {p.price}
+                <small>{p.unit}</small>
+              </span>
+              <h3>{p.name}</h3>
+              {p.when && <p>{p.when}</p>}
+              {p.who && (
+                <ul class="who">
+                  {p.who.map((w) => (
+                    <li>{w}</li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))
+        }
+        <li class="price-card" style="--panel: var(--logo-green)">
+          <span class="price-tag">
+            {shoeRental.price}
+            <small>{shoeRental.unit}</small>
+          </span>
+          <h3>{shoeRental.name}</h3>
+          <p>Everyone needs a pair.</p>
+        </li>
+      </ul>
+      <p class="fine-print">{priceNotes.tax} <Fragment set:html={withPhoneLinks(priceNotes.change)} /></p>
+      <a class="btn btn--ghost" href="/prices/">See all prices <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+
+  <section class="section night grain specials-band" aria-labelledby="specials-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Specials</p>
+        <h2 id="specials-title">Deals all week</h2>
+        <p>From cheap daytime games to unlimited Cosmic Bowling under the lights.</p>
+      </div>
+      <div class="ticket-grid">
+        {specials.map((s) => <SpecialTicket special={s} />)}
+      </div>
+      <p class="fine-print"><Fragment set:html={withPhoneLinks(priceNotes.change)} /></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="party-title">
+    <div class="wrap party-split">
+      <div>
+        <p class="eyebrow">Birthday parties</p>
+        <h2 id="party-title">Throw a party they'll talk about</h2>
+        <p class="lead">
+          We can provide everything you need for your child's birthday party. Bowling, shoes, pizza and soda, all in one
+          package.
+        </p>
+        <ul class="check-list">
+          {
+            birthdayPackage.includes.map((item) => (
+              <li>
+                <Icon name="check" />
+                {item}
+              </li>
+            ))
+          }
+          <li><Icon name="check" />{birthdayPackage.lanes}, {birthdayPackage.guests.toLowerCase()}</li>
+        </ul>
+        <div class="btn-row">
+          <a class="btn" href="/parties/">Party details <Icon name="arrow-right" /></a>
+          <a class="btn btn--ghost" href={business.bookingUrl}>
+            Reserve online <Icon name="external" /><span class="visually-hidden"> (Bowling Passport booking site)</span>
+          </a>
+        </div>
+      </div>
+      <div class="party-visual">
+        <Starburst class="party-burst" color="var(--logo-orange)">{birthdayPackage.price}<small>birthday package</small></Starburst>
+        <svg class="party-art" viewBox="0 0 360 300" aria-hidden="true" focusable="false">
+          <rect x="10" y="40" width="340" height="250" rx="28" fill="#3e1246"></rect>
+          <g stroke="#08090b" stroke-width="3">
+            <path d="M84 70c-22 0-36 18-36 40 0 26 22 42 36 46 14-4 36-20 36-46 0-22-14-40-36-40Z" fill="#cc5247"></path>
+            <path d="M150 50c-22 0-36 18-36 40 0 26 22 42 36 46 14-4 36-20 36-46 0-22-14-40-36-40Z" fill="#edda72"></path>
+            <path d="M276 66c-22 0-36 18-36 40 0 26 22 42 36 46 14-4 36-20 36-46 0-22-14-40-36-40Z" fill="#4c72b3"></path>
+          </g>
+          <g stroke="#fff7ec" stroke-width="2" fill="none" opacity=".8">
+            <path d="M84 156c4 30-10 50 2 80"></path>
+            <path d="M150 136c-6 40 14 60 4 100"></path>
+            <path d="M276 152c-6 30 8 50-4 84"></path>
+          </g>
+          <g stroke="#08090b" stroke-width="3">
+            <rect x="120" y="196" width="120" height="70" rx="10" fill="#efad63"></rect>
+            <rect x="120" y="196" width="120" height="22" rx="10" fill="#fff7ec"></rect>
+            <rect x="176" y="168" width="8" height="28" fill="#a9cd6a"></rect>
+          </g>
+          <path d="M180 150c5 7 8 12 8 16a8 8 0 0 1-16 0c0-4 3-9 8-16Z" fill="#edda72"></path>
+          <g transform="translate(46 186)">
+            <path d="M18 0c6 0 9 4 9 10 0 5-3 8-3.5 11-.5 4 10 13 10 30 0 13-5 21-6 28H8.5c-1-7-6-15-6-28 0-17 10.5-26 10-30C12 18 9 15 9 10c0-6 3-10 9-10Z" fill="#fffaf0" stroke="#08090b" stroke-width="3"></path>
+            <rect x="11" y="19" width="14" height="4" fill="#cc5247"></rect>
+            <rect x="11" y="26" width="14" height="4" fill="#cc5247"></rect>
+          </g>
+          <g transform="translate(276 186)">
+            <path d="M18 0c6 0 9 4 9 10 0 5-3 8-3.5 11-.5 4 10 13 10 30 0 13-5 21-6 28H8.5c-1-7-6-15-6-28 0-17 10.5-26 10-30C12 18 9 15 9 10c0-6 3-10 9-10Z" fill="#fffaf0" stroke="#08090b" stroke-width="3"></path>
+            <rect x="11" y="19" width="14" height="4" fill="#cc5247"></rect>
+            <rect x="11" y="26" width="14" height="4" fill="#cc5247"></rect>
+          </g>
+        </svg>
+        {previewMode && <p class="photo-spot">Photo spot: swap in a real party photo from the lanes.</p>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section leagues-band" aria-labelledby="leagues-title">
+    <div class="wrap leagues-inner">
+      <div>
+        <p class="eyebrow">Leagues</p>
+        <h2 id="leagues-title">Find the league that's right for you</h2>
+        <p>
+          {leagues.length} leagues across all seven days: mornings and nights, mixed, ladies, seniors (50+) and youth. All
+          skill levels welcome.
+        </p>
+      </div>
+      <a class="btn btn--yellow" href="/leagues/">See the league schedule <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="visit-title" id="hours">
+    <div class="wrap visit-grid">
+      <div>
+        <p class="eyebrow">Plan your visit</p>
+        <h2 id="visit-title">Come roll with us</h2>
+        <p class="lead">
+          <a href={business.mapsUrl}>
+            {fullAddress}<span class="visually-hidden"> (opens Google Maps)</span>
+          </a>
+        </p>
+        <p>
+          Call <a href={business.phoneHref}>{business.phone}</a> for lane availability, gift cards and party questions.
+        </p>
+        <div class="btn-row">
+          <a class="btn" href={business.mapsUrl}><Icon name="pin" /> Get directions</a>
+          <a class="btn btn--ghost" href={business.phoneHref}><Icon name="phone" /> {business.phone}</a>
+        </div>
+      </div>
+      <div class="card hours-card">
+        <h3>Hours</h3>
+        <table class="hours-table">
+          <caption class="visually-hidden">Weekly hours, Central Time</caption>
+          <tbody>
+            {
+              rows.map((r) => (
+                <tr data-day={r.dayIndex}>
+                  <th scope="row">
+                    {r.day}
+                    <span class="today-tag" hidden>
+                      Today
+                    </span>
+                  </th>
+                  <td>{r.range}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+        <p class="fine-print">{hoursNote} {leagueBlock.short} (league play).</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { centralNow } from '../lib/time';
+  const { day } = centralNow();
+  const row = document.querySelector<HTMLElement>(`.hours-table tr[data-day="${day}"]`);
+  if (row) {
+    row.classList.add('is-today');
+    row.querySelector<HTMLElement>('.today-tag')?.removeAttribute('hidden');
+  }
+</script>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero {
+    overflow: hidden;
+    padding-top: clamp(2rem, 5vw, 4rem);
+  }
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60% 55% at 15% 20%, rgb(118 54 255 / 0.35), transparent 70%),
+      radial-gradient(50% 50% at 85% 30%, rgb(24 12 242 / 0.4), transparent 70%),
+      radial-gradient(40% 40% at 50% 100%, rgb(42 197 253 / 0.18), transparent 70%);
+  }
+  .hero-grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 64rem) {
+    .hero-grid {
+      grid-template-columns: 1.25fr 1fr;
+    }
+  }
+  .hero-logo {
+    margin: 0 0 var(--space-m);
+    max-width: 520px;
+    filter: drop-shadow(0 0 28px rgb(237 218 114 / 0.28)) drop-shadow(0 10px 24px rgb(0 0 0 / 0.45));
+  }
+  .hero-logo :global(img) {
+    width: 100%;
+    height: auto;
+  }
+  .hero-tagline {
+    margin: 0 0 var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1.05;
+    color: var(--logo-yellow);
+  }
+  .hero-lede {
+    max-width: 34rem;
+    font-size: var(--step-1);
+    color: var(--on-night);
+  }
+  .hero-ctas {
+    margin-top: var(--space-l);
+  }
+  .hero :global(.hero-status) {
+    margin-top: var(--space-xs);
+  }
+
+  .cosmic-card {
+    position: relative;
+    background: var(--site-deep-plum);
+    border-radius: var(--radius-l);
+    box-shadow:
+      0 0 0 2px rgb(42 197 253 / 0.55),
+      0 0 40px rgb(42 197 253 / 0.25),
+      0 24px 50px rgb(0 0 0 / 0.45);
+    overflow: visible;
+  }
+  @media (min-width: 64rem) {
+    .cosmic-card {
+      transform: rotate(2deg);
+    }
+  }
+  .cosmic-card :global(.cosmic-strip) {
+    height: 30px;
+    margin: 1rem 1rem 0;
+    border-radius: 6px;
+  }
+  .cosmic-fine {
+    margin: 0 0 0.25rem;
+    font-size: var(--step--1);
+    color: var(--on-night-soft);
+  }
+  .cosmic-body {
+    padding: var(--space-l) var(--space-l) var(--space-xl);
+  }
+  .cosmic-kicker {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: var(--step--1);
+    color: var(--on-night-soft);
+  }
+  .cosmic-title {
+    margin: 0.1rem 0 0.2rem;
+    font-family: var(--font-script);
+    font-size: clamp(2.6rem, 2rem + 3vw, 4rem);
+    line-height: 1.1;
+    color: var(--site-cyan);
+    text-shadow:
+      0 0 10px rgb(42 197 253 / 0.65),
+      0 0 32px rgb(42 197 253 / 0.4);
+  }
+  .cosmic-when {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--logo-yellow);
+    margin-bottom: var(--space-s);
+  }
+  .cosmic-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-m);
+    display: grid;
+    gap: 0.35rem;
+  }
+  .cosmic-list li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-weight: 700;
+  }
+  .cosmic-list :global(svg) {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--logo-lime);
+  }
+  .cosmic-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    font-weight: 800;
+  }
+  .cosmic-link :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+  .cosmic-card :global(.cosmic-burst) {
+    --burst-size: 8rem;
+    position: absolute;
+    right: -1.25rem;
+    top: -2.25rem;
+  }
+  @media (max-width: 30rem) {
+    .cosmic-card :global(.cosmic-burst) {
+      --burst-size: 6.5rem;
+      right: -0.5rem;
+      top: -1.75rem;
+    }
+  }
+  .hero :global(.lane-art) {
+    margin-top: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  .league-callout {
+    background: var(--logo-yellow);
+    color: var(--ink);
+    border-block: 3px solid #08090b;
+  }
+  .league-callout .wrap {
+    display: flex;
+    gap: var(--space-s);
+    align-items: flex-start;
+    padding-block: var(--space-m);
+  }
+  .league-callout :global(svg) {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+  }
+  .league-callout p {
+    margin: 0;
+  }
+
+  /* ---------- Amenities ---------- */
+  .amenities {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-l) var(--space-xl);
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  }
+  .amenities li {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+  }
+  .amenities strong {
+    display: block;
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  /* ---------- Prices ---------- */
+  .price-cards {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-l);
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+  }
+  .price-card {
+    position: relative;
+    padding: var(--space-l);
+    padding-top: calc(var(--space-l) + 1.9rem);
+    background: var(--paper);
+    border-radius: var(--radius);
+    border: 2px solid var(--line);
+  }
+  .price-card h3 {
+    margin-bottom: 0.35rem;
+  }
+  .price-card p,
+  .price-card .who {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+  .price-card .who {
+    list-style: none;
+    padding: 0;
+  }
+  .price-tag {
+    position: absolute;
+    top: -0.9rem;
+    left: var(--space-m);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    background: var(--panel);
+    border: 3px solid #08090b;
+    border-radius: 6px;
+    transform: rotate(-3deg);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1;
+    color: var(--ink);
+  }
+  .price-tag small {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 0.45em;
+  }
+  .section--white .fine-print {
+    margin-bottom: var(--space-l);
+  }
+
+  /* ---------- Specials ---------- */
+  .specials-band {
+    background:
+      radial-gradient(60% 80% at 100% 0%, rgb(24 12 242 / 0.35), transparent 70%),
+      radial-gradient(50% 70% at 0% 100%, rgb(118 54 255 / 0.3), transparent 70%),
+      var(--night);
+  }
+  .ticket-grid {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    margin-bottom: var(--space-l);
+  }
+
+  /* ---------- Parties ---------- */
+  .party-split {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: center;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 56rem) {
+    .party-split {
+      grid-template-columns: 1.1fr 1fr;
+    }
+  }
+  .lead {
+    font-size: var(--step-1);
+  }
+  .check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-l);
+    display: grid;
+    gap: 0.45rem;
+  }
+  .check-list li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-weight: 700;
+  }
+  .check-list :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--site-electric);
+  }
+  .party-visual {
+    position: relative;
+  }
+  .party-art {
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+  }
+  .party-visual :global(.party-burst) {
+    --burst-size: 8.5rem;
+    position: absolute;
+    top: -1.5rem;
+    right: 0;
+    z-index: 1;
+  }
+  .photo-spot {
+    margin: var(--space-s) auto 0;
+    max-width: 30rem;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  /* ---------- Leagues band ---------- */
+  .leagues-band {
+    background: var(--site-electric);
+    color: #fff;
+    --focus: var(--logo-yellow);
+  }
+  .leagues-band h2 {
+    color: #fff;
+  }
+  .leagues-band .eyebrow {
+    color: #fff;
+  }
+  .leagues-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-l);
+    align-items: center;
+    justify-content: space-between;
+  }
+  .leagues-inner > div {
+    max-width: 44rem;
+  }
+  .leagues-inner p {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  /* ---------- Visit ---------- */
+  .visit-grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 56rem) {
+    .visit-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .hours-table th,
+  .hours-table td {
+    padding: 0.55rem 0.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .hours-table td {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .hours-table tr.is-today {
+    background: rgb(237 218 114 / 0.35);
+    font-weight: 800;
+  }
+  .today-tag {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0 0.45rem;
+    border-radius: var(--pill);
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.8em;
+  }
+</style>

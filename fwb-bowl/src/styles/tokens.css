@@ -1,0 +1,71 @@
+/*
+ * Design tokens. Brand colors come straight from Fort Walton Beach Bowl's own
+ * logo and current website. `npm run contrast` reads this file and checks every
+ * text/background pairing the site uses against WCAG 2.2 AA.
+ */
+:root {
+  /* Logo panel colors, sampled from the FWB BOWL logo */
+  --logo-orange: #efad63;
+  --logo-yellow: #edda72;
+  --logo-lime: #a9cd6a;
+  --logo-green: #6cb762;
+  --logo-blue: #4c72b3;
+  --logo-red: #cc5247;
+  --logo-purple: #835ba1;
+
+  /* Colors from the current fwbbowl.com site */
+  --site-electric: #180cf2;
+  --site-violet: #7636ff;
+  --site-plum: #601d6c;
+  --site-deep-plum: #3e1246;
+  --site-cyan: #2ac5fd;
+
+  /* Neutrals */
+  --ink: #1f0a26;
+  --ink-soft: #4a3653;
+  --paper: #fffbf3;
+  --card: #ffffff;
+  --line: #e7dcea;
+  --night: #16061f;
+  --night-raised: #3e1246;
+  --on-night: #fff7ec;
+  --on-night-soft: #d9cce3;
+
+  /* Roles */
+  --link: var(--site-electric);
+  --link-on-night: var(--site-cyan);
+  --accent-on-night: var(--logo-yellow);
+  --focus: var(--site-electric);
+
+  /* Type */
+  --font-display: 'Bungee', 'Arial Black', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible Next', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-script: 'Yellowtail', 'Brush Script MT', cursive;
+
+  --step--1: clamp(0.94rem, 0.91rem + 0.15vw, 1rem);
+  --step-0: clamp(1.06rem, 1.01rem + 0.25vw, 1.19rem);
+  --step-1: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.05rem);
+  --step-3: clamp(1.85rem, 1.5rem + 1.75vw, 2.85rem);
+  --step-4: clamp(2.25rem, 1.6rem + 3.2vw, 4.25rem);
+
+  /* Space */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2.25rem;
+  --space-2xl: clamp(3rem, 2.2rem + 4vw, 5.5rem);
+
+  --radius-s: 10px;
+  --radius: 18px;
+  --radius-l: 28px;
+  --pill: 999px;
+
+  --shadow-1: 0 1px 2px rgb(31 10 38 / 0.06), 0 4px 14px rgb(31 10 38 / 0.07);
+  --shadow-2: 0 2px 6px rgb(31 10 38 / 0.07), 0 18px 40px rgb(31 10 38 / 0.12);
+
+  --wrap: 1200px;
+  --header-h: 4.5rem;
+}

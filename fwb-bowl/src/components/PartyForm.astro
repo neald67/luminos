@@ -1,0 +1,407 @@
+---
+// Party inquiry form. Collects only what's needed to reply: no payment info,
+// nothing about the birthday kid. Netlify Forms handles delivery at launch;
+// in preview mode it never sends anything.
+import Icon from './Icon.astro';
+import { business, previewMode } from '../data/site';
+---
+
+<form
+  id="party-form"
+  class="party-form"
+  name="party-inquiry"
+  method="POST"
+  action="/parties/thanks/"
+  data-preview={previewMode ? 'true' : 'false'}
+  data-netlify={previewMode ? undefined : 'true'}
+  netlify-honeypot={previewMode ? undefined : 'company'}
+  aria-describedby="pf-intro"
+>
+  <input type="hidden" name="form-name" value="party-inquiry" />
+
+  <div class="error-summary" id="pf-errors" tabindex="-1" aria-labelledby="pf-errors-title" hidden>
+    <h3 id="pf-errors-title">Please fix these before sending:</h3>
+    <ul></ul>
+  </div>
+
+  <p id="pf-intro" class="form-intro">
+    For parents, guardians and anyone 18 or older. Fields marked <strong>(required)</strong> must be filled in. Please don't
+    include children's full names, birthdates or photos.
+  </p>
+
+  <div class="field">
+    <label for="pf-name">Your name <span class="req">(required)</span></label>
+    <input id="pf-name" name="name" type="text" autocomplete="name" required aria-describedby="pf-name-error" />
+    <p class="field-error" id="pf-name-error" hidden></p>
+  </div>
+
+  <fieldset class="field-group" aria-describedby="pf-contact-hint pf-contact-error">
+    <legend>How can we reach you? <span class="req">(phone or email required)</span></legend>
+    <p class="hint" id="pf-contact-hint">Give us at least one. We'll only use it to reply about your party.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="pf-phone">Phone</label>
+        <input id="pf-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="pf-phone-error" />
+        <p class="field-error" id="pf-phone-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="pf-email">Email</label>
+        <input id="pf-email" name="email" type="email" autocomplete="email" aria-describedby="pf-email-error" />
+        <p class="field-error" id="pf-email-error" hidden></p>
+      </div>
+    </div>
+    <p class="field-error" id="pf-contact-error" hidden></p>
+  </fieldset>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="pf-date">Preferred date <span class="req">(required)</span></label>
+      <input id="pf-date" name="date" type="date" required aria-describedby="pf-date-hint pf-date-error" />
+      <p class="hint" id="pf-date-hint">Parties must be reserved in advance.</p>
+      <p class="field-error" id="pf-date-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="pf-guests">Number of guests <span class="req">(required)</span></label>
+      <input
+        id="pf-guests"
+        name="guests"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        max="200"
+        step="1"
+        required
+        aria-describedby="pf-guests-hint pf-guests-error"
+      />
+      <p class="hint" id="pf-guests-hint">The Birthday Package covers up to 12 kids.</p>
+      <p class="field-error" id="pf-guests-error" hidden></p>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pf-package">What are you planning? <span class="opt">(optional)</span></label>
+    <select id="pf-package" name="package">
+      <option value="">Choose one</option>
+      <option>Birthday Package ($150, up to 12 kids)</option>
+      <option>Corporate party</option>
+      <option>Something else</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="pf-notes">Anything else? <span class="opt">(optional)</span></label>
+    <textarea id="pf-notes" name="notes" rows="4" maxlength="1000" aria-describedby="pf-notes-hint"></textarea>
+    <p class="hint" id="pf-notes-hint">Preferred time, questions, special requests. No children's names or birthdates, please.</p>
+  </div>
+
+  <p class="hp" aria-hidden="true">
+    <label>Leave this empty <input name="company" tabindex="-1" autocomplete="off" /></label>
+  </p>
+
+  <div class="field check">
+    <input id="pf-adult" name="adult" type="checkbox" value="yes" required aria-describedby="pf-adult-error" />
+    <label for="pf-adult">I'm 18 or older. <span class="req">(required)</span></label>
+    <p class="field-error" id="pf-adult-error" hidden></p>
+  </div>
+
+  <p class="privacy-note">
+    We use this only to reply about your party. No marketing, no selling or sharing. Read the <a href="/privacy/"
+      >privacy policy</a
+    >.
+  </p>
+
+  {
+    previewMode && (
+      <p class="preview-note" id="pf-preview-note">
+        <strong>Concept preview:</strong> this form doesn't send anything yet. To book now, call{' '}
+        <a href={business.phoneHref}>{business.phone}</a>.
+      </p>
+    )
+  }
+
+  <button class="btn" type="submit" disabled={previewMode}>
+    <Icon name="calendar" />
+    Send party inquiry
+  </button>
+
+  <div class="form-status" role="status" tabindex="-1" hidden></div>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#party-form');
+
+  if (form) {
+    const preview = form.dataset.preview === 'true';
+    const $ = <T extends HTMLElement>(sel: string) => form.querySelector<T>(sel)!;
+    const submit = $<HTMLButtonElement>('button[type="submit"]');
+    const summary = $<HTMLDivElement>('#pf-errors');
+    const status = $<HTMLDivElement>('.form-status');
+    const name = $<HTMLInputElement>('#pf-name');
+    const phone = $<HTMLInputElement>('#pf-phone');
+    const email = $<HTMLInputElement>('#pf-email');
+    const date = $<HTMLInputElement>('#pf-date');
+    const guests = $<HTMLInputElement>('#pf-guests');
+    const adult = $<HTMLInputElement>('#pf-adult');
+
+    form.noValidate = true;
+    submit.disabled = false;
+
+    // Earliest date = today in Fort Walton Beach.
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
+    date.min = today;
+
+    type Problem = { field: HTMLElement; errorId: string; message: string };
+
+    const setError = (input: HTMLInputElement | null, errorId: string, message: string | null) => {
+      const el = form.querySelector<HTMLElement>(`#${errorId}`)!;
+      el.textContent = message ?? '';
+      el.hidden = !message;
+      if (input) {
+        if (message) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+      }
+    };
+
+    const digits = (v: string) => v.replace(/\D/g, '');
+    const phoneOk = (v: string) => {
+      const d = digits(v);
+      return d.length === 10 || (d.length === 11 && d.startsWith('1'));
+    };
+    const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+    function check(): Problem[] {
+      const problems: Problem[] = [];
+      const add = (input: HTMLInputElement | null, field: HTMLElement, errorId: string, message: string) => {
+        setError(input, errorId, message);
+        problems.push({ field, errorId, message });
+      };
+
+      if (!name.value.trim()) add(name, name, 'pf-name-error', 'Enter your name.');
+      else setError(name, 'pf-name-error', null);
+
+      const p = phone.value.trim();
+      const e = email.value.trim();
+      setError(null, 'pf-contact-error', null);
+      if (!p && !e) {
+        phone.setAttribute('aria-invalid', 'true');
+        email.setAttribute('aria-invalid', 'true');
+        add(null, phone, 'pf-contact-error', 'Enter a phone number or an email address so we can reply.');
+      } else {
+        phone.removeAttribute('aria-invalid');
+        email.removeAttribute('aria-invalid');
+      }
+      if (p && !phoneOk(p)) add(phone, phone, 'pf-phone-error', 'Enter a 10-digit phone number, like 850-555-0123.');
+      else setError(phone, 'pf-phone-error', null);
+      if (e && !emailOk(e)) add(email, email, 'pf-email-error', 'Enter an email address like name@example.com.');
+      else setError(email, 'pf-email-error', null);
+
+      if (!date.value) add(date, date, 'pf-date-error', 'Choose a date for your party.');
+      else if (date.value < today) add(date, date, 'pf-date-error', "Choose a date that hasn't passed yet.");
+      else setError(date, 'pf-date-error', null);
+
+      const g = Number(guests.value);
+      if (!guests.value) add(guests, guests, 'pf-guests-error', 'Enter how many guests are coming.');
+      else if (!Number.isInteger(g) || g < 1 || g > 200)
+        add(guests, guests, 'pf-guests-error', 'Enter a whole number of guests between 1 and 200.');
+      else setError(guests, 'pf-guests-error', null);
+
+      if (!adult.checked) add(adult, adult, 'pf-adult-error', "Confirm you're 18 or older to send this form.");
+      else setError(adult, 'pf-adult-error', null);
+
+      return problems;
+    }
+
+    function showSummary(problems: Problem[]) {
+      const list = summary.querySelector('ul')!;
+      list.replaceChildren(
+        ...problems.map((pr) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = `#${pr.field.id}`;
+          a.textContent = pr.message;
+          a.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            pr.field.focus();
+          });
+          li.append(a);
+          return li;
+        }),
+      );
+      summary.hidden = false;
+      summary.focus();
+    }
+
+    form.addEventListener('submit', (ev) => {
+      status.hidden = true;
+      const problems = check();
+      if (problems.length) {
+        ev.preventDefault();
+        showSummary(problems);
+        return;
+      }
+      summary.hidden = true;
+      if (preview) {
+        ev.preventDefault();
+        status.textContent =
+          'Looks good! This is a concept preview, so nothing was sent. On the live site, this inquiry goes straight to Fort Walton Beach Bowl.';
+        status.hidden = false;
+        status.focus();
+      }
+    });
+
+    // Clear a field's error as soon as it's fixed.
+    form.addEventListener('change', () => {
+      if (!summary.hidden) {
+        const remaining = check();
+        if (!remaining.length) summary.hidden = true;
+      }
+    });
+  }
+</script>
+
+<style>
+  .party-form {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 44rem;
+  }
+  .form-intro {
+    margin: 0;
+  }
+  .field {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+  }
+  .field-row {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .field-group {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-s);
+  }
+  legend {
+    padding: 0;
+    font-weight: 800;
+  }
+  label {
+    font-weight: 800;
+  }
+  .req,
+  .opt {
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  input:not([type='checkbox']),
+  select,
+  textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.65rem 0.85rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-s);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+  }
+  textarea {
+    resize: vertical;
+  }
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--site-electric);
+    outline-offset: 2px;
+  }
+  [aria-invalid='true'] {
+    border-color: #b3261e !important;
+    border-width: 3px !important;
+  }
+  .field-error {
+    margin: 0;
+    display: flex;
+    gap: 0.4rem;
+    font-weight: 800;
+    color: #b3261e;
+  }
+  .field-error::before {
+    content: '⚠';
+    speak: never;
+  }
+  .check {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 0.75rem;
+  }
+  .check input {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    accent-color: var(--site-electric);
+  }
+  .check .field-error {
+    grid-column: 1 / -1;
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .privacy-note {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+  .preview-note {
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-left: 6px solid var(--logo-orange);
+    background: rgb(239 173 99 / 0.2);
+    border-radius: var(--radius-s);
+  }
+  .party-form .btn {
+    justify-self: start;
+  }
+  .party-form .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .error-summary {
+    padding: var(--space-m) var(--space-l);
+    border: 3px solid #b3261e;
+    border-radius: var(--radius-s);
+    background: #fff5f4;
+  }
+  .error-summary:focus-visible {
+    outline: 3px solid var(--site-electric);
+  }
+  .error-summary h3 {
+    color: #b3261e;
+    margin-bottom: 0.4rem;
+  }
+  .error-summary ul {
+    margin: 0;
+  }
+  .error-summary a {
+    color: #b3261e;
+    font-weight: 800;
+  }
+  .form-status {
+    padding: var(--space-m) var(--space-l);
+    border: 3px solid var(--logo-green);
+    border-radius: var(--radius-s);
+    background: rgb(108 183 98 / 0.15);
+    font-weight: 700;
+  }
+</style>

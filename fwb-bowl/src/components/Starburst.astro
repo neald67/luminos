@@ -1,0 +1,51 @@
+---
+// Mustard-yellow starburst badge for prices. The text inside is real text.
+interface Props {
+  color?: string;
+  class?: string;
+}
+const { color = 'var(--logo-yellow)', class: className } = Astro.props;
+const points =
+  '100,2 114.4,27.4 137.5,9.5 141.1,38.5 169.3,30.7 161.5,58.9 190.5,62.5 172.6,85.6 198,100 172.6,114.4 190.5,137.5 161.5,141.1 169.3,169.3 141.1,161.5 137.5,190.5 114.4,172.6 100,198 85.6,172.6 62.5,190.5 58.9,161.5 30.7,169.3 38.5,141.1 9.5,137.5 27.4,114.4 2,100 27.4,85.6 9.5,62.5 38.5,58.9 30.7,30.7 58.9,38.5 62.5,9.5 85.6,27.4';
+---
+
+<div class:list={['burst', className]}>
+  <svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+    <polygon points={points} fill={color} stroke="#08090b" stroke-width="6" stroke-linejoin="round"></polygon>
+  </svg>
+  <div class="burst-text"><slot /></div>
+</div>
+
+<style>
+  .burst {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--burst-size, 8rem);
+    aspect-ratio: 1;
+    color: var(--ink);
+  }
+  .burst svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .burst-text {
+    position: relative;
+    max-width: 68%;
+    text-align: center;
+    line-height: 1;
+    transform: rotate(-8deg);
+    font-family: var(--font-display);
+    font-size: calc(var(--burst-size, 8rem) * 0.2);
+  }
+  .burst-text :global(small) {
+    display: block;
+    margin-top: 0.3em;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 0.38em;
+    line-height: 1.15;
+  }
+</style>

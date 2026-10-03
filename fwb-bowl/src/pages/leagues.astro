@@ -1,0 +1,235 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import PanelIcon from '../components/PanelIcon.astro';
+import { business, leagueBlock, leaguePrices, leagueSeason, leagues } from '../data/site';
+import { withPhoneLinks } from '../lib/text';
+
+const colors = ['orange', 'green', 'yellow', 'blue', 'lime', 'orange', 'purple', 'yellow', 'green'] as const;
+---
+
+<Base
+  title="Bowling Leagues | Fort Walton Beach Bowl"
+  description="Bowling leagues seven days a week at Fort Walton Beach Bowl: mixed, ladies, seniors (50+), youth and open leagues. League games are $2 weekday mornings and $3 other times."
+>
+  <PageHero
+    eyebrow="Leagues"
+    title="Find the league that's right for you"
+    lede="Good friends. Great bowling. Even better times. All skill levels welcome."
+  >
+    <div class="btn-row">
+      <a class="btn btn--yellow" href={business.phoneHref}><Icon name="phone" /> Call {business.phone}</a>
+    </div>
+  </PageHero>
+
+  <section class="section" aria-labelledby="schedule-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">{leagueSeason.name}</p>
+        <h2 id="schedule-title">League schedule</h2>
+        <p>{leagueSeason.status} <Fragment set:html={withPhoneLinks(leagueSeason.signUp)} /></p>
+      </div>
+
+      <div class="table-wrap schedule">
+        <table>
+          <caption class="visually-hidden">Fall league schedule</caption>
+          <thead>
+            <tr>
+              <th scope="col">Day</th>
+              <th scope="col">League</th>
+              <th scope="col">Bowl time</th>
+              <th scope="col">Season started</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              leagues.map((l, i) => (
+                <tr>
+                  <td>{l.day}</td>
+                  <th scope="row">
+                    <span class="league-name" style={`--panel: var(--logo-${colors[i]})`}>
+                      {l.name}
+                    </span>
+                  </th>
+                  <td class="time">{l.bowlTime}</td>
+                  <td>{l.start}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="fine-print">
+        League meetings for the fall season were held in August and September. Ask at the front desk about openings and
+        the next season.
+      </p>
+    </div>
+  </section>
+
+  <section class="section night grain" aria-labelledby="join-title">
+    <div class="wrap join-grid">
+      <div>
+        <p class="eyebrow">How to join</p>
+        <h2 id="join-title">More leagues. More friends. More fun.</h2>
+        <ol class="steps">
+          <li>
+            <PanelIcon icon="phone" color="yellow" tilt={-4} />
+            <span><strong>Call or stop by.</strong> Sign up at the front desk or call <a href={business.phoneHref}>{business.phone}</a> for more info.</span>
+          </li>
+          <li>
+            <PanelIcon icon="trophy" color="lime" tilt={4} />
+            <span><strong>Pick your night.</strong> Mornings or nights, mixed, ladies, seniors (50+), youth or open.</span>
+          </li>
+          <li>
+            <PanelIcon icon="bowling-pin" color="orange" tilt={-4} />
+            <span><strong>Roll with us.</strong> All skill levels welcome.</span>
+          </li>
+        </ol>
+      </div>
+      <div class="card league-rates">
+        <h3>League bowler rates</h3>
+        <ul>
+          {
+            leaguePrices.map((p) => (
+              <li>
+                <span class="rate">{p.price}</span>
+                <span>
+                  {p.unit}
+                  <br />
+                  <strong>{p.when}</strong>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="fine-print">Prices do not include sales tax. Prices subject to change.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="open-title">
+    <div class="wrap open-note">
+      <Icon name="bowling-pin" />
+      <div>
+        <h2 id="open-title" class="open-title">Coming for open bowling?</h2>
+        <p>{leagueBlock.long} Call <a href={business.phoneHref}>{business.phone}</a> for lane availability.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .schedule {
+    border: 3px solid #08090b;
+    background: var(--card);
+    box-shadow: 8px 8px 0 var(--logo-purple);
+    margin-bottom: var(--space-m);
+  }
+  .schedule table {
+    min-width: 36rem;
+  }
+  .schedule thead th {
+    padding: var(--space-s) var(--space-m);
+    background: var(--site-deep-plum);
+    color: #fff;
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .schedule td,
+  .schedule tbody th {
+    padding: var(--space-s) var(--space-m);
+    border-top: 2px solid var(--line);
+    vertical-align: middle;
+  }
+  .schedule tbody td:first-child {
+    font-weight: 800;
+  }
+  .league-name {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border: 2px solid #08090b;
+    border-radius: 5px;
+    background: var(--panel);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-0);
+    transform: rotate(-1.5deg);
+  }
+  tr:nth-child(4) .league-name,
+  tr:nth-child(7) .league-name {
+    color: #fff;
+  }
+  .time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .join-grid {
+    display: grid;
+    gap: var(--space-2xl);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 56rem) {
+    .join-grid {
+      grid-template-columns: 1.4fr 1fr;
+    }
+  }
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-l);
+  }
+  .steps li {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+  }
+  .league-rates h3 {
+    color: var(--logo-yellow);
+  }
+  .league-rates ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-m);
+    display: grid;
+    gap: var(--space-m);
+  }
+  .league-rates li {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+  }
+  .rate {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--logo-yellow);
+    line-height: 1;
+  }
+  .open-note {
+    display: flex;
+    gap: var(--space-m);
+    align-items: flex-start;
+    padding: var(--space-l);
+    border-radius: var(--radius);
+    background: var(--logo-yellow);
+    border: 3px solid #08090b;
+  }
+  .open-note > :global(svg) {
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+  }
+  .open-title {
+    font-size: var(--step-2);
+    margin-bottom: 0.3rem;
+  }
+  .open-note p {
+    margin: 0;
+  }
+</style>

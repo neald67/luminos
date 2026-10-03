@@ -1,0 +1,89 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { business, previewMode } from '../data/site';
+import { businessSchema } from '../lib/schema';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Leave out on pages that shouldn't be indexed even after launch (e.g. thank-you page). */
+  noindex?: boolean;
+}
+
+const { title, description, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, business.siteUrl).href;
+const ogImage = new URL('/og-image.png', business.siteUrl).href;
+const robots = previewMode || noindex ? 'noindex, nofollow' : 'index, follow';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#16061f" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={business.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Fort Walton Beach Bowl logo over a glowing cosmic bowling lane" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <link rel="preload" href="/fonts/atkinson-hyperlegible-next-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/bungee-latin-400.woff2" as="font" type="font/woff2" crossorigin />
+
+    <script type="application/ld+json" set:html={JSON.stringify(businessSchema())} />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    {
+      previewMode && (
+        <div class="preview-bar" role="note" aria-label="Concept preview">
+          <strong>Concept preview.</strong> Not the official Fort Walton Beach Bowl website.
+        </div>
+      )
+    }
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .preview-bar {
+    background: var(--ink);
+    color: var(--on-night);
+    text-align: center;
+    padding: 0.4rem 1rem;
+    font-size: var(--step--1);
+    line-height: 1.4;
+  }
+  .preview-bar strong {
+    color: var(--logo-yellow);
+  }
+  main:focus {
+    outline: none;
+  }
+</style>

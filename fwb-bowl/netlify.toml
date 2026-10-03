@@ -1,0 +1,8 @@
+# Netlify settings. If this site lives in a subfolder of a bigger repo, set
+# "Base directory" to that folder (fwb-bowl) in Netlify's site settings.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

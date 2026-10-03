@@ -1,0 +1,150 @@
+---
+// One special, styled as a ticket stub: when on the left, details in the middle, price on the stub.
+import type { Special } from '../data/site';
+interface Props {
+  special: Special;
+  headingLevel?: 'h2' | 'h3';
+  /** Override the "when" text, e.g. just the times on the by-day list */
+  when?: string;
+  tone?: 'night' | 'day';
+}
+const { special, headingLevel = 'h3', when = special.when, tone = 'night' } = Astro.props;
+const Heading = headingLevel;
+const [whenDays, whenTime] = when.includes(', ') ? when.split(', ') : [when, ''];
+const accent = { cosmic: 'var(--site-cyan)', 'after-league': 'var(--logo-orange)', daytime: 'var(--logo-lime)' }[special.id] ?? 'var(--logo-yellow)';
+---
+
+<article class:list={['ticket', `ticket--${tone}`]} style={`--accent: ${accent}`}>
+  <div class="ticket-main">
+    <Heading class:list={['ticket-name', { 'is-script': special.id === 'cosmic' }]}>{special.name}</Heading>
+    <p class="ticket-when">
+      {whenDays}{whenTime && ', '}{whenTime && <span class="nowrap">{whenTime}</span>}
+    </p>
+    {
+      special.details.length > 0 && (
+        <ul class="ticket-details">
+          {special.details.map((d) => (
+            <li>{d}</li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+  <div class="ticket-stub">
+    <span class="ticket-price">{special.price}</span>
+    <span class="ticket-unit">{special.unit}</span>
+  </div>
+</article>
+
+<style>
+  .ticket {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 2px solid var(--accent);
+  }
+  .ticket--night {
+    background: var(--night-raised);
+    color: var(--on-night);
+  }
+  .ticket--day {
+    background: var(--card);
+    color: var(--ink);
+    border-color: var(--ink);
+    box-shadow: var(--shadow-1);
+  }
+  /* die-cut notches on the perforation line */
+  .ticket::before,
+  .ticket::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--stub-w, 8.5rem) - 0.75rem);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--notch-bg, var(--night));
+    border: 2px solid var(--accent);
+  }
+  .ticket::before {
+    top: -0.85rem;
+  }
+  .ticket::after {
+    bottom: -0.85rem;
+  }
+  .ticket--day {
+    --notch-bg: var(--paper);
+  }
+  .ticket-main {
+    padding: var(--space-l);
+  }
+  .ticket-name {
+    margin: 0 0 0.3rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-2);
+    line-height: 1.05;
+    color: var(--accent);
+  }
+  .ticket--day .ticket-name {
+    color: var(--ink);
+  }
+  .ticket-name.is-script {
+    font-family: var(--font-script);
+    font-size: calc(var(--step-2) * 1.35);
+    text-shadow: 0 0 18px rgb(42 197 253 / 0.55);
+  }
+  .ticket-when {
+    margin: 0 0 0.5rem;
+    font-weight: 800;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+  .ticket-details {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+  .ticket-stub {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+    width: var(--stub-w, 8.5rem);
+    padding: var(--space-m);
+    border-left: 3px dashed var(--accent);
+    text-align: center;
+  }
+  .ticket-price {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1;
+    color: var(--logo-yellow);
+  }
+  .ticket--day .ticket-price {
+    color: var(--ink);
+  }
+  .ticket-unit {
+    font-size: var(--step--1);
+    line-height: 1.3;
+  }
+  @media (max-width: 26rem) {
+    .ticket {
+      grid-template-columns: 1fr;
+    }
+    .ticket::before,
+    .ticket::after {
+      display: none;
+    }
+    .ticket-stub {
+      width: auto;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 0.6rem;
+      border-left: 0;
+      border-top: 3px dashed var(--accent);
+    }
+  }
+</style>

@@ -1,0 +1,230 @@
+---
+import Base from '../layouts/Base.astro';
+import { withPhoneLinks } from '../lib/text';
+import PageHero from '../components/PageHero.astro';
+import SpecialTicket from '../components/SpecialTicket.astro';
+import Icon from '../components/Icon.astro';
+import { business, dayNames, leagueBlock, priceNotes, specials } from '../data/site';
+import { formatTime, hoursRows, specialsOn } from '../lib/time';
+
+// Monday first, like the week on a calendar at the front desk.
+const week = hoursRows().map((r) => ({
+  ...r,
+  specials: specialsOn(r.dayIndex),
+  league: leagueBlock.days.includes(r.dayIndex),
+}));
+const timeOf = (s: (typeof specials)[number]) => `${formatTime(s.start)}–${formatTime(s.end)}`;
+---
+
+<Base
+  title="Bowling Specials: Cosmic Bowling & More | Fort Walton Beach Bowl"
+  description="Cosmic Bowling Friday and Saturday 9 PM–1 AM, $14 unlimited with shoes. After League Special Mon–Thu 9–11 PM, $2.50 a game. Daytime Special Mon–Fri, $4 a game."
+>
+  <PageHero eyebrow="Specials" title="Specials all week" lede="Here's what's running each day, from cheap daytime games to unlimited Cosmic Bowling." />
+
+  <section class="section night grain featured" aria-labelledby="featured-title">
+    <div class="wrap">
+      <h2 id="featured-title" class="visually-hidden">The specials</h2>
+      <div class="ticket-grid">
+        {specials.map((s) => <SpecialTicket special={s} />)}
+      </div>
+      <p class="fine-print"><Fragment set:html={withPhoneLinks(priceNotes.change)} /></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="week-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Day by day</p>
+        <h2 id="week-title">This week at the lanes</h2>
+        <p>Every day, with its hours and specials.</p>
+      </div>
+      <ol class="week">
+        {
+          week.map((d) => (
+            <li class="day" data-day={d.dayIndex}>
+              <div class="day-head">
+                <h3>
+                  {d.day}
+                  <span class="today-tag" hidden>
+                    Today
+                  </span>
+                </h3>
+                <p class="day-hours">
+                  <Icon name="clock" />
+                  <span>Open {d.range}</span>
+                </p>
+              </div>
+              {d.specials.length > 0 ? (
+                <ul class="day-specials">
+                  {d.specials.map((s) => (
+                    <li>
+                      <span class="day-special-name">{s.name}</span>
+                      <span class="day-special-time">{timeOf(s)}</span>
+                      <span class="day-special-price">
+                        {s.price} <small>{s.unit}</small>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="day-none">No specials today. Regular prices all day.</p>
+              )}
+              {d.league && (
+                <p class="day-league">
+                  <Icon name="bowling-pin" />
+                  <span>League play: no open lanes {formatTime(leagueBlock.start)}–{formatTime(leagueBlock.end)}.</span>
+                </p>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+      <p class="fine-print">
+        <Fragment set:html={withPhoneLinks(priceNotes.change)} />
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { centralNow } from '../lib/time';
+  const { day } = centralNow();
+  const el = document.querySelector<HTMLElement>(`.week .day[data-day="${day}"]`);
+  if (el) {
+    el.classList.add('is-today');
+    el.querySelector('.today-tag')?.removeAttribute('hidden');
+  }
+</script>
+
+<style>
+  .featured {
+    background:
+      radial-gradient(60% 80% at 100% 0%, rgb(24 12 242 / 0.35), transparent 70%),
+      radial-gradient(50% 70% at 0% 100%, rgb(118 54 255 / 0.3), transparent 70%),
+      var(--night);
+  }
+  .ticket-grid {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    margin-bottom: var(--space-l);
+  }
+  .week {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-l);
+    display: grid;
+    gap: var(--space-m);
+  }
+  .day {
+    display: grid;
+    gap: var(--space-s) var(--space-l);
+    grid-template-columns: 1fr;
+    padding: var(--space-l);
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 2px solid var(--line);
+  }
+  @media (min-width: 52rem) {
+    .day {
+      grid-template-columns: 15rem 1fr;
+      align-items: start;
+    }
+    .day-league {
+      grid-column: 2;
+    }
+  }
+  .day.is-today {
+    border-color: var(--site-electric);
+    box-shadow: 0 0 0 3px rgb(24 12 242 / 0.15);
+  }
+  .day h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--step-2);
+  }
+  .today-tag {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0.4rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: var(--pill);
+    background: var(--site-electric);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--step--1);
+  }
+  .day-hours {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0.2rem 0 0;
+    color: var(--ink-soft);
+  }
+  .day-hours :global(svg),
+  .day-league :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+  }
+  .day-specials {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-s);
+  }
+  .day-specials li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 var(--space-m);
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-s);
+    background: var(--paper);
+    border-left: 6px solid var(--logo-orange);
+  }
+  .day-specials li:nth-child(2) {
+    border-left-color: var(--logo-blue);
+  }
+  .day-special-name {
+    font-weight: 800;
+    font-size: var(--step-1);
+  }
+  .day-special-time {
+    grid-column: 1;
+    color: var(--ink-soft);
+  }
+  .day-special-price {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    text-align: right;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+  .day-special-price small {
+    display: block;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .day-none {
+    margin: 0;
+    color: var(--ink-soft);
+    align-self: center;
+  }
+  .day-league {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-radius: var(--radius-s);
+    background: rgb(237 218 114 / 0.45);
+    font-weight: 700;
+  }
+</style>
