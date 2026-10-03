@@ -1,0 +1,48 @@
+---
+// Compact cosmic header for inside pages.
+import RainbowStrip from './RainbowStrip.astro';
+interface Props {
+  eyebrow: string;
+  title: string;
+  lede?: string;
+}
+const { eyebrow, title, lede } = Astro.props;
+---
+
+<section class="page-hero night grain" aria-labelledby="page-title">
+  <div class="page-hero-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow">{eyebrow}</p>
+    <h1 id="page-title">{title}</h1>
+    {lede && <p class="page-lede">{lede}</p>}
+    <slot />
+  </div>
+  <RainbowStrip class="page-hero-strip" />
+</section>
+
+<style>
+  .page-hero {
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    overflow: hidden;
+  }
+  .page-hero-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(55% 80% at 10% 0%, rgb(118 54 255 / 0.4), transparent 70%),
+      radial-gradient(45% 70% at 95% 20%, rgb(24 12 242 / 0.45), transparent 70%);
+  }
+  h1 {
+    color: var(--logo-yellow);
+    max-width: 20ch;
+  }
+  .page-lede {
+    max-width: 42rem;
+    font-size: var(--step-1);
+    color: var(--on-night);
+  }
+  .page-hero :global(.page-hero-strip) {
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+  }
+</style>

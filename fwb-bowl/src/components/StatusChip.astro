@@ -1,0 +1,107 @@
+---
+// Live "Open now / Closed" chip, computed in Central Time in the browser.
+// Without JavaScript it falls back to a plain pointer to the hours.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<p class:list={['status', className]} data-status data-state="unknown">
+  <span class="status-icon" aria-hidden="true">
+    <svg viewBox="0 0 20 20" class="i-open"><circle cx="10" cy="10" r="7" fill="currentColor"></circle></svg>
+    <svg viewBox="0 0 20 20" class="i-closed"
+      ><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2.5"></circle></svg
+    >
+    <svg viewBox="0 0 24 24" class="i-league"
+      ><path
+        fill="currentColor"
+        d="M12 1.5c1.8 0 2.9 1.4 2.9 3.4 0 1.5-.8 2.6-1 3.6-.1.9 2.9 3.7 2.9 8.2 0 3.1-1.3 5-1.6 5.8H8.8c-.3-.8-1.6-2.7-1.6-5.8 0-4.5 3-7.3 2.9-8.2-.2-1-1-2.1-1-3.6 0-2 1.1-3.4 2.9-3.4Z"
+      ></path></svg
+    >
+  </span>
+  <span class="status-text">
+    <strong data-label>Open 7 days</strong>
+    <span data-detail><a href="#hours">See today's hours</a></span>
+  </span>
+  <span class="status-note" data-note hidden></span>
+</p>
+
+<script>
+  import { getStatus } from '../lib/time';
+
+  function paint() {
+    const s = getStatus();
+    document.querySelectorAll<HTMLElement>('[data-status]').forEach((el) => {
+      el.dataset.state = s.state;
+      const label = el.querySelector('[data-label]');
+      const detail = el.querySelector('[data-detail]');
+      const note = el.querySelector<HTMLElement>('[data-note]');
+      if (label) label.textContent = s.label;
+      if (detail) detail.textContent = `· ${s.detail}`;
+      if (note) {
+        note.hidden = !s.note;
+        note.textContent = s.note ?? '';
+      }
+    });
+  }
+  paint();
+  setInterval(paint, 60_000);
+</script>
+
+<style>
+  .status {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.6rem;
+    margin: 0;
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+    border: 2px solid currentColor;
+    border-radius: var(--radius);
+    background: rgb(22 6 31 / 0.65);
+    color: var(--on-night);
+    line-height: 1.35;
+  }
+  .status-icon svg {
+    display: none;
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+  .status-text {
+    display: inline-flex;
+    flex-wrap: wrap;
+    column-gap: 0.4em;
+  }
+  .status-text strong {
+    font-weight: 800;
+  }
+  .status-note {
+    flex-basis: 100%;
+    padding-left: 1.75rem;
+    font-size: var(--step--1);
+    color: var(--on-night-soft);
+  }
+  .status[data-state='unknown'] .i-open,
+  .status[data-state='open'] .i-open,
+  .status[data-state='closing'] .i-open {
+    display: block;
+  }
+  .status[data-state='closed'] .i-closed,
+  .status[data-state='league'] .i-league {
+    display: block;
+  }
+  .status[data-state='open'] {
+    color: var(--logo-lime);
+  }
+  .status[data-state='closing'],
+  .status[data-state='league'] {
+    color: var(--logo-yellow);
+  }
+  .status[data-state='closed'] {
+    color: var(--logo-orange);
+  }
+  .status-text [data-detail] {
+    color: var(--on-night);
+  }
+</style>

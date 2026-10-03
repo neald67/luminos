@@ -1,0 +1,405 @@
+---
+// Party inquiry form. Collects only what's needed to reply: no payment info,
+// nothing about the birthday kid. Netlify Forms handles delivery at launch;
+// in preview mode it never sends anything.
+import Icon from './Icon.astro';
+import { business, previewMode } from '../data/site';
+---
+
+<form
+  id="party-form"
+  class="party-form"
+  name="party-inquiry"
+  method="POST"
+  action="/parties/thanks/"
+  data-preview={previewMode ? 'true' : 'false'}
+  data-netlify={previewMode ? undefined : 'true'}
+  netlify-honeypot={previewMode ? undefined : 'company'}
+  aria-describedby="pf-intro"
+>
+  <input type="hidden" name="form-name" value="party-inquiry" />
+
+  <div class="error-summary" id="pf-errors" tabindex="-1" aria-labelledby="pf-errors-title" hidden>
+    <h3 id="pf-errors-title">Please fix these before sending:</h3>
+    <ul></ul>
+  </div>
+
+  <p id="pf-intro" class="form-intro">
+    For parents, guardians and anyone 18 or older. Fields marked <strong>(required)</strong> must be filled in. Please don't
+    include children's full names, birthdates or photos.
+  </p>
+
+  <div class="field">
+    <label for="pf-name">Your name <span class="req">(required)</span></label>
+    <input id="pf-name" name="name" type="text" autocomplete="name" required aria-describedby="pf-name-error" />
+    <p class="field-error" id="pf-name-error" hidden></p>
+  </div>
+
+  <fieldset class="field-group" aria-describedby="pf-contact-hint pf-contact-error">
+    <legend>How can we reach you? <span class="req">(phone or email required)</span></legend>
+    <p class="hint" id="pf-contact-hint">Give us at least one. We'll only use it to reply about your party.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="pf-phone">Phone</label>
+        <input id="pf-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="pf-phone-error" />
+        <p class="field-error" id="pf-phone-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="pf-email">Email</label>
+        <input id="pf-email" name="email" type="email" autocomplete="email" aria-describedby="pf-email-error" />
+        <p class="field-error" id="pf-email-error" hidden></p>
+      </div>
+    </div>
+    <p class="field-error" id="pf-contact-error" hidden></p>
+  </fieldset>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="pf-date">Preferred date <span class="req">(required)</span></label>
+      <input id="pf-date" name="date" type="date" required aria-describedby="pf-date-hint pf-date-error" />
+      <p class="hint" id="pf-date-hint">Parties must be reserved in advance.</p>
+      <p class="field-error" id="pf-date-error" hidden></p>
+    </div>
+    <div class="field">
+      <label for="pf-guests">Number of guests <span class="req">(required)</span></label>
+      <input
+        id="pf-guests"
+        name="guests"
+        type="number"
+        inputmode="numeric"
+        min="1"
+        max="200"
+        step="1"
+        required
+        aria-describedby="pf-guests-hint pf-guests-error"
+      />
+      <p class="hint" id="pf-guests-hint">The Birthday Package covers up to 12 kids.</p>
+      <p class="field-error" id="pf-guests-error" hidden></p>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pf-package">What are you planning? <span class="opt">(optional)</span></label>
+    <select id="pf-package" name="package">
+      <option value="">Choose one</option>
+      <option>Birthday Package ($150, up to 12 kids)</option>
+      <option>Corporate party</option>
+      <option>Something else</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="pf-notes">Anything else? <span class="opt">(optional)</span></label>
+    <textarea id="pf-notes" name="notes" rows="4" maxlength="1000" aria-describedby="pf-notes-hint"></textarea>
+    <p class="hint" id="pf-notes-hint">Preferred time, questions, special requests. No children's names or birthdates, please.</p>
+  </div>
+
+  <p class="hp" aria-hidden="true">
+    <label>Leave this empty <input name="company" tabindex="-1" autocomplete="off" /></label>
+  </p>
+
+  <div class="field check">
+    <input id="pf-adult" name="adult" type="checkbox" value="yes" required aria-describedby="pf-adult-error" />
+    <label for="pf-adult">I'm 18 or older. <span class="req">(required)</span></label>
+    <p class="field-error" id="pf-adult-error" hidden></p>
+  </div>
+
+  <p class="privacy-note">
+    We use this only to reply about your party. No marketing, no selling or sharing. Read the <a href="/privacy/"
+      >privacy policy</a
+    >.
+  </p>
+
+  {
+    previewMode && (
+      <p class="preview-note" id="pf-preview-note">
+        <strong>Concept preview:</strong> this form doesn't send anything yet. To book now, call{' '}
+        <a href={business.phoneHref}>{business.phone}</a>.
+      </p>
+    )
+  }
+
+  <button class="btn" type="submit" disabled={previewMode}>
+    <Icon name="calendar" />
+    Send party inquiry
+  </button>
+
+  <div class="form-status" role="status" tabindex="-1" hidden></div>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#party-form');
+
+  if (form) {
+    const preview = form.dataset.preview === 'true';
+    const $ = <T extends HTMLElement>(sel: string) => form.querySelector<T>(sel)!;
+    const submit = $<HTMLButtonElement>('button[type="submit"]');
+    const summary = $<HTMLDivElement>('#pf-errors');
+    const status = $<HTMLDivElement>('.form-status');
+    const name = $<HTMLInputElement>('#pf-name');
+    const phone = $<HTMLInputElement>('#pf-phone');
+    const email = $<HTMLInputElement>('#pf-email');
+    const date = $<HTMLInputElement>('#pf-date');
+    const guests = $<HTMLInputElement>('#pf-guests');
+    const adult = $<HTMLInputElement>('#pf-adult');
+
+    form.noValidate = true;
+    submit.disabled = false;
+
+    // Earliest date = today in Fort Walton Beach.
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
+    date.min = today;
+
+    type Problem = { field: HTMLElement; message: string };
+
+    const digits = (v: string) => v.replace(/\D/g, '');
+    const phoneOk = (v: string) => {
+      const d = digits(v);
+      return d.length === 10 || (d.length === 11 && d.startsWith('1'));
+    };
+    const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+    // One rule per field. Each returns an error message, or null when the field is fine.
+    const rules: Record<string, () => string | null> = {
+      'pf-name': () => (name.value.trim() ? null : 'Enter your name.'),
+      'pf-phone': () =>
+        phone.value.trim() && !phoneOk(phone.value) ? 'Enter a 10-digit phone number, like 850-555-0123.' : null,
+      'pf-email': () =>
+        email.value.trim() && !emailOk(email.value.trim()) ? 'Enter an email address like name@example.com.' : null,
+      'pf-contact': () =>
+        phone.value.trim() || email.value.trim() ? null : 'Enter a phone number or an email address so we can reply.',
+      'pf-date': () =>
+        !date.value ? 'Choose a date for your party.' : date.value < today ? "Choose a date that hasn't passed yet." : null,
+      'pf-guests': () => {
+        if (!guests.value) return 'Enter how many guests are coming.';
+        const g = Number(guests.value);
+        return Number.isInteger(g) && g >= 1 && g <= 200 ? null : 'Enter a whole number of guests between 1 and 200.';
+      },
+      'pf-adult': () => (adult.checked ? null : "Confirm you're 18 or older to send this form."),
+    };
+
+    // Shows or clears one rule's message and keeps aria-invalid in step with it.
+    function apply(id: string): Problem | null {
+      const message = rules[id]();
+      const errorEl = form!.querySelector<HTMLElement>(`#${id}-error`)!;
+      errorEl.textContent = message ?? '';
+      errorEl.hidden = !message;
+      const contactMissing = !!rules['pf-contact']();
+      const invalid = (el: HTMLElement, on: boolean) =>
+        on ? el.setAttribute('aria-invalid', 'true') : el.removeAttribute('aria-invalid');
+      if (id === 'pf-contact' || id === 'pf-phone' || id === 'pf-email') {
+        invalid(phone, contactMissing || !!rules['pf-phone']());
+        invalid(email, contactMissing || !!rules['pf-email']());
+      } else {
+        invalid(form!.querySelector<HTMLElement>(`#${id}`)!, !!message);
+      }
+      if (!message) return null;
+      const field = id === 'pf-contact' ? phone : form!.querySelector<HTMLElement>(`#${id}`)!;
+      return { field, message };
+    }
+
+    const checkAll = () => Object.keys(rules).map(apply).filter((p): p is Problem => p !== null);
+
+    function showSummary(problems: Problem[]) {
+      const list = summary.querySelector('ul')!;
+      list.replaceChildren(
+        ...problems.map((pr) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = `#${pr.field.id}`;
+          a.textContent = pr.message;
+          a.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            pr.field.focus();
+          });
+          li.append(a);
+          return li;
+        }),
+      );
+      summary.hidden = false;
+      summary.focus();
+    }
+
+    form.addEventListener('submit', (ev) => {
+      status.hidden = true;
+      const problems = checkAll();
+      if (problems.length) {
+        ev.preventDefault();
+        showSummary(problems);
+        return;
+      }
+      summary.hidden = true;
+      if (preview) {
+        ev.preventDefault();
+        status.textContent =
+          'Looks good! This is a concept preview, so nothing was sent. On the live site, this inquiry goes straight to Fort Walton Beach Bowl.';
+        status.hidden = false;
+        status.focus();
+      }
+    });
+
+    // Once a field has been flagged, clear its message the moment it's fixed. This runs while
+    // typing (not on blur), so the layout never jumps under the pointer mid-click. New errors
+    // only appear when the form is submitted, and the summary only changes on submit.
+    const recheck = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      if (!el?.id || !(el.id in rules)) return;
+      const ids = el.id === 'pf-phone' || el.id === 'pf-email' ? [el.id, 'pf-contact'] : [el.id];
+      for (const id of ids) {
+        const shown = !form.querySelector<HTMLElement>(`#${id}-error`)!.hidden;
+        if (shown && !rules[id]()) apply(id);
+      }
+    };
+    form.addEventListener('input', (ev) => recheck(ev.target));
+    form.addEventListener('change', (ev) => recheck(ev.target));
+  }
+</script>
+
+<style>
+  .party-form {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 44rem;
+  }
+  .form-intro {
+    margin: 0;
+  }
+  .field {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+  }
+  .field-row {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .field-group {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-s);
+  }
+  legend {
+    padding: 0;
+    font-weight: 800;
+  }
+  label {
+    font-weight: 800;
+  }
+  .req,
+  .opt {
+    font-weight: 400;
+    color: var(--ink-soft);
+  }
+  .hint {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  input:not([type='checkbox']),
+  select,
+  textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.65rem 0.85rem;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-s);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+  }
+  textarea {
+    resize: vertical;
+  }
+  /* Form fields always show focus. :focus-within catches the date picker's built-in calendar button. */
+  input:focus,
+  input:focus-within,
+  select:focus,
+  textarea:focus {
+    outline: 3px solid var(--site-electric);
+    outline-offset: 2px;
+  }
+  [aria-invalid='true'] {
+    border-color: #b3261e !important;
+    border-width: 3px !important;
+  }
+  .field-error {
+    margin: 0;
+    display: flex;
+    gap: 0.4rem;
+    font-weight: 800;
+    color: #b3261e;
+  }
+  .field-error::before {
+    content: '⚠';
+    speak: never;
+  }
+  .check {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 0.75rem;
+  }
+  .check input {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    accent-color: var(--site-electric);
+  }
+  .check .field-error {
+    grid-column: 1 / -1;
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .privacy-note {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+  .preview-note {
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-left: 6px solid var(--logo-orange);
+    background: rgb(239 173 99 / 0.2);
+    border-radius: var(--radius-s);
+  }
+  .party-form .btn {
+    justify-self: start;
+  }
+  .party-form .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .error-summary {
+    padding: var(--space-m) var(--space-l);
+    border: 3px solid #b3261e;
+    border-radius: var(--radius-s);
+    background: #fff5f4;
+  }
+  .error-summary:focus-visible {
+    outline: 3px solid var(--site-electric);
+  }
+  .error-summary h3 {
+    color: #b3261e;
+    margin-bottom: 0.4rem;
+  }
+  .error-summary ul {
+    margin: 0;
+  }
+  .error-summary a {
+    color: #b3261e;
+    font-weight: 800;
+  }
+  .form-status {
+    padding: var(--space-m) var(--space-l);
+    border: 3px solid var(--logo-green);
+    border-radius: var(--radius-s);
+    background: rgb(108 183 98 / 0.15);
+    font-weight: 700;
+  }
+</style>

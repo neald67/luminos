@@ -1,0 +1,16 @@
+---
+// A row of tilted color panels borrowed from the FWB BOWL logo. Pure decoration.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={['rainbow-strip', className]} aria-hidden="true"></div>
+
+<style>
+  .rainbow-strip {
+    height: 40px;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22448%22 height=%2240%22 viewBox=%220 0 448 40%22%3E%3Cpolygon points=%223,8 61,4 61,34 3,32%22 fill=%22%23EFAD63%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%2267,4 125,9 125,32 67,35%22 fill=%22%236CB762%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%22131,7 189,5 189,36 131,31%22 fill=%22%23CC5247%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%22195,5 253,8 253,31 195,36%22 fill=%22%234C72B3%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%22259,9 317,4 317,35 259,32%22 fill=%22%23A9CD6A%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%22323,4 381,7 381,31 323,34%22 fill=%22%23EDDA72%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3Cpolygon points=%22387,7 445,4 445,34 387,31%22 fill=%22%23835BA1%22 stroke=%22%2308090B%22 stroke-width=%223%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") repeat-x left center / auto 100%;
+  }
+</style>

@@ -1,0 +1,232 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import PartyForm from '../components/PartyForm.astro';
+import Starburst from '../components/Starburst.astro';
+import Icon from '../components/Icon.astro';
+import { birthdayPackage, business, corporateParties, partyRules, previewMode } from '../data/site';
+---
+
+<Base
+  title="Birthday Parties & Corporate Events | Fort Walton Beach Bowl"
+  description="The $150 Birthday Package at Fort Walton Beach Bowl: 2 lanes for 2 hours, shoes, 2 one-topping pizzas and 2 pitchers of soda for up to 12 kids."
+>
+  <PageHero
+    eyebrow="Parties"
+    title="Birthday parties at the lanes"
+    lede="Let us host your next party. It's sure to be a hit for all ages, and we can provide everything you need for your child's birthday."
+  >
+    <div class="btn-row">
+      <a class="btn btn--yellow" href={business.bookingUrl}>
+        <Icon name="calendar" />
+        Reserve online
+        <Icon name="external" /><span class="visually-hidden"> (Bowling Passport booking site)</span>
+      </a>
+      <a class="btn btn--ghost" href="#inquiry">Ask us a question</a>
+    </div>
+  </PageHero>
+
+  <section class="section" aria-labelledby="package-title">
+    <div class="wrap package-grid">
+      <article class="package">
+        <Starburst class="package-burst" color="var(--logo-orange)">{birthdayPackage.price}</Starburst>
+        <p class="eyebrow">Kids' birthday party</p>
+        <h2 id="package-title">{birthdayPackage.price} {birthdayPackage.name}</h2>
+        <p class="package-meta">
+          <span>{birthdayPackage.lanes}</span>
+          <span>{birthdayPackage.guests}</span>
+        </p>
+        <h3>What's included</h3>
+        <ul class="includes">
+          {
+            birthdayPackage.includes.map((item) => (
+              <li>
+                <Icon name="check" />
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="package-blurb">{birthdayPackage.blurb}</p>
+        <a class="btn" href={business.bookingUrl}>
+          Reserve this package <Icon name="external" /><span class="visually-hidden"> (Bowling Passport booking site)</span>
+        </a>
+      </article>
+
+      <div class="rules">
+        <h2 class="rules-title">Party details</h2>
+        <ul class="rule-list">
+          {
+            partyRules.map((rule, i) => (
+              <li style={`--panel: var(--logo-${['yellow', 'lime', 'orange'][i]})`}>
+                <span class="rule-num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                {rule}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="fine-print">
+          Online reservations are handled on our Bowling Passport booking page. We never take card details on this website.
+        </p>
+
+        <div class="corporate card">
+          <h2 class="corporate-title">Corporate parties</h2>
+          <p>{corporateParties}</p>
+          <a class="btn btn--ghost" href={business.phoneHref}><Icon name="phone" /> Call {business.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white" aria-labelledby="inquiry-title" id="inquiry">
+    <div class="wrap inquiry-grid">
+      <div class="inquiry-copy">
+        <p class="eyebrow">Questions first?</p>
+        <h2 id="inquiry-title">Send a party inquiry</h2>
+        <p>
+          Tell us the date and how many are coming, and we'll get back to you. Rather talk? Call <a href={business.phoneHref}
+            >{business.phone}</a
+          >.
+        </p>
+        {previewMode && <p class="photo-spot">Photo spot: a real party photo can go here.</p>}
+      </div>
+      <PartyForm />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .package-grid {
+    display: grid;
+    gap: var(--space-2xl);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .package-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    }
+  }
+  .package {
+    position: relative;
+    padding: var(--space-xl);
+    background: var(--card);
+    border: 3px solid #08090b;
+    border-radius: var(--radius-l);
+    box-shadow: 10px 10px 0 var(--logo-blue);
+  }
+  .package :global(.package-burst) {
+    --burst-size: 7.5rem;
+    position: absolute;
+    top: -2rem;
+    right: -1.25rem;
+  }
+  @media (max-width: 48rem) {
+    .package :global(.package-burst) {
+      right: -0.5rem;
+    }
+  }
+  @media (max-width: 30rem) {
+    .package {
+      padding: var(--space-l);
+    }
+    .package :global(.package-burst) {
+      --burst-size: 6.25rem;
+      right: -0.5rem;
+    }
+  }
+  .package h2 {
+    font-size: var(--step-3);
+    padding-right: 4.5rem;
+  }
+  .package-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .package-meta span {
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--pill);
+    background: var(--site-deep-plum);
+    color: #fff;
+    font-weight: 800;
+  }
+  .includes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-l);
+    display: grid;
+    gap: 0.5rem;
+  }
+  .includes li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+  .includes :global(svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--site-electric);
+  }
+  .package-blurb {
+    font-weight: 700;
+    color: var(--site-plum);
+  }
+  .rules-title,
+  .corporate-title {
+    font-size: var(--step-2);
+  }
+  .rule-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-m);
+    display: grid;
+    gap: var(--space-m);
+  }
+  .rule-list li {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+  .rule-num {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 3px solid #08090b;
+    border-radius: 6px;
+    background: var(--panel);
+    font-family: var(--font-display);
+    transform: rotate(-4deg);
+  }
+  .corporate {
+    margin-top: var(--space-xl);
+  }
+  .inquiry-grid {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 60rem) {
+    .inquiry-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    }
+  }
+  .photo-spot {
+    margin-top: var(--space-l);
+    padding: var(--space-xl) var(--space-l);
+    border: 3px dashed var(--line);
+    border-radius: var(--radius);
+    text-align: center;
+    color: var(--ink-soft);
+  }
+</style>

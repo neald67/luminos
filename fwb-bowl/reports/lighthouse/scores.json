@@ -1,0 +1,156 @@
+[
+  {
+    "page": "home",
+    "formFactor": "mobile",
+    "performance": 99,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.8 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "home",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.4 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "prices",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "prices",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "specials",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.5 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "specials",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.4 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "parties",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "parties",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "leagues",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "leagues",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "accessibility",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "accessibility",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "privacy",
+    "formFactor": "mobile",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "1.3 s",
+    "cls": "0",
+    "failed": []
+  },
+  {
+    "page": "privacy",
+    "formFactor": "desktop",
+    "performance": 100,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcp": "0.3 s",
+    "cls": "0",
+    "failed": []
+  }
+]

@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { business, fullAddress } from '../data/site';
+
+const reviewed = 'October 3, 2026';
+---
+
+<Base
+  title="Accessibility Statement | Fort Walton Beach Bowl"
+  description="Fort Walton Beach Bowl's commitment to an accessible website, the standard we follow, and how to reach us if something doesn't work for you."
+>
+  <PageHero eyebrow="Accessibility" title="Accessibility statement" lede="We want everyone to be able to use this website, plan a visit and book a party." />
+
+  <section class="section">
+    <div class="wrap prose">
+      <h2>Our commitment</h2>
+      <p>
+        {business.name} is committed to making this website usable for people of all abilities, including people who use
+        screen readers, keyboard navigation, voice control, magnification or captions.
+      </p>
+
+      <h2>The standard we follow</h2>
+      <p>
+        This website is designed and tested to meet the
+        <a href="https://www.w3.org/TR/WCAG22/">Web Content Accessibility Guidelines (WCAG) 2.2</a>, Level AA.
+      </p>
+
+      <h2>What we've done</h2>
+      <ul>
+        <li>Clear page structure with headings, landmarks and a "Skip to main content" link.</li>
+        <li>Everything works with a keyboard, with a visible focus outline.</li>
+        <li>Text and background colors meet WCAG AA contrast, including on our dark "cosmic" sections.</li>
+        <li>Prices, hours, specials and party details are real text, not pictures of text.</li>
+        <li>Text can be enlarged to 200% without breaking the layout.</li>
+        <li>Information is never shown by color alone.</li>
+        <li>Form fields have labels, plain-language error messages, and errors are announced to screen readers.</li>
+        <li>Animations are short, stop on their own, and switch off if your device is set to reduce motion.</li>
+        <li>Buttons and links are sized for easy tapping.</li>
+        <li>Pages are checked with automated tools (axe-core and Lighthouse) and by hand with a keyboard.</li>
+      </ul>
+
+      <h2>Other websites we link to</h2>
+      <p>
+        Online party reservations happen on Bowling Passport, and we also link to Facebook and Google Maps. Those sites are
+        run by other companies, so we can't control how accessible they are. If you have trouble with any of them, call us
+        at <a href={business.phoneHref}>{business.phone}</a> and we'll help you over the phone.
+      </p>
+
+      <h2>Tell us about a problem</h2>
+      <p>
+        If something on this site doesn't work for you, or you need information in a different format, please let us know.
+        Tell us the page and what happened, and we'll do our best to fix it and get you what you need.
+      </p>
+      <ul>
+        <li>Call: <a href={business.phoneHref}>{business.phone}</a></li>
+        <li>Visit or write: {fullAddress}</li>
+      </ul>
+      <p>
+        Questions about getting around inside the building? Give us a call before your visit.
+      </p>
+
+      <p class="fine-print">This statement was last reviewed on {reviewed}.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose {
+    max-width: 46rem;
+  }
+  .prose h2 {
+    font-size: var(--step-2);
+    margin-top: var(--space-xl);
+  }
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+  .prose li {
+    margin-bottom: 0.4rem;
+  }
+</style>

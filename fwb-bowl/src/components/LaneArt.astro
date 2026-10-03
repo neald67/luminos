@@ -1,0 +1,242 @@
+---
+// Cosmic bowling alley, drawn with a real pinhole-camera projection so the
+// lane markings sit flat on the lanes and everything shrinks toward one
+// vanishing point. Above the pin decks, the masking panels spell FWB BOWL in
+// the logo's colors. Built at compile time; ships as a static inline SVG.
+
+const W = 1440;
+const HORIZON = -40; // screen y of the vanishing point
+const D0 = 12; // camera distance behind the foul line, in feet
+const F = 1080; // focal length, in SVG units
+const H = 4; // camera height above the lanes, in feet
+const LANE = 41.5 / 12; // lane width, feet
+const GUTTER = 9.25 / 12;
+const PITCH = 5.4; // distance between lane centers
+const LEN = 60; // foul line to head pin
+const MASK_Z = 63;
+
+const X = (x: number, z: number) => W / 2 + (F * x) / (z + D0);
+const Y = (z: number, height = 0) => HORIZON + (F * (H - height)) / (z + D0);
+const pt = (x: number, z: number, height = 0) => `${X(x, z).toFixed(1)},${Y(z, height).toFixed(1)}`;
+const quad = (x0: number, x1: number, z0: number, z1: number) =>
+  `${pt(x0, z0)} ${pt(x1, z0)} ${pt(x1, z1)} ${pt(x0, z1)}`;
+
+// Eight lanes, camera standing between lanes 4 and 5.
+const lanes = Array.from({ length: 8 }, (_, k) => (k - 3.5) * PITCH);
+const feature = (cx: number) => Math.abs(cx) < PITCH; // the two lanes in front of us
+
+// Lane surfaces and gutters
+const surfaces = lanes.map((cx) => ({
+  lane: quad(cx - LANE / 2, cx + LANE / 2, 0, LEN + 3),
+  left: quad(cx - LANE / 2 - GUTTER, cx - LANE / 2, 0, LEN + 3),
+  right: quad(cx + LANE / 2, cx + LANE / 2 + GUTTER, 0, LEN + 3),
+  bright: feature(cx),
+}));
+
+// Boards on the featured lanes only (keeps the SVG light)
+const boards = lanes
+  .filter(feature)
+  .flatMap((cx) =>
+    Array.from({ length: 38 }, (_, i) => {
+      const x = cx - LANE / 2 + ((i + 1) * LANE) / 39;
+      return `M${pt(x, 0)}L${pt(x, LEN)}`;
+    }),
+  )
+  .join('');
+
+// Target arrows: flat triangles painted on the lane, in a V with the middle one farthest.
+const ARROW_W = 0.4;
+const ARROW_L = 1.2;
+const arrows = lanes.map((cx) =>
+  [5, 10, 15, 20, 25, 30, 35].map((board) => {
+    const x = cx + ((board - 20) * LANE) / 39;
+    const tipZ = 16 - Math.abs(board - 20) / 5;
+    const baseZ = tipZ - ARROW_L;
+    return {
+      d: `M${pt(x, tipZ)}L${pt(x + ARROW_W / 2, baseZ)}L${pt(x - ARROW_W / 2, baseZ)}Z`,
+      bright: feature(cx),
+    };
+  }),
+);
+
+// Guide dots at 7 feet: flattened ellipses, because they're lying on the floor.
+const dots = lanes.filter(feature).flatMap((cx) =>
+  [3, 5, 8, 11, 14, 26, 29, 32, 35, 37].map((board) => {
+    const x = cx + ((board - 20) * LANE) / 39;
+    const rx = (F * 0.07) / (7 + D0);
+    return { cx: X(x, 7).toFixed(1), cy: Y(7).toFixed(1), rx: rx.toFixed(1), ry: (rx * 0.32).toFixed(1) };
+  }),
+);
+
+// Ten pins per lane, back row first so nearer pins draw on top.
+const PIN_ROWS = [
+  [-1.5, -0.5, 0.5, 1.5],
+  [-1, 0, 1],
+  [-0.5, 0.5],
+  [0],
+];
+const pins = lanes.flatMap((cx) =>
+  PIN_ROWS.flatMap((row, r) => {
+    const z = LEN + (3 - r) * 0.866;
+    return row.map((dx) => {
+      const scale = F / (z + D0);
+      return {
+        x: X(cx + dx, z).toFixed(1),
+        y: Y(z).toFixed(1),
+        s: ((scale * 1.25) / 100).toFixed(3), // pin symbol is 100 units tall = 15 inches
+      };
+    });
+  }),
+);
+
+// Masking panels: a vertical wall above the pin decks, so they project as rectangles.
+const MASK_COLORS = ['#EFAD63', '#6CB762', '#CC5247', '#4C72B3', '#A9CD6A', '#EDDA72', '#EFAD63', '#835BA1'];
+const MASK_LETTERS = ['F', 'W', 'B', '', 'B', 'O', 'W', 'L'];
+const TILTS = [-3, 2, -2, 3, -2, 2, -3, 3];
+const masks = lanes.map((cx, k) => {
+  const x0 = X(cx - PITCH / 2, MASK_Z);
+  const x1 = X(cx + PITCH / 2, MASK_Z);
+  const y0 = Y(MASK_Z, 7);
+  const y1 = Y(MASK_Z, 4.4);
+  return {
+    x: x0.toFixed(1),
+    y: y0.toFixed(1),
+    w: (x1 - x0).toFixed(1),
+    h: (y1 - y0).toFixed(1),
+    cx: ((x0 + x1) / 2).toFixed(1),
+    cy: ((y0 + y1) / 2).toFixed(1),
+    fill: MASK_COLORS[k],
+    letter: MASK_LETTERS[k],
+    tilt: TILTS[k],
+  };
+});
+
+const foulLeft = X(lanes[2] - LANE / 2, 0);
+const foulRight = X(lanes[5] + LANE / 2, 0);
+const deckY = Y(LEN + 3);
+
+// Ball path down lane 5 (just right of center), sampled in depth for the roll animation.
+const ballLane = lanes[4];
+const roll = [0, 4, 9, 16, 26, 40, 59].map((z) => ({
+  x: X(ballLane + 0.15, z) - W / 2,
+  y: Y(z, 0.354),
+  s: (F * 0.354) / (z + D0) / ((F * 0.354) / D0),
+}));
+const rollKeyframes = roll
+  .map(
+    (p, i) =>
+      `${Math.round((i / (roll.length - 1)) * 100)}%{opacity:${i === roll.length - 1 ? 0 : 1};transform:translate(${p.x.toFixed(1)}px,${(p.y - Y(0, 0.354)).toFixed(1)}px) scale(${p.s.toFixed(3)})}`,
+  )
+  .join('');
+const ballR = ((F * 0.354) / D0).toFixed(1);
+const ballStartY = Y(0, 0.354).toFixed(1);
+---
+
+<svg
+  class="lane-art"
+  viewBox="0 -100 1440 420"
+  preserveAspectRatio="xMidYMax slice"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id="laneSheen" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#4a2ccf" />
+      <stop offset="0.55" stop-color="#2a1170" />
+      <stop offset="1" stop-color="#1a0838" />
+    </linearGradient>
+    <linearGradient id="laneDim" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#2b136e" />
+      <stop offset="1" stop-color="#150630" />
+    </linearGradient>
+    <radialGradient id="deckGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#b9a6ff" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#7636ff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="ballFill" cx="0.35" cy="0.3" r="0.75">
+      <stop offset="0" stop-color="#7ee6ff" />
+      <stop offset="0.45" stop-color="#2ac5fd" />
+      <stop offset="1" stop-color="#180cf2" />
+    </radialGradient>
+    <g id="pin">
+      <path
+        d="M0-100C5-100 8-96 8-89 8-82 5-78 4.5-73 4-66 16-56 16-38 16-20 11-8 10 0H-10C-11-8-16-20-16-38-16-56-4-66-4.5-73-5-78-8-82-8-89-8-96-5-100 0-100Z"
+        fill="#fffaf0"></path>
+      <rect x="-5.5" y="-72" width="11" height="3.5" fill="#cc5247"></rect>
+      <rect x="-5.2" y="-66.5" width="10.4" height="3.5" fill="#cc5247"></rect>
+    </g>
+    <linearGradient id="floorFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16061f" stop-opacity="0" />
+      <stop offset="0.25" stop-color="#120420" />
+    </linearGradient>
+  </defs>
+
+  <!-- floor between lanes -->
+  <rect x="0" y={HORIZON - 30} width="1440" height="410" fill="url(#floorFade)"></rect>
+
+  <!-- pin deck glow -->
+  <ellipse cx="720" cy={deckY} rx="430" ry="70" fill="url(#deckGlow)"></ellipse>
+
+  <g class="lanes">
+    {
+      surfaces.map((s) => (
+        <g>
+          <polygon points={s.left} fill="#07020f" />
+          <polygon points={s.right} fill="#07020f" />
+          <polygon points={s.lane} fill={s.bright ? 'url(#laneSheen)' : 'url(#laneDim)'} />
+        </g>
+      ))
+    }
+  </g>
+
+  <path class="boards" d={boards}></path>
+
+  <g class="arrows">
+    {arrows.flat().map((a) => <path d={a.d} class={a.bright ? 'bright' : 'dim'} />)}
+  </g>
+
+  <g class="dots">
+    {dots.map((d) => <ellipse cx={d.cx} cy={d.cy} rx={d.rx} ry={d.ry} />)}
+  </g>
+
+  <line class="foul" x1={foulLeft} y1="320" x2={foulRight} y2="320"></line>
+
+  <g class="masking">
+    {
+      masks.map((m) => (
+        <g transform={`rotate(${m.tilt} ${m.cx} ${m.cy})`}>
+          <rect x={m.x} y={m.y} width={m.w} height={m.h} fill={m.fill} stroke="#08090b" stroke-width="3" />
+          {m.letter && (
+            <text x={m.cx} y={Number(m.cy) + 11} text-anchor="middle">
+              {m.letter}
+            </text>
+          )}
+        </g>
+      ))
+    }
+  </g>
+
+  <g class="pins">
+    {pins.map((p) => <use href="#pin" transform={`translate(${p.x} ${p.y}) scale(${p.s})`} />)}
+  </g>
+
+  <circle class="ball" cx="720" cy={ballStartY} r={ballR} fill="url(#ballFill)"></circle>
+</svg>
+
+<style set:html={`
+  .lane-art{display:block;width:100%;height:clamp(250px,29.17vw,420px)}
+  .lane-art .boards{stroke:rgb(255 247 236 / .07);stroke-width:1;fill:none}
+  .lane-art .arrows .bright{fill:#edda72;filter:drop-shadow(0 0 4px #edda72)}
+  .lane-art .arrows .dim{fill:#edda72;opacity:.45}
+  .lane-art .dots ellipse{fill:#2ac5fd;filter:drop-shadow(0 0 3px #2ac5fd)}
+  .lane-art .foul{stroke:#2ac5fd;stroke-width:4;filter:drop-shadow(0 0 6px #2ac5fd)}
+  .lane-art .masking text{font:700 30px Arial,Helvetica,sans-serif;fill:#fff;stroke:#08090b;stroke-width:1.5;paint-order:stroke}
+  .lane-art .pins use{filter:drop-shadow(0 0 2px #b9a6ff)}
+  .lane-art .ball{opacity:0;transform-box:fill-box;transform-origin:center}
+  @media (prefers-reduced-motion:no-preference){
+    .lane-art .ball{animation:fwb-roll 2.1s cubic-bezier(.25,.6,.35,1) .6s both}
+    .lane-art .pins{animation:fwb-strike .9s ease-out 2.55s both}
+  }
+  @keyframes fwb-roll{${rollKeyframes}}
+  @keyframes fwb-strike{0%{filter:none}35%{filter:brightness(1.6) drop-shadow(0 0 6px #fff)}100%{filter:none}}
+`} />

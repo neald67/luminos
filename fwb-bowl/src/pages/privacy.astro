@@ -1,0 +1,117 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { business, fullAddress } from '../data/site';
+
+const effective = 'October 3, 2026';
+---
+
+<Base
+  title="Privacy Policy | Fort Walton Beach Bowl"
+  description="What the Fort Walton Beach Bowl website collects, why, and how it's used. No cookies, no tracking, no selling your information."
+>
+  <PageHero eyebrow="Privacy" title="Privacy policy" lede="Short version: we only collect what you send us in the party form, we use it to reply, and that's it." />
+
+  <section class="section">
+    <div class="wrap prose">
+      <p class="fine-print">Effective {effective}</p>
+
+      <h2>Who we are</h2>
+      <p>
+        This website belongs to {business.name}, {fullAddress}. You can reach us at
+        <a href={business.phoneHref}>{business.phone}</a>.
+      </p>
+
+      <h2>The quick summary</h2>
+      <ul>
+        <li>No accounts, no ads, no cookies and no tracking.</li>
+        <li>We only collect what you type into the party inquiry form.</li>
+        <li>We use it to reply about your party. We don't sell it, rent it or use it for marketing.</li>
+        <li>We never take payments or card details on this website.</li>
+      </ul>
+
+      <h2>What we collect, and why</h2>
+      <h3>The party inquiry form</h3>
+      <p>When you send a party inquiry, we receive:</p>
+      <ul>
+        <li>Your name</li>
+        <li>Your phone number and/or email address</li>
+        <li>Your preferred date and number of guests</li>
+        <li>What you're planning and any notes you add</li>
+        <li>Your confirmation that you're 18 or older</li>
+      </ul>
+      <p>
+        We use this only to answer your inquiry and plan your event. We'll contact you by the phone number or email you gave
+        us about that party, and nothing else.
+      </p>
+
+      <h3>Technical information</h3>
+      <p>
+        Like any website, our hosting provider automatically records basic technical details when you visit, such as your IP
+        address, browser type and the pages you request. This is used to deliver the site and keep it secure, not to track
+        you.
+      </p>
+
+      <h2>Who handles it</h2>
+      <p>
+        Our website and form are hosted by Netlify, which delivers form submissions to us and may run them through automated
+        spam filtering. Netlify handles that information under its own privacy policy. We don't share your information with
+        anyone else unless the law requires it.
+      </p>
+
+      <h2>How long we keep it</h2>
+      <p>We keep party inquiries only as long as we need them to plan your event, then delete them.</p>
+
+      <h2>Children's privacy</h2>
+      <p>
+        This website isn't directed to children under 13, and we don't knowingly collect personal information from them.
+        The party form is for parents, guardians and adults 18 or older, and it asks you not to include children's full
+        names, birthdates or photos. If you think a child has sent us personal information, call us and we'll delete it.
+      </p>
+
+      <h2>Cookies, analytics and tracking</h2>
+      <p>
+        This website doesn't use cookies, analytics, advertising trackers or social media pixels. Our fonts and images load
+        from our own site, not from third parties. If we ever add analytics, we'll choose a privacy-friendly tool and
+        update this policy first.
+      </p>
+
+      <h2>Payments and reservations</h2>
+      <p>
+        We don't take payments on this website. Online party reservations are made on Bowling Passport's website, under
+        their privacy policy.
+      </p>
+
+      <h2>Links to other websites</h2>
+      <p>
+        We link to Facebook, Google Maps and Bowling Passport. When you follow those links, their privacy policies apply,
+        not ours.
+      </p>
+
+      <h2>Your choices</h2>
+      <p>
+        You can ask us what information you've sent us, ask us to correct it, or ask us to delete it. Just call
+        <a href={business.phoneHref}>{business.phone}</a>.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>If we change how we handle information, we'll update this page and the effective date at the top.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose {
+    max-width: 46rem;
+  }
+  .prose h2 {
+    font-size: var(--step-2);
+    margin-top: var(--space-xl);
+  }
+  .prose h3 {
+    margin-top: var(--space-l);
+  }
+  .prose li {
+    margin-bottom: 0.3rem;
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { business } from '../data/site';
+---
+
+<Base title="Gutter ball! Page not found | Fort Walton Beach Bowl" description="That page rolled into the gutter." noindex>
+  <PageHero eyebrow="Error 404" title="Gutter ball!" lede="That page rolled right off the lane. Try one of these instead.">
+    <ul class="links">
+      <li><a class="btn btn--yellow" href="/">Home</a></li>
+      <li><a class="btn btn--ghost" href="/prices/">Prices</a></li>
+      <li><a class="btn btn--ghost" href="/specials/">Specials</a></li>
+      <li><a class="btn btn--ghost" href="/parties/">Parties</a></li>
+      <li><a class="btn btn--ghost" href={business.phoneHref}>Call {business.phone}</a></li>
+    </ul>
+  </PageHero>
+</Base>
+
+<style>
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+  }
+</style>
