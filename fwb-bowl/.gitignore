@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.netlify/
+.vercel/
+.DS_Store
+
+# Reference captures of the current fwbbowl.com site. These contain the
+# business's own photos and graphics, which their site says may not be
+# republished, and this repo is public. Keep them local only.
+reference/screenshots/
+reference/raw/
